@@ -1,0 +1,15 @@
+Flask==0.11.1
+Flask-Script==2.0.5
+Jinja2==2.8
+MarkupSafe==0.23
+Werkzeug==0.11.10
+beautifulsoup4==4.4.1
+click==6.6
+ndg-httpsclient==0.4.1
+itsdangerous==0.24
+pyOpenSSL==16.0.0
+pyasn1==0.1.9
+requests==2.10.0
+robobrowser==0.5.3
+six==1.10.0
+wsgiref==0.1.2
