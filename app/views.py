@@ -6,7 +6,7 @@ votebot = Blueprint('votebot', __name__)
 
 
 @votebot.errorhandler(OVRError)
-def handle_invalid_usage(error):
+def handle_ovr_error(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
     return response
@@ -25,7 +25,7 @@ def registration():
         form = OVR_FORMS['default']()
 
     status = form.submit(user)
-    return jsonify({'status': status})
+    return jsonify(status)
 
 
 @votebot.route('/confirm')
