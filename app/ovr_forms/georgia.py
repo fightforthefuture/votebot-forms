@@ -13,7 +13,7 @@ class Georgia(BaseOVRForm):
         self.browser.submit_form(ovr_welcome_form, submit=ovr_welcome_form['ddsIdButton'])
         return ovr_welcome_form
 
-    def minimum_requirements(self):
+    def minimum_requirements(self, user):
         min_req_form = self.browser.get_form()
 
         # todo: these will need to be boolean for the form.
@@ -62,6 +62,6 @@ class Georgia(BaseOVRForm):
 
     def submit(self, user):
         self.welcome()
-        self.minimum_requirements()
+        self.minimum_requirements(user)
         self.registration(user)
         # todo: I need a valid GA driver's license.
