@@ -5,7 +5,7 @@ class Georgia(BaseOVRForm):
     def __init__(self):
         super(Georgia, self).__init__('https://registertovote.sos.ga.gov/GAOLVR/welcometoga.do')
         # todo: you can check if you are registered at https://www.mvp.sos.ga.gov/MVP/mvp.do
-        self.required_fields.extend(['us_citizen', 'will_be_18', 'legal_resident', 'not_a_felon', 'mentally_competent'])
+        self.required_fields.extend(['will_be_18', 'legal_resident', 'mentally_competent'])
 
     def welcome(self):
         ovr_welcome_form = self.browser.get_form()
@@ -37,11 +37,11 @@ class Georgia(BaseOVRForm):
     def registration(self, user):
         registration_form = self.browser.get_form()
         # new voter
-        registration_form['changeType'] = 'NV'
-        registration_form['county'] = self.get_county(user)
+        registration_form['changeType'].value = 'NV'
+        registration_form['county'].value = self.get_county(user)
         
-        registration_form['lastName'] = user['last_name']
-        registration_form['firstName'] = user['first_name']
+        registration_form['lastName'].value = user['last_name']
+        registration_form['firstName'].value = user['first_name']
 
         try:
             year, month, day = user['date_of_birth'].split('-')
@@ -51,11 +51,11 @@ class Georgia(BaseOVRForm):
             if len(year) == 2:
                 year = '19%s' % year
 
-            registration_form['dobDate'] = '/'.join([month.zfill(2), day.zfill(2), year])
+            registration_form['dobDate'].value = '/'.join([month.zfill(2), day.zfill(2), year])
         except:
             raise OVRError('date must be in YYYY-MM-DD format')
 
-        registration_form['ddsId'] = user['id_number']
+        registration_form['ddsId'].value = user['id_number']
         
         self.browser.submit_form(registration_form, submit=registration_form['next'])
         return registration_form
