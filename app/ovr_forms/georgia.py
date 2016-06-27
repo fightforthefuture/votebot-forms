@@ -5,6 +5,7 @@ class Georgia(BaseOVRForm):
     def __init__(self):
         super(Georgia, self).__init__('https://registertovote.sos.ga.gov/GAOLVR/welcometoga.do')
         # todo: you can check if you are registered at https://www.mvp.sos.ga.gov/MVP/mvp.do
+        self.required_fields.extend(['us_citizen', 'will_be_18', 'legal_resident', 'not_a_felon', 'mentally_competent'])
 
     def welcome(self):
         ovr_welcome_form = self.browser.get_form()
@@ -14,11 +15,15 @@ class Georgia(BaseOVRForm):
 
     def minimum_requirements(self):
         min_req_form = self.browser.get_form()
-        min_req_form['citizenVer'].checked = True
-        min_req_form['ageVer'].checked = True
-        min_req_form['stateVer'].checked = True
-        min_req_form['felonyVer'].checked = True
-        min_req_form['mentally'].checked = True
+
+        # todo: these will need to be boolean for the form.
+        # we'll need to normalize truthy values from SMS/etc. input
+        min_req_form['citizenVer'].checked = user['us_citizen']
+        min_req_form['ageVer'].checked = user['will_be_18']
+        min_req_form['stateVer'].checked = user['legal_resident']
+        min_req_form['felonyVer'].checked = user['not_a_felon']
+        min_req_form['mentally'].checked = user['mentally_competent']
+        
         # every GA form has a "back" button which also does a submit, so we have to specify
         self.browser.submit_form(min_req_form, submit=min_req_form['beginReg'])
         return min_req_form
