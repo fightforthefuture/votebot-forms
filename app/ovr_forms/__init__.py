@@ -4,6 +4,7 @@ from california import California
 from georgia import Georgia
 from illinois import Illinois
 from massachusetts import Massachusetts
+from virginia import Virginia
 
 
 OVR_FORMS = {
@@ -12,5 +13,6 @@ OVR_FORMS = {
     'GA': Georgia,
     'IL': Illinois,
     'MA': Massachusetts,
+    'VA': Virginia,
     'default': VoteDotOrg
 }
