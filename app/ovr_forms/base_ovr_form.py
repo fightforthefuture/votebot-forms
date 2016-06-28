@@ -37,6 +37,25 @@ class BaseOVRForm(object):
         #log.info(serialized)
         print serialized
 
+    def split_date(date_string):
+        """ Expects date as YYYY-MM-DD, returns (year, month, day) tuple of strings.
+            Performs zfill to ensure zero-padding for month, day.
+        """
+        try:
+            (year, month, day) = date_string.split('-')
+
+            # there's a Y2k bug lurking here for 2020...
+            # todo: centralize / standardize how to handle and submit dates
+            if len(year) == 2:
+                year = '19%s' % year
+
+            month = month.zfill(2)
+            day = day.zfill(2)
+
+            return (year, month, day)
+        except:
+            raise OVRError('date must be in YYYY-MM-DD format')
+
 
 class OVRError(Exception):
     status_code = 400

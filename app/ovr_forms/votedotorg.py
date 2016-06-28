@@ -20,13 +20,9 @@ class VoteDotOrg(BaseOVRForm):
         form['last_name'].value = user['last_name']
 
         # date_of_birth -> parts
-        try:
-            year, month, day = user['date_of_birth'].split('-')
-        except ValueError:
-            raise OVRError('date must be in YYYY-MM-DD format')
-
-        form['date_of_birth_month'].value = str(int(month))  # deal with zero-padding
-        form['date_of_birth_day'].value = str(int(day))
+        (year, month, day) = self.split_date(user['date_of_birth'])
+        form['date_of_birth_month'].value = month
+        form['date_of_birth_day'].value = day
         form['date_of_birth_year'].value = year
 
         # street address

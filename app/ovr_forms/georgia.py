@@ -43,17 +43,8 @@ class Georgia(BaseOVRForm):
         registration_form['lastName'].value = user['last_name']
         registration_form['firstName'].value = user['first_name']
 
-        try:
-            year, month, day = user['date_of_birth'].split('-')
-
-            # there's a Y2k bug lurking here for 2020...
-            # todo: centralize / standardize how to handle and submit dates
-            if len(year) == 2:
-                year = '19%s' % year
-
-            registration_form['dobDate'].value = '/'.join([month.zfill(2), day.zfill(2), year])
-        except:
-            raise OVRError('date must be in YYYY-MM-DD format')
+        (year, month, day) = user['date_of_birth'].split('-')
+        registration_form['dobDate'].value = '/'.join([month, day, year])
 
         registration_form['ddsId'].value = user['id_number']
         

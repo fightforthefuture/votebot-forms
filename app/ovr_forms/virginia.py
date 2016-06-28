@@ -23,17 +23,8 @@ class Virginia(BaseOVRForm):
         voter_record_form['FirstName'].value = user['first_name']
         voter_record_form['LastName'].value = user['last_name']
 
-        try:
-            year, month, day = user['date_of_birth'].split('-')
-
-            # there's a Y2k bug lurking here for 2020...
-            # todo: centralize / standardize how to handle and submit dates
-            if len(year) == 2:
-                year = '19%s' % year
-
-            voter_record_form['DateOfBirth'].value = '/'.join([month.zfill(2), day.zfill(2), year])
-        except:
-            raise OVRError('date_of_birth must be in YYYY-MM-DD format')
+        (year, month, day) = self.split_date(user['date_of_birth'])
+        voter_record_form['DateOfBirth'].value = '/'.join([month, day, year])
 
         # some BeautifulSoup / RoboBrowser jiu-jitsu
         # find the locality name (from elsewhere on virgnia.gov), see get_locality

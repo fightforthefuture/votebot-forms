@@ -47,32 +47,12 @@ class Illinois(BaseOVRForm):
         illinois_identification_form['ctl00$MainContent$tbILDLIDNumber2'] = user['id_number'][4:7]
         illinois_identification_form['ctl00$MainContent$tbILDLIDNumber3'] = user['id_number'][8:11]
 
-        try:
-            year, month, day = user['date_of_birth'].split('-')
+        (dob_year, dob_month, dob_day) = self.split_date(user['date_of_birth'])
+        illinois_identification_form['ctl00$MainContent$tbDOB'].value = '-'.join([dob_month, dob_day, dob_year])
 
-            # there's a Y2k bug lurking here for 2020...
-            # todo: centralize / standardize how to handle and submit dates
-            if len(year) == 2:
-                year = '19%s' % year
-
-            illinois_identification_form['ctl00$MainContent$tbDOB'].value = '-'.join([month.zfill(2), day.zfill(2), year])
-        except:
-            raise OVRError('date_of_birth must be in YYYY-MM-DD format')
-
-
-        # similar to above but for driver's license issue date.
-        try:
-            year, month, day = user['id_issue_date'].split('-')
-
-            # there's a Y2k bug lurking here for 2020...
-            # todo: centralize / standardize how to handle and submit dates
-            if len(year) == 2:
-                year = '19%s' % year
-
-            illinois_identification_form['ctl00$MainContent$tbIDIssuedDate'].value = '-'.join([month.zfill(2), day.zfill(2), year])
-        except:
-            raise OVRError('id_issue_date must be in YYYY-MM-DD format')
-
+        (id_year, id_month, id_day) = self.split_date(user['date_of_birth'])   
+        illinois_identification_form['ctl00$MainContent$tbIDIssuedDate'].value = '-'.join([id_month, id_day, id_year])
+        
         self.browser.submit_form(illinois_identification_form, submit=illinois_identification_form['ctl00$MainContent$btnNext'])
 
         

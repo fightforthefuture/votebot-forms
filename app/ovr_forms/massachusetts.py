@@ -29,18 +29,8 @@ class Massachusetts(BaseOVRForm):
         rmv_id_form['ctl00$MainContent$TxtFirstName'].value = user['first_name']
         rmv_id_form['ctl00$MainContent$TxtLastName'].value = user['last_name']
 
-        try:
-            year, month, day = user['date_of_birth'].split('-')
-
-            # there's a Y2k bug lurking here for 2020...
-            # todo: centralize / standardize how to handle and submit dates
-            if len(year) == 2:
-                year = '19%s' % year
-
-            rmv_id_form['ctl00$MainContent$TxtDoB'].value = '/'.join([month.zfill(2), day.zfill(2), year])
-        except:
-            raise OVRError('date must be in YYYY-MM-DD format')
-
+        (year, month, day) = self.split_date(user['date_of_birth'])
+        rmv_id_form['ctl00$MainContent$TxtDoB'].value = '/'.join([month, day, year])
 
         rmv_id_form['ctl00$MainContent$TxtRMVID'].value = user['id_number']
         rmv_id_form['ctl00$MainContent$ChkConsent'].checked = user['consent_get_signature_from_rmv']
