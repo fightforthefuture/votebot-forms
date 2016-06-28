@@ -9,7 +9,7 @@ from virginia import Virginia
 
 OVR_FORMS = {
     # 'AZ': Arizona,
-    # 'CA': California,
+    'CA': California,
     'GA': Georgia,
     'IL': Illinois,
     'MA': Massachusetts,
