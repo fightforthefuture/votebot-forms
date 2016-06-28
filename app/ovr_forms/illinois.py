@@ -1,4 +1,5 @@
 from base_ovr_form import BaseOVRForm
+from form_utils import split_date
 
 
 class Illinois(BaseOVRForm):
@@ -47,10 +48,10 @@ class Illinois(BaseOVRForm):
         illinois_identification_form['ctl00$MainContent$tbILDLIDNumber2'] = user['id_number'][4:7]
         illinois_identification_form['ctl00$MainContent$tbILDLIDNumber3'] = user['id_number'][8:11]
 
-        (dob_year, dob_month, dob_day) = self.split_date(user['date_of_birth'])
+        (dob_year, dob_month, dob_day) = split_date(user['date_of_birth'])
         illinois_identification_form['ctl00$MainContent$tbDOB'].value = '-'.join([dob_month, dob_day, dob_year])
 
-        (id_year, id_month, id_day) = self.split_date(user['date_of_birth'])   
+        (id_year, id_month, id_day) = split_date(user['date_of_birth'])   
         illinois_identification_form['ctl00$MainContent$tbIDIssuedDate'].value = '-'.join([id_month, id_day, id_year])
         
         self.browser.submit_form(illinois_identification_form, submit=illinois_identification_form['ctl00$MainContent$btnNext'])

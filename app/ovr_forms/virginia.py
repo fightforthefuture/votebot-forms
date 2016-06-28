@@ -1,4 +1,6 @@
 from base_ovr_form import BaseOVRForm, OVRError
+from form_utils import split_date
+
 from robobrowser import RoboBrowser
 
 
@@ -23,7 +25,7 @@ class Virginia(BaseOVRForm):
         voter_record_form['FirstName'].value = user['first_name']
         voter_record_form['LastName'].value = user['last_name']
 
-        (year, month, day) = self.split_date(user['date_of_birth'])
+        (year, month, day) = split_date(user['date_of_birth'])
         voter_record_form['DateOfBirth'].value = '/'.join([month, day, year])
 
         # some BeautifulSoup / RoboBrowser jiu-jitsu

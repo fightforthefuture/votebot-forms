@@ -29,32 +29,7 @@ class BaseOVRForm(object):
         self.check_required_fields(user)
 
     def submit(self, user):
-        print "submitting user data", user
-
-    def log_form(self, form):
-        payload = form.serialize()
-        serialized = payload.to_requests('POST')
-        #log.info(serialized)
-        print serialized
-
-    def split_date(date_string):
-        """ Expects date as YYYY-MM-DD, returns (year, month, day) tuple of strings.
-            Performs zfill to ensure zero-padding for month, day.
-        """
-        try:
-            (year, month, day) = date_string.split('-')
-
-            # there's a Y2k bug lurking here for 2020...
-            # todo: centralize / standardize how to handle and submit dates
-            if len(year) == 2:
-                year = '19%s' % year
-
-            month = month.zfill(2)
-            day = day.zfill(2)
-
-            return (year, month, day)
-        except:
-            raise OVRError('date must be in YYYY-MM-DD format')
+        raise NotImplemented('subclass a new submit function for %s' % self.__class__)
 
 
 class OVRError(Exception):

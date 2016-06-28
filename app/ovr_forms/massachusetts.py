@@ -1,4 +1,5 @@
 from base_ovr_form import BaseOVRForm
+from form_utils import split_date
 
 
 class Massachusetts(BaseOVRForm):
@@ -29,7 +30,7 @@ class Massachusetts(BaseOVRForm):
         rmv_id_form['ctl00$MainContent$TxtFirstName'].value = user['first_name']
         rmv_id_form['ctl00$MainContent$TxtLastName'].value = user['last_name']
 
-        (year, month, day) = self.split_date(user['date_of_birth'])
+        (year, month, day) = split_date(user['date_of_birth'])
         rmv_id_form['ctl00$MainContent$TxtDoB'].value = '/'.join([month, day, year])
 
         rmv_id_form['ctl00$MainContent$TxtRMVID'].value = user['id_number']

@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from base_ovr_form import BaseOVRForm, OVRError
-import json
+from form_utils import split_date, bool_to_int, log_form
 
 
 class VoteDotOrg(BaseOVRForm):
@@ -20,7 +20,7 @@ class VoteDotOrg(BaseOVRForm):
         form['last_name'].value = user['last_name']
 
         # date_of_birth -> parts
-        (year, month, day) = self.split_date(user['date_of_birth'])
+        (year, month, day) = split_date(user['date_of_birth'], padding=False)
         form['date_of_birth_month'].value = month
         form['date_of_birth_day'].value = day
         form['date_of_birth_year'].value = year
@@ -33,7 +33,7 @@ class VoteDotOrg(BaseOVRForm):
         form['email'] = user.get('email')
         form['mobile_phone'] = user['phone']
 
-        self.log_form(form)
+        log_form(form)
         self.browser.submit_form(form)
 
         return form
@@ -42,7 +42,7 @@ class VoteDotOrg(BaseOVRForm):
         # if given choice to register online, choose pdf form
         if self.browser.get_form(id='state_ovr'):
             finish_form = self.browser.get_form(id='finish')
-            self.log_form(finish_form)
+            log_form(finish_form)
             self.browser.submit_form(finish_form)
 
         full_form = self.browser.get_form(id='full_registration')
@@ -57,11 +57,10 @@ class VoteDotOrg(BaseOVRForm):
 
             # TODO, coerce free text party name to valid enum values
             full_form['political_party'].value = user.get('political_party')
+            # why does the form require bool as string?
+            full_form['us_citizen'].value = str(bool_to_int(user['us_citizen']))
 
-            # convert boolean to '0' or '1'
-            full_form['us_citizen'].value = str(int(user['us_citizen']))
-
-            self.log_form(full_form)
+            log_form(full_form)
             self.browser.submit_form(full_form)
 
         else:

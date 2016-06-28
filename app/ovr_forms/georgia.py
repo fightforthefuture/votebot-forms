@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm
-
+from form_utils import split_date
 
 class Georgia(BaseOVRForm):
     def __init__(self):
@@ -43,7 +43,7 @@ class Georgia(BaseOVRForm):
         registration_form['lastName'].value = user['last_name']
         registration_form['firstName'].value = user['first_name']
 
-        (year, month, day) = user['date_of_birth'].split('-')
+        (year, month, day) = split_date(user['date_of_birth'])
         registration_form['dobDate'].value = '/'.join([month, day, year])
 
         registration_form['ddsId'].value = user['id_number']
