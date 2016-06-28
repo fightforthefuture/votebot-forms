@@ -6,7 +6,7 @@ class Massachusetts(BaseOVRForm):
 
     def __init__(self):
         super(Massachusetts, self).__init__('https://www.sec.state.ma.us/OVR/Pages/MinRequirements.aspx?RMVId=True')
-        self.required_fields.extend(['will_be_18', 'legal_resident', 'consent_get_signature_from_rmv'])
+        self.required_fields.extend(['will_be_18', 'legal_resident', 'consent_use_signature'])
 
     def submit(self, user):
         self.minimum_requirements(user)
@@ -34,7 +34,7 @@ class Massachusetts(BaseOVRForm):
         rmv_id_form['ctl00$MainContent$TxtDoB'].value = '/'.join([month, day, year])
 
         rmv_id_form['ctl00$MainContent$TxtRMVID'].value = user['id_number']
-        rmv_id_form['ctl00$MainContent$ChkConsent'].checked = user['consent_get_signature_from_rmv']
+        rmv_id_form['ctl00$MainContent$ChkConsent'].checked = user['consent_use_signature']
 
         self.browser.submit_form(rmv_id_form, submit=rmv_id_form['ctl00$MainContent$BtnValidate'])
 
