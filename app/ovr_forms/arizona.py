@@ -1,6 +1,63 @@
 from base_ovr_form import BaseOVRForm
+from form_utils import split_date
 
 
 class Arizona(BaseOVRForm):
+
     def __init__(self):
-        super(Arizona, self).__init__('https://servicearizona.com/webapp/evoter/register?execution=e1s2')
+        super(Arizona, self).__init__('https://servicearizona.com/webapp/evoter/selectLanguage')
+        self.required_fields.extend(['will_be_18', 'legal_resident', 'mentally_competent', 'ssn_last_4'])
+
+    def submit(self, user):
+        self.language(user)
+        self.init_voter_registration(user)
+        self.eligibility(user)
+        self.personal_information(user)
+
+    def get_default_submit_headers(self):
+        # AZ does a validation check on referer, so fill it in with the current URL
+        return {'Referer': self.browser.url}
+
+    def language(self, user):
+        language_form = self.browser.get_form()
+        language_form['lang'].value = 'en'
+        self.browser.submit_form(language_form, headers=self.get_default_submit_headers())
+
+    def init_voter_registration(self, user):
+        # a functional no-op; just click submit.
+        voter_reg_form = self.browser.get_form()
+        self.browser.submit_form(voter_reg_form, headers=self.get_default_submit_headers())
+
+    def eligibility(self, user):
+        eligibility_form = self.browser.get_form()
+        
+        # they have some Dojo trickery, and server-side validation to go with it?
+        # it needs both checked and a value set. :shrug:
+        eligibility_form['resident'].checked = 'checked' if user['legal_resident'] else ''
+        eligibility_form['resident'].value = 'true' if user['legal_resident'] else 'false'
+        
+        eligibility_form['felon'].checked = 'checked' if user['not_a_felon'] else ''
+        eligibility_form['felon'].value = 'true' if user['not_a_felon'] else 'false'
+        
+        eligibility_form['competent'].checked = 'checked' if user['mentally_competent'] else ''
+        eligibility_form['competent'].value = 'true' if user['mentally_competent'] else 'false'
+        
+        # these are more straightforward
+        eligibility_form['citizenCheck'].value = 'on' if user['us_citizen'] else 'no'
+        eligibility_form['ageCheck'].value = 'on' if user['will_be_18'] else 'no'
+        
+        self.browser.submit_form(eligibility_form, headers=self.get_default_submit_headers())
+
+    def personal_information(self, user):
+        personal_info_form = self.browser.get_form()
+        personal_info_form['firstname'].value = user['first_name']
+        personal_info_form['lastname'].value = user['last_name']
+
+        year, month, day = split_date(user['date_of_birth'])
+        personal_info_form['dob'].value = '/'.join([month, day, year])
+
+        personal_info_form['ssn3'].value = user['ssn_last_4']
+        personal_info_form['dln'].value = user['id_number']
+
+        # specify the Continue button, not the "what if I don't know my DL number?" button, also a submit
+        self.browser.submit_form(personal_info_form, submit=personal_info_form['_eventId_continue'], headers=self.get_default_submit_headers())

@@ -8,7 +8,7 @@ from virginia import Virginia
 
 
 OVR_FORMS = {
-    # 'AZ': Arizona,
+    'AZ': Arizona,
     'CA': California,
     'GA': Georgia,
     'IL': Illinois,
