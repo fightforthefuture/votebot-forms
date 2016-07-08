@@ -1,4 +1,13 @@
+from smartystreets.client import Client
 from base_ovr_form import OVRError
+
+# todo: this should really come from teh app.config object itself
+# but I am in Python import hell with this for some reason.
+# from app import app
+
+# so pull the values themselves
+from app.config import SMARTY_STREETS_AUTH_ID, SMARTY_STREETS_AUTH_TOKEN
+
 
 #  TODO, move some of these into a fork of robobrowser?
 
@@ -53,3 +62,18 @@ def bool_to_int(boolean):
         raise OVRError("boolean shouldn't be None")
     r = int(boolean)
     return r
+
+
+def get_address_components(home_address, home_city, state, home_zip):
+    client = Client(auth_id=SMARTY_STREETS_AUTH_ID, auth_token=SMARTY_STREETS_AUTH_TOKEN)
+
+    response = client.street_address("%(home_address)s, %(home_city)s, %(state)s, %(home_zip)s" % \
+                                    {'home_address': home_address, 'home_city': home_city, 'state': state, 'home_zip': home_zip})
+
+    if not response or not response.get('analysis', False) or \
+        response['analysis'].get('active', 'N') != 'Y':
+        raise OVRError("could not validate address")
+
+    return response['components']
+
+
