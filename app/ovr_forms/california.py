@@ -53,9 +53,6 @@ class California(BaseOVRForm):
         # doctor up the DOM to un-disable Political Party
         del self.browser.select('select[name="VoterInformation.PoliticalPartyIdKey"]')[0]['disabled']
 
-        # then reset our form var
-        form = self.browser.get_form(action="/Home/MainForm")
-
         #  Eligibility
         form['VoterInformation.IsUsCitizen'].value = bool_to_string(user['us_citizen'])
         form['VoterInformation.IsEighteenYear'].value = bool_to_string(user['will_be_18'])

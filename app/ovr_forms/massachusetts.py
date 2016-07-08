@@ -43,7 +43,7 @@ class Massachusetts(BaseOVRForm):
 
     def complete_form(self, user):
 
-        # crucial - un-disable the party list before getting the form.
+        # crucial - un-disable the party list
         del self.browser.select('select[name="ctl00$MainContent$ddlPartyList"]')[0]['disabled']
 
         form = self.browser.get_form(id='form1')
