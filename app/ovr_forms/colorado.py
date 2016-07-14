@@ -1,12 +1,13 @@
 from base_ovr_form import BaseOVRForm
-from form_utils import bool_to_string, split_date, options_dict
+from form_utils import bool_to_string, options_dict, split_date
 
 
 class Colorado(BaseOVRForm):
     def __init__(self):
         super(Colorado, self).__init__('https://www.sos.state.co.us/voter-classic/pages/pub/olvr/verifyNewVoter.xhtml')
-        self.required_fields.extend(['is_military', 'vote_by_mail',
-                'military_overseas', 'gender', 'legal_resident', 'consent_use_signature'])
+        self.required_fields.extend(['is_military', 'vote_by_mail', 'political_party', 'email',
+                'military_overseas', 'gender', 'legal_resident', 'consent_use_signature',
+                'will_be_18', 'eligible_and_providing_accurate_information'])
 
     def submit(self, user):
         self.verify_identification(user)
@@ -21,7 +22,7 @@ class Colorado(BaseOVRForm):
         verify_identification_form['verifyNewVoterForm:voterSearchFirstId'].value = user['first_name']
 
         (year, month, day) = split_date(user['date_of_birth'])
-        verify_identification_form['verifyNewVoterForm:voterDOB'].value = '/'.join(month, day, year)
+        verify_identification_form['verifyNewVoterForm:voterDOB'].value = '/'.join([month, day, year])
 
         verify_identification_form['verifyNewVoterForm:driverId'].value = user['id_number']
 
@@ -41,29 +42,28 @@ class Colorado(BaseOVRForm):
         #     <option value="UAF">Unaffiliated</option>
         #     <option value="UNI">Unity</option>
         # </select>
-        edit_voter_form['editVoterForm:partyAffiliationId_input'].value = options_dict(edit_voter_form['editVoterForm:partyAffiliationId_input'])[user['party_affiliation']]
+        edit_voter_form['editVoterForm:partyAffiliationId_input'].value = options_dict(edit_voter_form['editVoterForm:partyAffiliationId_input'])[user['political_party']]
 
-        if user['is_military'] or user['overseas']:
+        if user['is_military'] or user['military_overseas']:
             edit_voter_form['editVoterForm:areUOCAVAId'].value = 'Y'
             edit_voter_form['editVoterForm:uocavaTypeId'].value = 'a' if user['is_military'] else 'c'
         else:
             edit_voter_form['editVoterForm:areUOCAVAId'].value = 'N'
 
-        edit_voter_form['editVoterForm:uocavaBallotMethodId'].value = 'Mail' # or 'Fax' or 'Email'
+        edit_voter_form['editVoterForm:uocavaBallotMethodId'].value = 'Mail' if user['vote_by_mail'] else 'Email' # or 'Fax'
 
         # todo: these seem optional or debatable
         # email, phone and gender are prefilled
         edit_voter_form['editVoterForm:emailId'].value = user['email']
-        edit_voter_form['editVoterForm:receiveEmailCommunicationId'].value = user['receive_election_info_by_email']
+        if user['receive_election_info_by_email']:
+            edit_voter_form['editVoterForm:receiveEmailCommunicationId'].checked = 'checked'
         edit_voter_form['editVoterForm:phoneId'].value = user['phone']
         edit_voter_form['editVoterForm:genderSelectId'].value = '0' if user['gender'] == 'F' else '1'
 
         edit_voter_form['editVoterForm:resAddress'].value = user['home_address']
         edit_voter_form['editVoterForm:resCity'].value = user['home_city']
 
-        # todo:
-        county = None
-        edit_voter_form['editVoterForm:resCounty_input'].value = options_dict(edit_voter_form['editVoterForm:resCounty_input'])[county]
+        edit_voter_form['editVoterForm:resCounty_input'].value = options_dict(edit_voter_form['editVoterForm:resCounty_input'])[user['home_county']]
 
         edit_voter_form['editVoterForm:resZip'].value = user['home_zip']
 
@@ -104,7 +104,7 @@ class Colorado(BaseOVRForm):
         # application is true to the best of my knowledge and belief;
         # and that I have not, nor will I, cast more than one ballot
         # in any election.
-        if False:
+        if user['will_be_18'] and user['legal_resident'] and user['eligible_and_providing_accurate_information']:
             affirmation_form['affirmationVoterForm:affirmCtizId'].checked = 'checked'
 
 
