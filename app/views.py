@@ -17,8 +17,13 @@ def registration():
     user = request.get_json(force=True)  # so we don't have to set mimetype
     if not user:
         return jsonify({'status': 'no user data specified'})
-    state = user['state']
+    # pull fields out of user.settings
+    if user['settings']:
+        for (key, value) in user['settings'].items():
+            user[key] = value
+        del user['settings']
 
+    state = user['state']
     if state in OVR_FORMS:
         form = OVR_FORMS[state]()
     else:
