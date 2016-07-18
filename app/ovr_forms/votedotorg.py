@@ -6,7 +6,7 @@ from form_utils import split_date, bool_to_int, log_form
 class VoteDotOrg(BaseOVRForm):
     def __init__(self):
         super(VoteDotOrg, self).__init__('https://register.vote.org/')
-        self.required_fields.extend(['political_party', 'email'])
+        self.add_required_fields(['political_party', 'email'])
 
     def parse_errors(self):
         messages = []

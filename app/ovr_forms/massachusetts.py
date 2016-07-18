@@ -6,7 +6,7 @@ class Massachusetts(BaseOVRForm):
 
     def __init__(self):
         super(Massachusetts, self).__init__('https://www.sec.state.ma.us/OVR/Pages/MinRequirements.aspx?RMVId=True')
-        self.required_fields.extend(['will_be_18', 'legal_resident', 'consent_use_signature', 'political_party'])
+        self.add_required_fields(['will_be_18', 'legal_resident', 'consent_use_signature', 'political_party'])
 
     def submit(self, user):
         self.minimum_requirements(user)

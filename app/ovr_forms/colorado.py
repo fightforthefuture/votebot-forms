@@ -5,7 +5,7 @@ from form_utils import bool_to_string, options_dict, split_date
 class Colorado(BaseOVRForm):
     def __init__(self):
         super(Colorado, self).__init__('https://www.sos.state.co.us/voter-classic/pages/pub/olvr/verifyNewVoter.xhtml')
-        self.required_fields.extend(['is_military', 'vote_by_mail', 'political_party', 'email',
+        self.add_required_fields(['is_military', 'vote_by_mail', 'political_party', 'email',
                 'military_overseas', 'gender', 'legal_resident', 'consent_use_signature',
                 'will_be_18', 'eligible_and_providing_accurate_information'])
 

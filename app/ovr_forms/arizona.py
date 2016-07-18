@@ -6,7 +6,7 @@ class Arizona(BaseOVRForm):
 
     def __init__(self):
         super(Arizona, self).__init__('https://servicearizona.com/webapp/evoter/selectLanguage')
-        self.required_fields.extend(['will_be_18', 'legal_resident', 'mentally_competent', 'ssn_last_4'])
+        self.add_required_fields(['will_be_18', 'legal_resident', 'mentally_competent', 'ssn_last_4'])
 
     def submit(self, user):
         self.language(user)

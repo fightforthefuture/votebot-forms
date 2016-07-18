@@ -20,6 +20,12 @@ class BaseOVRForm(object):
         self.browser.open(start_url)
         self.required_fields = BASE_REQUIRED_FIELDS
 
+    def add_required_fields(self, fields):
+        # moving this to its own method seemed to remedy some object-reuse issues
+        # I ran into with nose. todo: understand why those were popping up
+        # and make sure this doesn't have any unintended consequences
+        self.required_fields = self.required_fields + fields
+
     def check_required_fields(self, user):
         for field in self.required_fields:
             if field not in user:
