@@ -16,19 +16,6 @@ class TestCalifornia(BaseTestCase):
     def test_has_user(self):
         self.assertIsNotNone(self.user)
 
-    def test_user_has_required_fields(self):
-        print self.form
-        print self.form.required_fields
-
-        # dupe
-        dupe = California()
-        print "dupe fields"
-        print dupe.required_fields
-
-        dupe2 = California()
-        print "dupe2 fields"
-        print dupe2.required_fields
-
-
+    def test_user_has_required_fields(self):        
         for f in self.form.required_fields:
             self.assertIn(f, self.user)

@@ -1,4 +1,4 @@
-from base_ovr_form import BaseOVRForm
+from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import get_address_components, options_dict, split_date
 
 
@@ -8,45 +8,79 @@ class Massachusetts(BaseOVRForm):
         super(Massachusetts, self).__init__('https://www.sec.state.ma.us/OVR/Pages/MinRequirements.aspx?RMVId=True')
         self.add_required_fields(['will_be_18', 'legal_resident', 'consent_use_signature', 'political_party'])
 
+    def parse_errors(self):
+        messages = []
+        for error in self.browser.select('.ErrorMessage li'):
+            messages.append(error.text)
+        return messages
+
     def submit(self, user):
-        self.minimum_requirements(user)
-        self.rmv_identification(user)
-        self.complete_form(user)
-        self.review(user)
 
-    def minimum_requirements(self, user):
-        # this doesn't actually do a form submit, but if it did, it would look like ...
-        # min_req_form = self.browser.get_form(id="form1")
-        # min_req_form['ctl00$MainContent$ChkCitizen'].checked = user['us_citizen']
-        # min_req_form['ctl00$MainContent$ChkAge'].checked = user['will_be_18']
-        # min_req_form['ctl00$MainContent$ChkResident'].checked = user['legal_resident']
-        # self.browser.submit_form(min_req_form, submit=min_req_form['ctl00$MainContent$BtnBeginOVR'])
-        
-        # woe is me.
-        pass
+        # format is: [kwargs to select / identify form, method to call with form]
+        # frustratingly, MA uses the same methods and IDs for each form...
+        forms = [
+            [{'action': "./MinRequirements.aspx?RMVId=True"}, self.minimum_requirements],
+            [{'action': "./FormAndReview.aspx?RMVId=True"}, self.rmv_identification],
+            [{'action': "./FormAndReview.aspx?RMVId=True"}, self.complete_form],
+            [{'action': "./FormAndReview.aspx?RMVId=True"}, self.review]
+        ]
 
-    def rmv_identification(self, user):
-        self.browser.open('https://www.sec.state.ma.us/OVR/Pages/FormAndReview.aspx?RMVId=True')
-        rmv_id_form = self.browser.get_form(id="form1")
-        rmv_id_form['ctl00$MainContent$TxtFirstName'].value = user['first_name']
-        rmv_id_form['ctl00$MainContent$TxtLastName'].value = user['last_name']
+        for form_kwargs, handler in forms:
+
+            step_form = self.browser.get_form(**form_kwargs)
+
+            if step_form:
+                handler(user, step_form)
+                errors = self.parse_errors()
+
+                if errors:
+                    print errors
+                    return False
+            else:
+                return False
+
+        return True
+
+    def minimum_requirements(self, user, form):
+
+        if user['us_citizen']:
+            form['ctl00$MainContent$ChkCitizen'].checked = 'checked'
+            form['ctl00$MainContent$ChkCitizen'].value = 'on'
+
+        if user['will_be_18']:
+            form['ctl00$MainContent$ChkAge'].checked = 'checked'
+            form['ctl00$MainContent$ChkAge'].value = 'on'
+
+        if user['legal_resident']:
+            form['ctl00$MainContent$ChkResident'].checked = 'checked'
+            form['ctl00$MainContent$ChkResident'].value = 'on'
+
+        self.browser.submit_form(form, submit=form['ctl00$MainContent$BtnBeginOVR'])
+
+        if 'You must meet all 3 requirements' in self.browser.response.text:
+            raise OVRError('You must meet all three requirements: you are a U.S. citizen, you will be 18 on or before Election Day, and you are a Massachusetts resident')
+
+    def rmv_identification(self, user, form):
+        form['ctl00$MainContent$TxtFirstName'].value = user['first_name']
+        form['ctl00$MainContent$TxtLastName'].value = user['last_name']
 
         (year, month, day) = split_date(user['date_of_birth'])
-        rmv_id_form['ctl00$MainContent$TxtDoB'].value = '/'.join([month, day, year])
+        form['ctl00$MainContent$TxtDoB'].value = '/'.join([month, day, year])
 
-        rmv_id_form['ctl00$MainContent$TxtRMVID'].value = user['id_number']
+        form['ctl00$MainContent$TxtRMVID'].value = user['id_number']
         
-        rmv_id_form['ctl00$MainContent$ChkConsent'].checked = 'checked' if user['consent_use_signature'] else ''
-        rmv_id_form['ctl00$MainContent$ChkConsent'].value = 'on' if user['consent_use_signature'] else 'off'
+        if user['consent_use_signature']:
+            form['ctl00$MainContent$ChkConsent'].checked = 'checked'
+            form['ctl00$MainContent$ChkConsent'].value = 'on'
 
-        self.browser.submit_form(rmv_id_form, submit=rmv_id_form['ctl00$MainContent$BtnValidate'])
+        self.browser.submit_form(form, submit=form['ctl00$MainContent$BtnValidate'])
 
-    def complete_form(self, user):
+        if "Your RMV ID cannot be verified" in self.browser.response.text:
+            raise OVRError("Your Massachusetts RMV ID cannot be verified.")
+            # todo: fall back to PDF form here? retry?
 
-        # crucial - un-disable the party list
-        del self.browser.select('select[name="ctl00$MainContent$ddlPartyList"]')[0]['disabled']
+    def complete_form(self, user, form):
 
-        form = self.browser.get_form(id='form1')
         address_components = get_address_components(user['home_address'], user['home_city'], user['state'], user['home_zip'])
 
         form['ctl00$MainContent$txtStNum'].value = address_components['primary_number']
@@ -58,9 +92,30 @@ class Massachusetts(BaseOVRForm):
 
         form['ctl00$MainContent$txtZip'].value = user['home_zip']
 
-        # todo: more delicateness needed here.
-        form['ctl00$MainContent$PartyEnrolled'].value ='rdoBtnParty' if user['political_party'] else ''
-        form['ctl00$MainContent$ddlPartyList'].value = options_dict(form['ctl00$MainContent$ddlPartyList'])[user['political_party']]
+        party = user['political_party']
+
+        if party and party.lower() != 'independent':
+
+            parties = options_dict(form['ctl00$MainContent$ddlPartyList'])
+            designations = options_dict(form['ctl00$MainContent$ddlPoliticalDesig'])
+
+            if party in parties:
+                form['ctl00$MainContent$PartyEnrolled'].value ='rdoBtnParty'
+                # crucial - un-disable the party list
+                del self.browser.select('select[name="ctl00$MainContent$ddlPartyList"]')[0]['disabled']
+                form['ctl00$MainContent$ddlPartyList'].value = parties[party]
+
+            
+            elif party in designations:
+                form['ctl00$MainContent$PartyEnrolled'].value = 'rdoBtnPolDesig'
+                # crucial - un-disable the designation list
+                del self.browser.select('select[name="ctl00$MainContent$ddlPoliticalDesig"]')[0]['disabled']
+                form['ctl00$MainContent$ddlPoliticalDesig'].value = designations[party]
+            
+        else:
+            # No Party (Unenrolled, commonly referred to as ''Independent'')
+            form['ctl00$MainContent$PartyEnrolled'].value = 'rdoBtnNoParty'
+        
 
         # possible todos, all optional:
         # former name
@@ -70,10 +125,23 @@ class Massachusetts(BaseOVRForm):
 
         self.browser.submit_form(form)
 
-    def review(self, user):
-        review_form = self.browser.get_form(id='form1')
-        review_form['ctl00$MainContent$ChkIsSwear'].checked = 'checked'
-        review_form['ctl00$MainContent$ChkIsSwear'].value = 'on'
+    def review(self, user, form):
 
-        # untested
+        # I hereby swear (affirm) that I am the person named above, that the
+        # above information is true, that I AM A CITIZEN OF THE UNITED STATES,
+        # that I am not a person under guardianship which prohibits my
+        # registering to vote, that I am not temporarily or permanantly
+        # disqualified by law from voting because of corrupt practices in
+        # respect to elections, that I am not currently incarcerated for a
+        # felony conviction, and that I consider this residence to be my home.
+
+        # still could use:
+        # - not under guardianship
+        # - not disqualified becuase of corrupt election practices
+
+        if user['us_citizen'] and user['not_a_felon'] and user['legal_resident']:
+
+            form['ctl00$MainContent$ChkIsSwear'].checked = 'checked'
+            form['ctl00$MainContent$ChkIsSwear'].value = 'on'
+        
         # self.browser.submit_form(review_form)
