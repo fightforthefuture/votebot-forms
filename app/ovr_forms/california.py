@@ -9,12 +9,17 @@ class California(BaseOVRForm):
                                     'vote_by_mail', 'consent_use_signature'])
 
     def submit(self, user):
-        forms = {'/?language=en-US': self.step1,
-                '/Home/MainForm': self.step2,
-                '/Home/MainForm2': self.step3,
-                '/Home/Review': self.step4}
+        # dict loses its order when iteritem()'ing
+        # there are probably more elegant approaches than lists,
+        # but for now...
+        forms = [
+                    ['/?language=en-US', self.step1],
+                    ['/Home/MainForm', self.step2],
+                    ['/Home/MainForm2', self.step3],
+                    ['/Home/Review', self.step4]
+                ]
 
-        for action, function in forms.iteritems():
+        for action, function in forms:
             step_form = self.browser.get_form(action=action)
             if step_form:
                 function(step_form, user)
@@ -44,6 +49,10 @@ class California(BaseOVRForm):
         #  A U.S. citizen and have never resided in the U.S.
 
     def step2(self, form, user):
+
+        # doctor up the DOM to un-disable Political Party
+        del self.browser.select('select[name="VoterInformation.PoliticalPartyIdKey"]')[0]['disabled']
+
         #  Eligibility
         form['VoterInformation.IsUsCitizen'].value = bool_to_string(user['us_citizen'])
         form['VoterInformation.IsEighteenYear'].value = bool_to_string(user['will_be_18'])
@@ -104,32 +113,47 @@ class California(BaseOVRForm):
                 form['VoterInformation.PoliticalPartyIdKey'].value = party_options.get('Other')
                 form['VoterInformation.PoliticalPrefOther'].value = user['political_party']
 
-        # BUG, party selection not working for some reason
-        print form['VoterInformation.isPoliticalPrefSelected'].value
-        print form['VoterInformation.PoliticalPartyIdKey'].value
-
         next_button = form['command']
         next_button.value = 'Next'
+        
         self.browser.submit_form(form, submit=next_button)
 
     def step3(self, form, user):
+        
         #  Vote by Mail
-        if user.get('vote_by_mail', False):
-            form['VoterInformation.IsVoteByMail'].value = bool_to_string(user['vote_by_mail'])
+        form['VoterInformation.IsVoteByMail'].value = bool_to_string(user.get('vote_by_mail', False))
 
         #  Consent to Use Signature
         form['VoterInformation.IsDmvSignatureConsent'].value = bool_to_string(user['consent_use_signature'])
 
         #  Affirmation
         user_is_eligible = user['us_citizen'] and user['will_be_18'] and user['not_a_felon']
+        
         # also add "information is true and correct"?
         form['VoterInformation.isAffirmationSelected'].value = bool_to_string(user_is_eligible)
+        form['VoterInformation.isAffirmationSelected'].checked = 'checked'
+
+        # seemingly very redundant, but in testing, curl's failed without these:
+        form['VoterInformation.IsAPollWorker'].value = 'false'
+        form['VoterInformation.MultiLanguageList[0].IsSelected'].value = 'false'
+        form['VoterInformation.MultiLanguageList[1].IsSelected'].value = 'false'
+        form['VoterInformation.MultiLanguageList[2].IsSelected'].value = 'false'
+        form['VoterInformation.MultiLanguageList[3].IsSelected'].value = 'false'
+        form['VoterInformation.MultiLanguageList[4].IsSelected'].value = 'false'
+        form['VoterInformation.MultiLanguageList[5].IsSelected'].value = 'false'
+        form['VoterInformation.MultiLanguageList[6].IsSelected'].value = 'false'
+        form['VoterInformation.MultiLanguageList[7].IsSelected'].value = 'false'
+        form['VoterInformation.MultiLanguageList[8].IsSelected'].value = 'false'
+        form['VoterInformation.MultiLanguageList[9].IsSelected'].value = 'false'
+        form['VoterInformation.MultiLanguageList[10].IsSelected'].value = 'false'
+        form['VoterInformation.IsPollingPlaceProvided'].value = 'false'
 
         next_button = form['command']
         next_button.value = 'Next'
         self.browser.submit_form(form, submit=next_button)
 
     def step4(self, form, user):
-        submit_button = form['command']
-        submit_button.value = 'Submit'
-        self.browser.submit_form(form, submit=submit_button)
+        # submit_button = form['command']
+        # submit_button.value = 'Submit'
+        # self.browser.submit_form(form, submit=submit_button)
+        pass
