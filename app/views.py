@@ -29,7 +29,7 @@ def registration():
         form = OVR_FORMS[state]()
     else:
         form = OVR_FORMS['default'](current_app.config.VOTEORG_PARTNER)
-    jobs.submit_form(form, user)  # needs to be a separate function, so we can queue execution
+    jobs.submit_form.queue(form, user)  # needs to be a separate function, so we can queue execution
     return jsonify({'status': 'queued'})
 
 
