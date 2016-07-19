@@ -6,7 +6,8 @@ class Massachusetts(BaseOVRForm):
 
     def __init__(self):
         super(Massachusetts, self).__init__('https://www.sec.state.ma.us/OVR/Pages/MinRequirements.aspx?RMVId=True')
-        self.add_required_fields(['will_be_18', 'legal_resident', 'consent_use_signature', 'political_party'])
+        self.add_required_fields(['will_be_18', 'legal_resident', 'consent_use_signature',
+            'political_party', 'not_under_guardianship', 'not_disqualified'])
 
     def parse_errors(self):
         messages = []
@@ -15,6 +16,8 @@ class Massachusetts(BaseOVRForm):
         return messages
 
     def submit(self, user):
+
+        self.validate(user)
 
         # format is: [kwargs to select / identify form, method to call with form]
         # frustratingly, MA uses the same methods and IDs for each form...
@@ -34,12 +37,11 @@ class Massachusetts(BaseOVRForm):
                 errors = self.parse_errors()
 
                 if errors:
-                    print errors
-                    return False
+                    return {'status': 'error', 'errors': errors}
             else:
-                return False
+                return {'status': 'error'}
 
-        return True
+        return {'status': 'OK'}
 
     def minimum_requirements(self, user, form):
 
@@ -47,13 +49,22 @@ class Massachusetts(BaseOVRForm):
             form['ctl00$MainContent$ChkCitizen'].checked = 'checked'
             form['ctl00$MainContent$ChkCitizen'].value = 'on'
 
+        else:
+            raise OVRError('You must be a U.S. Citizen.', field='us_citizen')
+
         if user['will_be_18']:
             form['ctl00$MainContent$ChkAge'].checked = 'checked'
             form['ctl00$MainContent$ChkAge'].value = 'on'
 
+        else:
+            raise OVRError('You must be 18 by Election Day.', field='will_be_18')
+
         if user['legal_resident']:
             form['ctl00$MainContent$ChkResident'].checked = 'checked'
             form['ctl00$MainContent$ChkResident'].value = 'on'
+
+        else:
+            raise OVRError('You must be a Massachusetts resident.', field='legal_resident')
 
         self.browser.submit_form(form, submit=form['ctl00$MainContent$BtnBeginOVR'])
 
@@ -73,10 +84,13 @@ class Massachusetts(BaseOVRForm):
             form['ctl00$MainContent$ChkConsent'].checked = 'checked'
             form['ctl00$MainContent$ChkConsent'].value = 'on'
 
+        else:
+            raise OVRError("You must consent to using your signature from the Massachusetts RMV.", field='consent_use_signature')
+
         self.browser.submit_form(form, submit=form['ctl00$MainContent$BtnValidate'])
 
         if "Your RMV ID cannot be verified" in self.browser.response.text:
-            raise OVRError("Your Massachusetts RMV ID cannot be verified.")
+            raise OVRError("Your Massachusetts RMV ID cannot be verified.", field='id_number')
             # todo: fall back to PDF form here? retry?
 
     def complete_form(self, user, form):
@@ -135,13 +149,27 @@ class Massachusetts(BaseOVRForm):
         # respect to elections, that I am not currently incarcerated for a
         # felony conviction, and that I consider this residence to be my home.
 
-        # still could use:
-        # - not under guardianship
-        # - not disqualified becuase of corrupt election practices
-
-        if user['us_citizen'] and user['not_a_felon'] and user['legal_resident']:
+        if user['us_citizen'] and user['not_a_felon'] and user['legal_resident'] \
+            and user['not_under_guardianship'] and user['not_disqualified']:
 
             form['ctl00$MainContent$ChkIsSwear'].checked = 'checked'
             form['ctl00$MainContent$ChkIsSwear'].value = 'on'
-        
+
+        elif not user['us_citizen']:
+            raise OVRError("You must be a U.S. Citizen.", field='us_citizen')
+
+        elif not user['not_a_felon']:
+            raise OVRError("You must not be a felon.", field='not_a_felon')
+
+        elif not user['legal_resident']:
+            raise OVRError("You must be a Massachusetts resident.", field='legal_resident')
+
+        elif not user['not_under_guardianship']:
+            raise OVRError("You must not be under guardianship which prohibits your registering to vote.", field='not_under_guardianship')
+
+        elif not user['not_disqualified']:
+            raise OVRError("You must not be legally disqualified to vote.", field='not_disqualified')
+
         # self.browser.submit_form(review_form)
+
+

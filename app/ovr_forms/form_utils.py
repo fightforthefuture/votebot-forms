@@ -67,8 +67,9 @@ def bool_to_int(boolean):
 def get_address_components(home_address, home_city, state, home_zip):
     client = Client(auth_id=SMARTY_STREETS_AUTH_ID, auth_token=SMARTY_STREETS_AUTH_TOKEN)
 
+    # smarty streets specifically wants strings (not unicode) so...
     response = client.street_address("%(home_address)s, %(home_city)s, %(state)s, %(home_zip)s" % \
-                                    {'home_address': home_address, 'home_city': home_city, 'state': state, 'home_zip': home_zip})
+                                    {'home_address': str(home_address), 'home_city': str(home_city), 'state': str(state), 'home_zip': str(home_zip)})
 
     if not response or not response.get('analysis', False) or \
         response['analysis'].get('active', 'N') != 'Y':

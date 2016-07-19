@@ -1,8 +1,9 @@
 from app.ovr_forms import Massachusetts
 from app.ovr_forms.base_ovr_form import OVRError
 from nose.tools import raises
-from run import BaseTestCase
+from tests.run import BaseTestCase
 
+import json
 import vcr
 
 
@@ -51,7 +52,7 @@ class TestMassachusetts(BaseTestCase):
         self.setUpClass()
         user = self.user
         user['id_number'] = '012345678'
-        self.form.submit(user)
+        response = self.form.submit(user)
 
     @raises(OVRError)
     @vcr.use_cassette('ma/test_not_meeting_requirements.yml')
@@ -60,3 +61,23 @@ class TestMassachusetts(BaseTestCase):
         user = self.user
         user['us_citizen'] = False
         self.form.submit(user)
+
+
+    ## HTTP powered tests
+
+    @vcr.use_cassette('ma/not_us_citizen.yml')
+    def test_not_us_citizen(self):
+        test_client = self.create_app().test_client()
+        user = self.user
+        user['us_citizen'] = False
+        post = test_client.post('/registration', data=json.dumps(user))
+        self.assertEqual(json.loads(post.data), {u'us_citizen': u'You must be a U.S. Citizen.'})
+
+
+    @vcr.use_cassette('ma/no_consent_to_use_signature.yml')
+    def test_no_consent_to_use_signature(self):
+        test_client = self.create_app().test_client()
+        user = self.user
+        user['consent_use_signature'] = False
+        post = test_client.post('/registration', data=json.dumps(user))
+        self.assertEqual(json.loads(post.data), {u'consent_use_signature': u'You must consent to using your signature from the Massachusetts RMV.'})

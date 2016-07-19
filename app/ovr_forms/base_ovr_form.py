@@ -29,7 +29,7 @@ class BaseOVRForm(object):
     def check_required_fields(self, user):
         for field in self.required_fields:
             if field not in user:
-                raise OVRError('%s is required' % field, payload=user)
+                raise OVRError('%s is required' % field, field=field, payload=user)
 
     def validate(self, user):
         self.check_required_fields(user)
@@ -41,14 +41,15 @@ class BaseOVRForm(object):
 class OVRError(Exception):
     status_code = 400
 
-    def __init__(self, message, status_code=None, payload=None):
+    def __init__(self, message, field='error', status_code=None, payload=None):
         Exception.__init__(self)
         self.message = message
+        self.field = field
         if status_code is not None:
             self.status_code = status_code
         self.payload = payload
 
     def to_dict(self):
         rv = dict(self.payload or {})
-        rv['message'] = self.message
+        rv[self.field] = self.message
         return rv
