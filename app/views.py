@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from ovr_forms import OVR_FORMS
 from ovr_forms.base_ovr_form import OVRError
 
@@ -17,12 +17,17 @@ def registration():
     user = request.get_json(force=True)  # so we don't have to set mimetype
     if not user:
         return jsonify({'status': 'no user data specified'})
-    state = user['state']
+    # pull fields out of user.settings
+    if user['settings']:
+        for (key, value) in user['settings'].items():
+            user[key] = value
+        del user['settings']
 
+    state = user['state']
     if state in OVR_FORMS:
         form = OVR_FORMS[state]()
     else:
-        form = OVR_FORMS['default']()
+        form = OVR_FORMS['default'](current_app.config.VOTEORG_PARTNER)
 
     status = form.submit(user)
     return jsonify(status)

@@ -1,5 +1,6 @@
 from smartystreets.client import Client
 from base_ovr_form import OVRError
+import datetime
 
 # todo: this should really come from teh app.config object itself
 # but I am in Python import hell with this for some reason.
@@ -22,29 +23,33 @@ def options_dict(field):
     return dict(zip(field.labels, field.options))
 
 
-def split_date(date_string, padding=True):
+def split_date(date, padding=True):
     """ Expects date as YYYY-MM-DD, returns (year, month, day) tuple of strings.
         Performs zfill to ensure zero-padding for month, day.
     """
-    try:
-        (year, month, day) = date_string.split('-')
+    if type(date) in [type(datetime.datetime), type(datetime.date)]:
+        return (date.year, date.month, date.day)
+    else:
+        try:
+            (year, month, day) = date.split('-')
 
-        # there's a Y2k bug lurking here for 2020...
-        # todo: centralize / standardize how to handle and submit dates
-        if len(year) == 2:
-            year = '19%s' % year
+            # there's a Y2k bug lurking here for 2020...
+            # todo: centralize / standardize how to handle and submit dates
+            if len(year) == 2:
+                year = '19%s' % year
 
-        if padding:
-            month = month.zfill(2)
-            day = day.zfill(2)
-        else:
-            if month.startswith('0'):
-                month = month[1]
-            if day.startswith('0'):
-                day = day[1]
-        return (year, month, day)
-    except:
-        raise OVRError('date must be in YYYY-MM-DD format')
+            if padding:
+                month = month.zfill(2)
+                day = day.zfill(2)
+            else:
+                if month.startswith('0'):
+                    month = month[1]
+                if day.startswith('0'):
+                    day = day[1]
+            return (year, month, day)
+        except:
+            raise OVRError('date must be in YYYY-MM-DD format')
+
 
 
 def bool_to_string(boolean, capitalize=False):

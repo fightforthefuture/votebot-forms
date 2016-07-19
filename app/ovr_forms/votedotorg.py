@@ -4,8 +4,11 @@ from form_utils import split_date, bool_to_int, log_form
 
 
 class VoteDotOrg(BaseOVRForm):
-    def __init__(self):
-        super(VoteDotOrg, self).__init__('https://register.vote.org/')
+    def __init__(self, partner_id=None):
+        VOTEORG_URL = 'https://register.vote.org/'
+        if partner_id:
+            VOTEORG_URL += '?partner=%s' % partner_id
+        super(VoteDotOrg, self).__init__(VOTEORG_URL)
         self.required_fields.extend(['political_party', 'email'])
 
     def parse_errors(self):
@@ -70,15 +73,16 @@ class VoteDotOrg(BaseOVRForm):
     def get_download(self, user):
         self.browser.open('https://register.vote.org/downloads.json')
         download_response = self.browser.state.response.json()
-        return download_response
+        if download_response['status'] == 'ready':
+            return True
 
     def submit(self, user):
         self.validate(user)
         self.get_started(user)
         self.full_registration(user)
 
-        if self.browser.select('a#download_link'):
-            return self.get_download(user)
+        if self.browser.select('a#download_link') and self.get_download(user):
+            return {'status': 'download_ready'}
         else:
             # log error?
             return {'status': 'unable to find download_link'}
