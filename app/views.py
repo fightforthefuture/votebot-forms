@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from ovr_forms import OVR_FORMS
 from ovr_forms.base_ovr_form import OVRError
+import jobs
 
 votebot = Blueprint('votebot', __name__)
 
@@ -28,9 +29,8 @@ def registration():
         form = OVR_FORMS[state]()
     else:
         form = OVR_FORMS['default'](current_app.config.VOTEORG_PARTNER)
-
-    status = form.submit(user)
-    return jsonify(status)
+    jobs.submit_form(form, user)  # needs to be a separate function, so we can queue execution
+    return jsonify({'status': 'queued'})
 
 
 @votebot.route('/confirm')
