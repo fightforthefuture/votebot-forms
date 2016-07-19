@@ -8,7 +8,7 @@ class Virginia(BaseOVRForm):
 
     def __init__(self):
         super(Virginia, self).__init__('https://vote.elections.virginia.gov/VoterInformation')
-        self.required_fields.extend(['ssn_last_4', 'lawful_affirmation', 'county'])
+        self.add_required_fields(['ssn_last_4', 'lawful_affirmation', 'county'])
 
     def submit(self, user):
         self.access_voter_record(user)

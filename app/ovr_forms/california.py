@@ -5,7 +5,7 @@ from form_utils import bool_to_string, split_date, options_dict
 class California(BaseOVRForm):
     def __init__(self):
         super(California, self).__init__('https://covr.sos.ca.gov/?language=en-US')
-        self.required_fields.extend(['will_be_18', 'last_4_ssn', 'political_party',
+        self.add_required_fields(['will_be_18', 'last_4_ssn', 'political_party',
                                     'vote_by_mail', 'consent_use_signature'])
 
     def submit(self, user):

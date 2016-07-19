@@ -14,7 +14,9 @@ def handle_ovr_error(error):
 
 @votebot.route('/registration', methods=['POST'])
 def registration():
+
     user = request.get_json(force=True)  # so we don't have to set mimetype
+
     if not user:
         return jsonify({'status': 'no user data specified'})
     # pull fields out of user.settings
@@ -30,6 +32,7 @@ def registration():
         form = OVR_FORMS['default'](current_app.config.VOTEORG_PARTNER)
 
     status = form.submit(user)
+
     return jsonify(status)
 
 
