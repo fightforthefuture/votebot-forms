@@ -20,7 +20,7 @@ def registration():
     if not user:
         return jsonify({'status': 'no user data specified'})
     # pull fields out of user.settings
-    if user['settings']:
+    if user.get('settings', None):
         for (key, value) in user['settings'].items():
             user[key] = value
         del user['settings']
