@@ -5,7 +5,7 @@ class Georgia(BaseOVRForm):
     def __init__(self):
         super(Georgia, self).__init__('https://registertovote.sos.ga.gov/GAOLVR/welcometoga.do')
         # todo: you can check if you are registered at https://www.mvp.sos.ga.gov/MVP/mvp.do
-        self.required_fields.extend(['will_be_18', 'legal_resident', 'mentally_competent'])
+        self.add_required_fields(['will_be_18', 'legal_resident', 'mentally_competent'])
 
     def welcome(self):
         ovr_welcome_form = self.browser.get_form()
