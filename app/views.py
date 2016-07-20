@@ -7,6 +7,7 @@ votebot = Blueprint('votebot', __name__)
 
 @votebot.errorhandler(OVRError)
 def handle_ovr_error(error):
+    print "damn daniel"
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
     return response

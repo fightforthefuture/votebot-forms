@@ -10,9 +10,12 @@ class Massachusetts(BaseOVRForm):
             'political_party', 'not_under_guardianship', 'not_disqualified'])
 
     def parse_errors(self):
+        if self.errors:
+            return self.errors
+
         messages = []
         for error in self.browser.select('.ErrorMessage li'):
-            messages.append(error.text)
+            messages.append({'error': error.text})
         return messages
 
     def submit(self, user):
@@ -34,12 +37,11 @@ class Massachusetts(BaseOVRForm):
 
             if step_form:
                 handler(user, step_form)
-                errors = self.parse_errors()
 
-                if errors:
-                    return {'status': 'error', 'errors': errors}
-            else:
-                return {'status': 'error'}
+            errors = self.parse_errors()
+
+            if errors or not step_form:
+                return {'errors': errors}
 
         return {'status': 'OK'}
 
@@ -68,8 +70,8 @@ class Massachusetts(BaseOVRForm):
 
         self.browser.submit_form(form, submit=form['ctl00$MainContent$BtnBeginOVR'])
 
-        if 'You must meet all 3 requirements' in self.browser.response.text:
-            self.add_error('You must meet all three requirements: you are a U.S. citizen, you will be 18 on or before Election Day, and you are a Massachusetts resident')
+        # if 'You must meet all 3 requirements' in self.browser.response.text:
+        #     self.add_error('You must meet all three requirements: you are a U.S. citizen, you will be 18 on or before Election Day, and you are a Massachusetts resident')
 
     def rmv_identification(self, user, form):
         form['ctl00$MainContent$TxtFirstName'].value = user['first_name']
