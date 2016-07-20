@@ -19,6 +19,10 @@ class BaseOVRForm(object):
         self.browser = RoboBrowser(parser='html.parser', user_agent='votebot-forms FightForTheFuture', history=True)
         self.browser.open(start_url)
         self.required_fields = BASE_REQUIRED_FIELDS
+        self.errors = []
+
+    def add_error(self, message, field='error'):
+        self.errors.append({field: message})
 
     def add_required_fields(self, fields):
         # moving this to its own method seemed to remedy some object-reuse issues
@@ -29,10 +33,12 @@ class BaseOVRForm(object):
     def check_required_fields(self, user):
         for field in self.required_fields:
             if field not in user:
-                raise OVRError('%s is required' % field, field=field, payload=user)
+                self.add_error('%s is required' % field, field=field)
 
     def validate(self, user):
         self.check_required_fields(user)
+        if self.errors:
+            raise OVRError(self.errors)
 
     def submit(self, user):
         raise NotImplemented('subclass a new submit function for %s' % self.__class__)
@@ -41,9 +47,9 @@ class BaseOVRForm(object):
 class OVRError(Exception):
     status_code = 400
 
-    def __init__(self, message, field='error', status_code=None, payload=None):
+    def __init__(self, errors, status_code=None, payload=None):
         Exception.__init__(self)
-        self.message = message
+        self.errors = errors
         self.field = field
         if status_code is not None:
             self.status_code = status_code
@@ -51,5 +57,5 @@ class OVRError(Exception):
 
     def to_dict(self):
         rv = dict(self.payload or {})
-        rv[self.field] = self.message
+        rv['errors'] = self.errors
         return rv
