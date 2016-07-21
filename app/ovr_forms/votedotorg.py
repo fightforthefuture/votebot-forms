@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import split_date, bool_to_int, log_form
+from form_utils import split_date, bool_to_int, log_form, get_party_from_list, options_dict
 
 
 class VoteDotOrg(BaseOVRForm):
@@ -31,7 +31,7 @@ class VoteDotOrg(BaseOVRForm):
 
         # street address
         # can't figure out how to bypass autocomplete, so reassemble parts into string
-        form['address_autocomplete'] = '%(home_address)s %(home_city)s %(state)s %(home_zip)s' % user
+        form['address_autocomplete'] = '%(home_address)s, %(home_city)s, %(state)s %(home_zip)s' % user
 
         # contact
         form['email'] = user.get('email')
@@ -59,8 +59,8 @@ class VoteDotOrg(BaseOVRForm):
 
             full_form['state_id_number'].value = user['id_number']
 
-            # TODO, coerce free text party name to valid enum values
-            full_form['political_party'].value = user.get('political_party')
+            party_translated = get_party_from_list(user.get('political_party'), options_dict(full_form['political_party']).keys())
+            full_form['political_party'].value = options_dict(full_form['political_party'])[party_translated]
             # why does the form require bool as string?
             full_form['us_citizen'].value = str(bool_to_int(user['us_citizen']))
 
@@ -80,7 +80,19 @@ class VoteDotOrg(BaseOVRForm):
     def submit(self, user):
         self.validate(user)
         self.get_started(user)
+
+        # todo: handle some state specific logic:
+
+        # vote.org has messaging for these:
+            # New Hampshire: town and city clerks will accept this application only as a request for their own absentee voter mail-in registration form.
+            # Wyoming: law does not permit mail registration
+
+        # but interestingly does not cover:
+            # North Dakota: does not have voter registration. (it's not required!)
+
         self.full_registration(user)
+
+        # todo: get_download really needs to be async / queued.
 
         if self.browser.select('a#download_link') and self.get_download(user):
             return {'status': 'download_ready'}

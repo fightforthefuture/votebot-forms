@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm
-from form_utils import bool_to_string, options_dict, split_date
+from form_utils import bool_to_string, options_dict, split_date, get_party_from_list
 
 
 class Colorado(BaseOVRForm):
@@ -31,18 +31,13 @@ class Colorado(BaseOVRForm):
     def edit_voter_information(self, user):
         edit_voter_form = self.browser.get_form(id='editVoterForm')
 
-        # choices for party:
-        # <select id="editVoterForm:partyAffiliationId_input" name="editVoterForm:partyAffiliationId_input">
-        #     <option value=""></option>
-        #     <option value="ACN">American Constitution</option>
-        #     <option value="DEM" selected="selected">Democratic</option>
-        #     <option value="GRN">Green</option>
-        #     <option value="LBR">Libertarian</option>
-        #     <option value="REP">Republican</option>
-        #     <option value="UAF">Unaffiliated</option>
-        #     <option value="UNI">Unity</option>
-        # </select>
-        edit_voter_form['editVoterForm:partyAffiliationId_input'].value = options_dict(edit_voter_form['editVoterForm:partyAffiliationId_input'])[user['political_party']]
+        party = get_party_from_list(user['political_party'], options_dict(edit_voter_form['editVoterForm:partyAffiliationId_input']))
+        
+        # it is required. if we haven't found a match, defer to 'Unaffiliated'
+        if not party:
+            party = 'Unaffiliated'
+        
+        edit_voter_form['editVoterForm:partyAffiliationId_input'].value = options_dict(edit_voter_form['editVoterForm:partyAffiliationId_input'])[party]
 
         if user['is_military'] or user['military_overseas']:
             edit_voter_form['editVoterForm:areUOCAVAId'].value = 'Y'
@@ -107,11 +102,10 @@ class Colorado(BaseOVRForm):
         if user['will_be_18'] and user['legal_resident'] and user['eligible_and_providing_accurate_information']:
             affirmation_form['affirmationVoterForm:affirmCtizId'].checked = 'checked'
 
-
         if user['consent_use_signature']:
             affirmation_form['affirmationVoterForm:fromStatueId'].checked = 'checked'
 
-        self.browser.submit_form(affirmation_form, submit=affirmation_form['affirmationVoterForm:j_idt73'])
+        # self.browser.submit_form(affirmation_form, submit=affirmation_form['affirmationVoterForm:j_idt73'])
 
 
 

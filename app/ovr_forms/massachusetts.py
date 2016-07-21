@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import get_address_components, options_dict, split_date
+from form_utils import get_address_components, options_dict, split_date, get_party_from_list
 
 
 class Massachusetts(BaseOVRForm):
@@ -108,25 +108,27 @@ class Massachusetts(BaseOVRForm):
 
         form['ctl00$MainContent$txtZip'].value = user['home_zip']
 
-        party = user['political_party']
+        user_party = user['political_party']
+        parties = options_dict(form['ctl00$MainContent$ddlPartyList'])
+        designations = options_dict(form['ctl00$MainContent$ddlPoliticalDesig'])
 
-        if party and party.lower() != 'independent':
+        party = get_party_from_list(user_party, parties.keys())
+        designation = get_party_from_list(user_party, designations.keys())
 
-            parties = options_dict(form['ctl00$MainContent$ddlPartyList'])
-            designations = options_dict(form['ctl00$MainContent$ddlPoliticalDesig'])
+        if user_party and user_party.lower().strip() != 'independent':
 
-            if party in parties:
+            if party:
                 form['ctl00$MainContent$PartyEnrolled'].value ='rdoBtnParty'
                 # crucial - un-disable the party list
                 del self.browser.select('select[name="ctl00$MainContent$ddlPartyList"]')[0]['disabled']
                 form['ctl00$MainContent$ddlPartyList'].value = parties[party]
 
             
-            elif party in designations:
+            elif designation:
                 form['ctl00$MainContent$PartyEnrolled'].value = 'rdoBtnPolDesig'
                 # crucial - un-disable the designation list
                 del self.browser.select('select[name="ctl00$MainContent$ddlPoliticalDesig"]')[0]['disabled']
-                form['ctl00$MainContent$ddlPoliticalDesig'].value = designations[party]
+                form['ctl00$MainContent$ddlPoliticalDesig'].value = designations[designation]
             
         else:
             # No Party (Unenrolled, commonly referred to as ''Independent'')
