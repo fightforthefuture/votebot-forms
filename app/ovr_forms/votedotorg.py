@@ -93,9 +93,4 @@ class VoteDotOrg(BaseOVRForm):
         self.full_registration(user)
 
         # todo: get_download really needs to be async / queued.
-
-        if self.browser.select('a#download_link') and self.get_download(user):
-            return {'status': 'download_ready'}
-        else:
-            # log error?
-            return {'status': 'unable to find download_link'}
+        return {'status': 'queued'}
