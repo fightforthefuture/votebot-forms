@@ -8,6 +8,7 @@ votebot = Blueprint('votebot', __name__)
 
 @votebot.errorhandler(OVRError)
 def handle_ovr_error(error):
+    print "damn daniel"
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
     return response
@@ -20,6 +21,7 @@ def registration():
     if not user:
         return jsonify({'status': 'no user data specified'})
     # pull fields out of user.settings
+
     if 'settings' in user:
         for (key, value) in user['settings'].items():
             user[key] = value

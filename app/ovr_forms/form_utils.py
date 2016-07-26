@@ -1,6 +1,8 @@
 from smartystreets.client import Client
 from base_ovr_form import OVRError
+
 import datetime
+import difflib
 
 # todo: this should really come from teh app.config object itself
 # but I am in Python import hell with this for some reason.
@@ -83,3 +85,23 @@ def get_address_components(home_address, home_city, state, home_zip):
     return response['components']
 
 
+def get_party_from_list(party, party_list):
+
+    # todo: we should normalize presence / abence of the word "Party"
+
+    # common misspellings / too short to catch
+    if party.lower() in ['dem', 'd']:
+        party = 'Democratic'
+
+    elif party.lower().strip() in ['r', 'gop', 'rep', 'repub', 'g.o.p.', 'grand old party']:
+        party = 'Republican'
+        
+
+    try:
+        return difflib.get_close_matches(party, party_list)[0]
+    except IndexError:
+        try:
+            return filter(lambda p: party.lower() in p.lower(), party_list)[0]
+        except IndexError:
+            # need some kind of graceful fallback here.
+            return None
