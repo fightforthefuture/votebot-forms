@@ -7,7 +7,7 @@ class Massachusetts(BaseOVRForm):
     def __init__(self):
         super(Massachusetts, self).__init__('https://www.sec.state.ma.us/OVR/Pages/MinRequirements.aspx?RMVId=True')
         self.add_required_fields(['will_be_18', 'legal_resident', 'consent_use_signature',
-            'political_party', 'not_under_guardianship', 'not_disqualified'])
+            'political_party', 'not_under_guardianship', 'disenfranchised'])
 
     def parse_errors(self):
         if self.errors:
@@ -153,8 +153,8 @@ class Massachusetts(BaseOVRForm):
         # respect to elections, that I am not currently incarcerated for a
         # felony conviction, and that I consider this residence to be my home.
 
-        if user['us_citizen'] and user['not_a_felon'] and user['legal_resident'] \
-            and user['not_under_guardianship'] and user['not_disqualified']:
+        if user['us_citizen'] and user['legal_resident'] \
+            and not (user['disqualified'] or user['disenfranchised']):
 
             form['ctl00$MainContent$ChkIsSwear'].checked = 'checked'
             form['ctl00$MainContent$ChkIsSwear'].value = 'on'
@@ -168,12 +168,9 @@ class Massachusetts(BaseOVRForm):
         elif not user['legal_resident']:
             self.add_error("You must be a Massachusetts resident.", field='legal_resident')
 
-        elif not user['not_under_guardianship']:
-            self.add_error("You must not be under guardianship which prohibits your registering to vote.", field='not_under_guardianship')
+        elif user['disenfranchised']:
+            self.add_error("You may not register to vote if you are currently imprisoned or on parole for the conviction of a felony.", field='disenfranchised')
 
-        elif not user['not_disqualified']:
-            self.add_error("You must not be legally disqualified to vote.", field='not_disqualified')
-
-        # self.browser.submit_form(review_form)
-
+        elif user['disqualified']:
+            self.add_error("You must not be legally disqualified to vote, or under legal guardianship which prohibits your registering. ", field='disqualified')
 

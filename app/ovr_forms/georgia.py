@@ -21,7 +21,7 @@ class Georgia(BaseOVRForm):
         min_req_form['citizenVer'].checked = user['us_citizen']
         min_req_form['ageVer'].checked = user['will_be_18']
         min_req_form['stateVer'].checked = user['legal_resident']
-        min_req_form['felonyVer'].checked = user['not_a_felon']
+        min_req_form['felonyVer'].checked = not user['disenfranchised']
         min_req_form['mentally'].checked = user['mentally_competent']
         
         # every GA form has a "back" button which also does a submit, so we have to specify

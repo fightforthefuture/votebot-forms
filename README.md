@@ -22,7 +22,8 @@ POST to '/registration' with json like
     "id_number":"NONE",
     "political_party":"No Party",
     "us_citizen":true,
-    "not_a_felon":true,
+    "legal_resident": true,
+    "disenfranchised":false,
   }
 }
 ```
@@ -71,7 +72,8 @@ or
       id_number: NONE
       political_party: No Party
       us_citizen:true
-      not_a_felon:true
+      legal_resident:true
+      disenfranchised:false
 `
 - run `python tests/run.py`
 

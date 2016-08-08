@@ -5,8 +5,8 @@ from form_utils import bool_to_string, split_date, options_dict
 class California(BaseOVRForm):
     def __init__(self):
         super(California, self).__init__('https://covr.sos.ca.gov/?language=en-US')
-        self.add_required_fields(['will_be_18', 'last_4_ssn', 'political_party',
-                                    'vote_by_mail', 'consent_use_signature'])
+        self.add_required_fields(['will_be_18', 'political_party', 'disenfranchised',
+                                 'last_4_ssn', 'county', 'consent_use_signature'])
 
     def submit(self, user):
         # dict loses its order when iteritem()'ing
@@ -127,7 +127,7 @@ class California(BaseOVRForm):
         form['VoterInformation.IsDmvSignatureConsent'].value = bool_to_string(user['consent_use_signature'])
 
         #  Affirmation
-        user_is_eligible = user['us_citizen'] and user['will_be_18'] and user['not_a_felon']
+        user_is_eligible = user['us_citizen'] and user['will_be_18'] and (not user['disenfranchised'])
         
         # also add "information is true and correct"?
         form['VoterInformation.isAffirmationSelected'].value = bool_to_string(user_is_eligible)

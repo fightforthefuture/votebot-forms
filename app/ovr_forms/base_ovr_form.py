@@ -9,7 +9,6 @@ BASE_REQUIRED_FIELDS = [
     'city',
     'zip',
     'us_citizen',
-    'not_a_felon',
     'id_number'
 ]
 

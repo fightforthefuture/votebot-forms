@@ -36,8 +36,8 @@ class Arizona(BaseOVRForm):
         eligibility_form['resident'].checked = 'checked' if user['legal_resident'] else ''
         eligibility_form['resident'].value = 'true' if user['legal_resident'] else 'false'
         
-        eligibility_form['felon'].checked = 'checked' if user['not_a_felon'] else ''
-        eligibility_form['felon'].value = 'true' if user['not_a_felon'] else 'false'
+        eligibility_form['felon'].checked = 'checked' if not user['disenfranchised'] else ''
+        eligibility_form['felon'].value = 'true' if not user['disenfranchised'] else 'false'
         
         eligibility_form['competent'].checked = 'checked' if user['mentally_competent'] else ''
         eligibility_form['competent'].value = 'true' if user['mentally_competent'] else 'false'
