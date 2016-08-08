@@ -118,12 +118,11 @@ class Massachusetts(BaseOVRForm):
         if user_party and user_party.lower().strip() != 'independent':
 
             if party:
-                form['ctl00$MainContent$PartyEnrolled'].value ='rdoBtnParty'
+                form['ctl00$MainContent$PartyEnrolled'].value = 'rdoBtnParty'
                 # crucial - un-disable the party list
                 del self.browser.select('select[name="ctl00$MainContent$ddlPartyList"]')[0]['disabled']
                 form['ctl00$MainContent$ddlPartyList'].value = parties[party]
 
-            
             elif designation:
                 form['ctl00$MainContent$PartyEnrolled'].value = 'rdoBtnPolDesig'
                 # crucial - un-disable the designation list

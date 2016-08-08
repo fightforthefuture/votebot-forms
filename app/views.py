@@ -8,7 +8,6 @@ votebot = Blueprint('votebot', __name__)
 
 @votebot.errorhandler(OVRError)
 def handle_ovr_error(error):
-    print "damn daniel"
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
     return response
@@ -32,7 +31,15 @@ def registration():
         form = OVR_FORMS[state]()
     else:
         form = OVR_FORMS['default'](current_app.config.get('VOTEORG_PARTNER'))
-    # needs to be a separate function, so we can queue execution
+
+    # validate before queueing for submission
+    try:
+        form.validate(user)
+    except OVRError, e:
+        print "OVRError", e
+        return jsonify({'status': 'error', 'errors': e.to_dict()})
+
+    # queue form submission and success callback
     jobs.submit_form.queue(form, user, callback_url=request_json.get('callback_url'))
     return jsonify({'status': 'queued'})
 

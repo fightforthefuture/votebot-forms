@@ -37,7 +37,7 @@ class BaseOVRForm(object):
     def validate(self, user):
         self.check_required_fields(user)
         if self.errors:
-            raise OVRError(self.errors)
+            raise OVRError(message='form did not validate', payload=self.errors)
 
     def submit(self, user):
         raise NotImplemented('subclass a new submit function for %s' % self.__class__)
@@ -54,6 +54,7 @@ class OVRError(Exception):
         self.payload = payload
 
     def to_dict(self):
-        rv = dict(self.payload or {})
-        rv['errors'] = self.message
+        rv = {}
+        rv['payload'] = self.payload
+        rv['message'] = self.message
         return rv

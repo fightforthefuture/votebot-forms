@@ -1,6 +1,7 @@
 from base_ovr_form import BaseOVRForm
 from form_utils import split_date
 
+
 class Georgia(BaseOVRForm):
     def __init__(self):
         super(Georgia, self).__init__('https://registertovote.sos.ga.gov/GAOLVR/welcometoga.do')

@@ -53,7 +53,6 @@ def split_date(date, padding=True):
             raise OVRError('date must be in YYYY-MM-DD format')
 
 
-
 def bool_to_string(boolean, capitalize=False):
     if boolean is None:
         raise OVRError("boolean shouldn't be None")
@@ -95,7 +94,6 @@ def get_party_from_list(party, party_list):
 
     elif party.lower().strip() in ['r', 'gop', 'rep', 'repub', 'g.o.p.', 'grand old party']:
         party = 'Republican'
-        
 
     try:
         return difflib.get_close_matches(party, party_list)[0]

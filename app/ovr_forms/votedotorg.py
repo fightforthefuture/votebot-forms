@@ -78,19 +78,8 @@ class VoteDotOrg(BaseOVRForm):
             return True
 
     def submit(self, user):
-        self.validate(user)
         self.get_started(user)
-
-        # todo: handle some state specific logic:
-
-        # vote.org has messaging for these:
-            # New Hampshire: town and city clerks will accept this application only as a request for their own absentee voter mail-in registration form.
-            # Wyoming: law does not permit mail registration
-
-        # but interestingly does not cover:
-            # North Dakota: does not have voter registration. (it's not required!)
-
         self.full_registration(user)
-
-        # todo: get_download really needs to be async / queued.
+        # return queue status immediately
+        # check for pdf with get_download
         return {'status': 'queued'}
