@@ -90,3 +90,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# test cassettes
+tests/.cassettes
+
+# API testing PAW
+*.paw
