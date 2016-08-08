@@ -88,12 +88,12 @@ class California(BaseOVRForm):
             form['VoterInformation.SsnLastFour'].value = user.get('last_4_ssn')
 
         #  Home and Mailing Address
-        form['VoterInformation.AddressStreet1'].value = user['home_address']
-        form['VoterInformation.AddressStreet2'].value = user.get('home_apt')
-        form['VoterInformation.AddressCity'].value = user['home_city']
-        form['VoterInformation.AddressZip'].value = user['home_zip']
+        form['VoterInformation.AddressStreet1'].value = user['address']
+        form['VoterInformation.AddressStreet2'].value = user.get('apartment')
+        form['VoterInformation.AddressCity'].value = user['city']
+        form['VoterInformation.AddressZip'].value = user['zip']
         county_options = options_dict(form['VoterInformation.CountyIdKey'])
-        form['VoterInformation.CountyIdKey'].value = county_options.get(user['home_county'])
+        form['VoterInformation.CountyIdKey'].value = county_options.get(user['county'])
 
         # Ethnicity (optional)
         if 'ethnicity' in user:

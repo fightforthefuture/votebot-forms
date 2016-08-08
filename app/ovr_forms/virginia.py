@@ -52,9 +52,9 @@ class Virginia(BaseOVRForm):
         locality_browser = RoboBrowser()
         locality_browser.open('http://www.tax.virginia.gov/fips')
         locality_form = locality_browser.get_form(id="build-fips-form")
-        locality_form['street1'] = user['home_address']
-        locality_form['city'] = user['home_city']
-        locality_form['zipcode'] = user['home_zip']
+        locality_form['street1'] = user['address']
+        locality_form['city'] = user['city']
+        locality_form['zipcode'] = user['zip']
         # two 'op' buttons, submit & reset. thankfully submit is first.
         locality_browser.submit_form(locality_form, submit=locality_form['op'])
         return locality_browser.select('dl dd')[1].text.strip().upper()

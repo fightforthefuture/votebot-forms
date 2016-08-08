@@ -30,7 +30,7 @@ class Georgia(BaseOVRForm):
 
     def get_county(self, user):
         # this takes place in a modal on the site.
-        county_req = self.browser.session.get('https://registertovote.sos.ga.gov/GAOLVR/getCounties.do?zipcode=%s' % user['home_zip'])
+        county_req = self.browser.session.get('https://registertovote.sos.ga.gov/GAOLVR/getCounties.do?zipcode=%s' % user['zip'])
         county_json = county_req.json()
         return county_json[0]['key']
 

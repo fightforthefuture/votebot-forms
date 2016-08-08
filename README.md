@@ -11,10 +11,10 @@ POST to '/registration' with json like
     "middle_name":"Q",
     "last_name":"Public",
     "date_of_birth":"1950-12-25",
-    "home_address":"314 Test St",
-    "home_city":"Schenectady",
+    "address":"314 Test St",
+    "city":"Schenectady",
     "state":"NY",
-    "home_zip":"12345",
+    "zip":"12345",
     "phone":"123-456-7890",
     "email":"text@example.com"
     "id_number":"NONE",
@@ -45,10 +45,10 @@ receive a response like
       middle_name: Q
       last_name: Public
       date_of_birth: "1950-12-25"
-      home_address: 314 Test St
-      home_city: Schenectady
+      address: 314 Test St
+      city: Schenectady
       state: NY
-      home_zip: 12345
+      zip: 12345
       phone: 123-456-7890
       email: text@example.com
       id_number: NONE

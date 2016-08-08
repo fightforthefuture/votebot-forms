@@ -60,12 +60,12 @@ class Colorado(BaseOVRForm):
         edit_voter_form['editVoterForm:phoneId'].value = user['phone']
         edit_voter_form['editVoterForm:genderSelectId'].value = '0' if user['gender'] == 'F' else '1'
 
-        edit_voter_form['editVoterForm:resAddress'].value = user['home_address']
-        edit_voter_form['editVoterForm:resCity'].value = user['home_city']
+        edit_voter_form['editVoterForm:resAddress'].value = user['address']
+        edit_voter_form['editVoterForm:resCity'].value = user['city']
 
-        edit_voter_form['editVoterForm:resCounty_input'].value = options_dict(edit_voter_form['editVoterForm:resCounty_input'])[user['home_county']]
+        edit_voter_form['editVoterForm:resCounty_input'].value = options_dict(edit_voter_form['editVoterForm:resCounty_input'])[user['county']]
 
-        edit_voter_form['editVoterForm:resZip'].value = user['home_zip']
+        edit_voter_form['editVoterForm:resZip'].value = user['zip']
 
         self.browser.submit_form(edit_voter_form, submit=edit_voter_form['editVoterForm:j_idt113'])
 

@@ -95,16 +95,16 @@ class Massachusetts(BaseOVRForm):
 
     def complete_form(self, user, form):
 
-        address_components = get_address_components(user['home_address'], user['home_city'], user['state'], user['home_zip'])
+        address_components = get_address_components(user['address'], user['city'], user['state'], user['zip'])
 
         form['ctl00$MainContent$txtStNum'].value = address_components['primary_number']
         form['ctl00$MainContent$txStNameSuffix'].value = address_components['street_name']
 
         # todo: these two seem fraught for IndexErrors
         form['ctl00$MainContent$ddlStreetSuffix'].value = options_dict(form['ctl00$MainContent$ddlStreetSuffix'])[address_components['street_suffix'].upper()]
-        form['ctl00$MainContent$ddlCityTown'].value = options_dict(form['ctl00$MainContent$ddlCityTown'])[user['home_city']]
+        form['ctl00$MainContent$ddlCityTown'].value = options_dict(form['ctl00$MainContent$ddlCityTown'])[user['city']]
 
-        form['ctl00$MainContent$txtZip'].value = user['home_zip']
+        form['ctl00$MainContent$txtZip'].value = user['zip']
 
         party = user['political_party']
 

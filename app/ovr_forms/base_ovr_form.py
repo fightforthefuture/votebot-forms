@@ -5,9 +5,9 @@ BASE_REQUIRED_FIELDS = [
     'last_name',
     'state',
     'date_of_birth',
-    'home_address',
-    'home_city',
-    'home_zip',
+    'address',
+    'city',
+    'zip',
     'us_citizen',
     'not_a_felon',
     'id_number'
@@ -16,7 +16,7 @@ BASE_REQUIRED_FIELDS = [
 
 class BaseOVRForm(object):
     def __init__(self, start_url):
-        self.browser = RoboBrowser(parser='html.parser', user_agent='votebot-forms FightForTheFuture', history=True)
+        self.browser = RoboBrowser(parser='html.parser', user_agent='HelloVote.org', history=True)
         self.browser.open(start_url)
         self.required_fields = BASE_REQUIRED_FIELDS
 

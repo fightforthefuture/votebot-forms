@@ -31,7 +31,7 @@ class VoteDotOrg(BaseOVRForm):
 
         # street address
         # can't figure out how to bypass autocomplete, so reassemble parts into string
-        form['address_autocomplete'] = '%(home_address)s %(home_city)s %(state)s %(home_zip)s' % user
+        form['address_autocomplete'] = '%(address)s, %(city)s, %(state)s %(zip)s' % user
 
         # contact
         form['email'] = user.get('email')
