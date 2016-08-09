@@ -5,15 +5,11 @@ try:
 except ImportError:
     print "unable to apply gevent monkey.patch_all"
 
-import os
-
-from werkzeug.contrib.fixers import ProxyFix
-
 from app import app as application
 
-if os.environ.get('SENTRY_DSN'):
+if application.config.get('SENTRY_DSN'):
     from raven.contrib.flask import Sentry
-    sentry = Sentry()
-    sentry.init_app(application)
+    sentry = Sentry(application, dsn=application.config.get('SENTRY_DSN'))
 
+from werkzeug.contrib.fixers import ProxyFix
 application.wsgi_app = ProxyFix(application.wsgi_app)

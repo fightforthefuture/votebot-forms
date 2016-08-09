@@ -1,6 +1,5 @@
 -r common.txt
-gevent==1.0
-greenlet==0.4.2
-newrelic==2.12.0.10
-raven==4.0.4
+gevent==1.1.2
+greenlet==0.4.9
+raven==5.24.3
 uWSGI==2.0
