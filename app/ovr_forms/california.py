@@ -6,7 +6,7 @@ class California(BaseOVRForm):
     def __init__(self):
         super(California, self).__init__('https://covr.sos.ca.gov/?language=en-US')
         self.add_required_fields(['will_be_18', 'political_party', 'disenfranchised',
-                                 'last_4_ssn', 'county', 'consent_use_signature'])
+                                 'ssn_last4', 'county', 'consent_use_signature'])
 
     def submit(self, user):
         # dict loses its order when iteritem()'ing
@@ -82,10 +82,10 @@ class California(BaseOVRForm):
         else:
             form['VoterInformation.NoCaIdentification'].value = bool_to_string(True)
             # we actually require this, so shouldn't get here, but just in case
-        if user.get('last_4_ssn') == "NONE":
+        if user.get('ssn_last4') == "NONE":
             form['VoterInformation.NoSsnLastFour'].value = bool_to_string(True)
         else:
-            form['VoterInformation.SsnLastFour'].value = user.get('last_4_ssn')
+            form['VoterInformation.SsnLastFour'].value = user.get('ssn_last4')
 
         #  Home and Mailing Address
         form['VoterInformation.AddressStreet1'].value = user['address']
