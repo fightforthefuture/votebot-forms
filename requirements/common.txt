@@ -5,6 +5,7 @@ Jinja2==2.8
 MarkupSafe==0.23
 Werkzeug==0.11.10
 beautifulsoup4==4.4.1
+blinker==1.4
 click==6.6
 croniter>=0.3.9
 ndg-httpsclient==0.4.1
