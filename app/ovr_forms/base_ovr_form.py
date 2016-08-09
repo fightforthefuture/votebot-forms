@@ -37,7 +37,7 @@ class BaseOVRForm(object):
     def validate(self, user):
         self.check_required_fields(user)
         if self.errors:
-            raise OVRError(message='form did not validate', payload=self.errors)
+            raise OVRError(message='missing_fields', payload=self.errors)
 
     def submit(self, user):
         raise NotImplemented('subclass a new submit function for %s' % self.__class__)
