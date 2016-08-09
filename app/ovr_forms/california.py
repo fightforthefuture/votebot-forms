@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm
-from form_utils import bool_to_string, split_date, options_dict
+from form_utils import bool_to_string, split_date, options_dict, get_party_from_list
 
 
 class California(BaseOVRForm):
@@ -107,8 +107,11 @@ class California(BaseOVRForm):
         else:
             form['VoterInformation.isPoliticalPrefSelected'].value = bool_to_string(True, capitalize=True)
             party_options = options_dict(form['VoterInformation.PoliticalPartyIdKey'])
-            if user['political_party'] in party_options.keys():
-                form['VoterInformation.PoliticalPartyIdKey'].value = party_options[user['political_party']]
+            # do fuzzy match to political party options
+            party_choice = get_party_from_list(user['political_party'], party_options.keys())
+
+            if party_choice in party_options.keys():
+                form['VoterInformation.PoliticalPartyIdKey'].value = party_options[party_choice]
             else:
                 form['VoterInformation.PoliticalPartyIdKey'].value = party_options.get('Other')
                 form['VoterInformation.PoliticalPrefOther'].value = user['political_party']
