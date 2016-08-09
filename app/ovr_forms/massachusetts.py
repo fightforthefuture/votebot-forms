@@ -80,7 +80,7 @@ class Massachusetts(BaseOVRForm):
         (year, month, day) = split_date(user['date_of_birth'])
         form['ctl00$MainContent$TxtDoB'].value = '/'.join([month, day, year])
 
-        form['ctl00$MainContent$TxtRMVID'].value = user['id_number']
+        form['ctl00$MainContent$TxtRMVID'].value = user['state_id_number']
         
         if user['consent_use_signature']:
             form['ctl00$MainContent$ChkConsent'].checked = 'checked'
@@ -92,7 +92,7 @@ class Massachusetts(BaseOVRForm):
         self.browser.submit_form(form, submit=form['ctl00$MainContent$BtnValidate'])
 
         if "Your RMV ID cannot be verified" in self.browser.response.text:
-            self.add_error("Your Massachusetts RMV ID cannot be verified.", field='id_number')
+            self.add_error("Your Massachusetts RMV ID cannot be verified.", field='state_id_number')
             # todo: fall back to PDF form here? retry?
 
     def complete_form(self, user, form):

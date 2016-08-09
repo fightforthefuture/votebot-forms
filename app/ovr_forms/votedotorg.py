@@ -57,7 +57,7 @@ class VoteDotOrg(BaseOVRForm):
             # full_form['suffix'].value = user.get('suffix', '')
             # print 'set suffix', full_form['suffix'].value
 
-            full_form['state_id_number'].value = user['id_number']
+            full_form['state_id_number'].value = user['state_id_number']
 
             party_translated = get_party_from_list(user.get('political_party'), options_dict(full_form['political_party']).keys())
             full_form['political_party'].value = options_dict(full_form['political_party'])[party_translated]

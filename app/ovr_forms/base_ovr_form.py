@@ -9,7 +9,7 @@ BASE_REQUIRED_FIELDS = [
     'city',
     'zip',
     'us_citizen',
-    'id_number'
+    'state_id_number'
 ]
 
 

@@ -24,7 +24,7 @@ class Colorado(BaseOVRForm):
         (year, month, day) = split_date(user['date_of_birth'])
         verify_identification_form['verifyNewVoterForm:voterDOB'].value = '/'.join([month, day, year])
 
-        verify_identification_form['verifyNewVoterForm:driverId'].value = user['id_number']
+        verify_identification_form['verifyNewVoterForm:driverId'].value = user['state_id_number']
 
         self.browser.submit_form(verify_identification_form, submit=verify_identification_form['verifyNewVoterForm:voterSearchButtonId'])
 

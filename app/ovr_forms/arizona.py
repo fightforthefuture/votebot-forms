@@ -57,7 +57,7 @@ class Arizona(BaseOVRForm):
         personal_info_form['dob'].value = '/'.join([month, day, year])
 
         personal_info_form['ssn3'].value = user['ssn_last_4']
-        personal_info_form['dln'].value = user['id_number']
+        personal_info_form['dln'].value = user['state_id_number']
 
         # specify the Continue button, not the "what if I don't know my DL number?" button, also a submit
         self.browser.submit_form(personal_info_form, submit=personal_info_form['_eventId_continue'], headers=self.get_default_submit_headers())

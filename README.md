@@ -19,7 +19,7 @@ POST to '/registration' with json like
     "zip":"12345",
     "phone":"123-456-7890",
     "email":"text@example.com"
-    "id_number":"NONE",
+    "state_id_number":"NONE",
     "political_party":"No Party",
     "us_citizen":true,
     "legal_resident": true,
@@ -69,7 +69,7 @@ or
       zip: 12345
       phone: 123-456-7890
       email: text@example.com
-      id_number: NONE
+      state_id_number: NONE
       political_party: No Party
       us_citizen:true
       legal_resident:true

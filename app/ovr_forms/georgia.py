@@ -47,7 +47,7 @@ class Georgia(BaseOVRForm):
         (year, month, day) = split_date(user['date_of_birth'])
         registration_form['dobDate'].value = '/'.join([month, day, year])
 
-        registration_form['ddsId'].value = user['id_number']
+        registration_form['ddsId'].value = user['state_id_number']
         
         self.browser.submit_form(registration_form, submit=registration_form['next'])
         return registration_form

@@ -16,7 +16,7 @@ class Illinois(BaseOVRForm):
 
     def drivers_license(self, user):
         drivers_license_form = self.browser.get_form()
-        drivers_license_form['ctl00$MainContent$rblDriversLicense'].value = 'Yes' if user['id_number'] else 'No'
+        drivers_license_form['ctl00$MainContent$rblDriversLicense'].value = 'Yes' if user['state_id_number'] else 'No'
         self.browser.submit_form(drivers_license_form, submit=drivers_license_form['ctl00$MainContent$btnNext'])
 
     def citizenship(self, user):
@@ -44,9 +44,9 @@ class Illinois(BaseOVRForm):
     def illinois_identification(self, user):
         self.browser.open('https://ova.elections.il.gov/Step4.aspx')
         illinois_identification_form = self.browser.get_form()
-        illinois_identification_form['ctl00$MainContent$tbILDLIDNumber'] = user['id_number'][0:3]
-        illinois_identification_form['ctl00$MainContent$tbILDLIDNumber2'] = user['id_number'][4:7]
-        illinois_identification_form['ctl00$MainContent$tbILDLIDNumber3'] = user['id_number'][8:11]
+        illinois_identification_form['ctl00$MainContent$tbILDLIDNumber'] = user['state_id_number'][0:3]
+        illinois_identification_form['ctl00$MainContent$tbILDLIDNumber2'] = user['state_id_number'][4:7]
+        illinois_identification_form['ctl00$MainContent$tbILDLIDNumber3'] = user['state_id_number'][8:11]
 
         (dob_year, dob_month, dob_day) = split_date(user['date_of_birth'])
         illinois_identification_form['ctl00$MainContent$tbDOB'].value = '-'.join([dob_month, dob_day, dob_year])

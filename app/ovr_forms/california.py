@@ -77,8 +77,8 @@ class California(BaseOVRForm):
         form['VoterInformation.Year'].value = year
 
         #  ID and last 4 of SSN (CA requires both!)
-        if 'id_number' in user:
-            form['VoterInformation.CaIdentification'].value = user.get('id_number')
+        if 'state_id_number' in user:
+            form['VoterInformation.CaIdentification'].value = user.get('state_id_number')
         else:
             form['VoterInformation.NoCaIdentification'].value = bool_to_string(True)
             # we actually require this, so shouldn't get here, but just in case
