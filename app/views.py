@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from ovr_forms import OVR_FORMS
 from ovr_forms.base_ovr_form import OVRError
+from ovr_forms.form_utils import clean_sensitive_info
 import jobs
 
 votebot = Blueprint('votebot', __name__)
@@ -36,6 +37,10 @@ def registration():
     try:
         form.validate(user)
     except OVRError, e:
+        if hasattr(current_app, 'sentry'):
+            current_app.sentry.captureException(e)
+            user_filtered = clean_sensitive_info(user)
+            current_app.sentry.user_context(user_filtered)
         return jsonify({'status': 'error', 'errors': e.to_dict()})
 
     # queue form submission and success callback

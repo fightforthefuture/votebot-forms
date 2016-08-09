@@ -21,6 +21,16 @@ def log_form(form):
     print serialized
 
 
+def clean_sensitive_info(user, keys=['state_id_number', 'ssn_last4']):
+    new_dict = user.copy()
+    for k in keys:
+        try:
+            new_dict.pop(k)
+        except KeyError:
+            continue
+    return new_dict
+
+
 def options_dict(field):
     return dict(zip(field.labels, field.options))
 
@@ -74,7 +84,7 @@ def get_address_components(address, city, state, zip):
     client = Client(auth_id=SMARTY_STREETS_AUTH_ID, auth_token=SMARTY_STREETS_AUTH_TOKEN)
 
     # smarty streets specifically wants strings (not unicode) so...
-    response = client.street_address("%(address)s, %(hcity)s, %(state)s, %(hzip)s" % \
+    response = client.street_address("%(address)s, %(city)s, %(state)s, %(zip)s" % \
                                     {'address': str(address), 'city': str(city), 'state': str(state), 'zip': str(zip)})
 
     if not response or not response.get('analysis', False) or \
