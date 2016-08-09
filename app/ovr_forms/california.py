@@ -156,7 +156,6 @@ class California(BaseOVRForm):
         self.browser.submit_form(form, submit=next_button)
 
     def step4(self, form, user):
-        # submit_button = form['command']
-        # submit_button.value = 'Submit'
-        # self.browser.submit_form(form, submit=submit_button)
-        pass
+        submit_button = form['command']
+        submit_button.value = 'Submit'
+        self.browser.submit_form(form, submit=submit_button)

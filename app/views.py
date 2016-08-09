@@ -36,7 +36,6 @@ def registration():
     try:
         form.validate(user)
     except OVRError, e:
-        print "OVRError", e
         return jsonify({'status': 'error', 'errors': e.to_dict()})
 
     # queue form submission and success callback

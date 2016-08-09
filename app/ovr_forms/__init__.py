@@ -9,12 +9,12 @@ from colorado import Colorado
 
 
 OVR_FORMS = {
-    'AZ': Arizona,
+    #'AZ': Arizona,
     'CA': California,
-    'CO': Colorado,
-    'GA': Georgia,
-    'IL': Illinois,
+    #'CO': Colorado,
+    #'GA': Georgia,
+    #'IL': Illinois,
     'MA': Massachusetts,
-    'VA': Virginia,
+    #'VA': Virginia,
     'default': VoteDotOrg
 }
