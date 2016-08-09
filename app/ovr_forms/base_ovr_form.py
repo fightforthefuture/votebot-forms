@@ -32,7 +32,7 @@ class BaseOVRForm(object):
     def check_required_fields(self, user):
         for field in self.required_fields:
             if field not in user:
-                self.add_error('%s is required' % field, field=field)
+                self.add_error('%s is required' % field.replace('_', ' '), field=field)
 
     def validate(self, user):
         self.check_required_fields(user)
