@@ -18,7 +18,7 @@ from app.config import SMARTY_STREETS_AUTH_ID, SMARTY_STREETS_AUTH_TOKEN
 def log_form(form):
     payload = form.serialize()
     serialized = payload.to_requests('POST')
-    print serialized
+    return serialized
 
 
 def clean_sensitive_info(user, keys=['state_id_number', 'ssn_last4']):
