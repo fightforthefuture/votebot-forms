@@ -54,9 +54,9 @@ class TestMassachusetts(BaseTestCase):
     def test_bad_id_number(self):
         self.setUpClass()
         user = self.user
-        user['id_number'] = '012345678'
+        user['state_id_number'] = '012345678'
         result = self.form.submit(user)
-        self.assertEqual(result, {'errors': [{'id_number': "Your Massachusetts RMV ID cannot be verified."}]})
+        self.assertEqual(result, {'errors': [{'state_id_number': "Your Massachusetts RMV ID cannot be verified."}]})
 
     @vcr.use_cassette('tests/.cassettes/ma/test_not_meeting_requirements.yml')
     def test_not_meeting_requirements(self):
@@ -74,7 +74,7 @@ class TestMassachusetts(BaseTestCase):
         test_client = self.create_app().test_client()
         user = self.user
         user['us_citizen'] = False
-        post = test_client.post('/registration', data=json.dumps(user))
+        post = test_client.post('/registration', data=json.dumps({'user': user}))
         expected = {u'errors': [{u'us_citizen': u'You must be a U.S. Citizen.'}]}
         self.assertEqual(json.loads(post.data), expected)
 
@@ -85,7 +85,7 @@ class TestMassachusetts(BaseTestCase):
         user = self.user
         user['us_citizen'] = False
         user['will_be_18'] = False
-        post = test_client.post('/registration', data=json.dumps(user))
+        post = test_client.post('/registration', data=json.dumps({'user': user}))
         expected = {u'errors': [{u'us_citizen': u'You must be a U.S. Citizen.'}, {u'will_be_18': u'You must be 18 by Election Day.'}]}
         self.assertEqual(json.loads(post.data), expected)
 
@@ -95,6 +95,6 @@ class TestMassachusetts(BaseTestCase):
         test_client = self.create_app().test_client()
         user = self.user
         user['consent_use_signature'] = False
-        post = test_client.post('/registration', data=json.dumps(user))
+        post = test_client.post('/registration', data=json.dumps({'user': user}))
         expected = {u'errors': [{u"consent_use_signature": u"You must consent to using your signature from the Massachusetts RMV."}]}
         self.assertEqual(json.loads(post.data), expected)

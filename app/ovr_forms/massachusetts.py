@@ -173,4 +173,4 @@ class Massachusetts(BaseOVRForm):
         elif user['disqualified']:
             self.add_error("You must not be legally disqualified to vote, or under legal guardianship which prohibits your registering. ", field='disqualified')
 
-        self.browser.submit_form(form)
+        # self.browser.submit_form(form)

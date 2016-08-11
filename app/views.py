@@ -43,9 +43,14 @@ def registration():
             current_app.sentry.user_context(user_filtered)
         return jsonify({'status': 'error', 'errors': e.to_dict()})
 
-    # queue form submission and success callback
-    jobs.submit_form.queue(form, user, callback_url=request_json.get('callback_url'))
-    return jsonify({'status': 'queued'})
+    # for local development / testing.
+    if current_app.config.get('SYNCHRONOUS_SUBMIT', False):
+        return jobs.submit_form(form, user, callback_url=request_json.get('callback_url'))
+
+    else:
+        # queue form submission and success callback
+        jobs.submit_form.queue(form, user, callback_url=request_json.get('callback_url'))
+        return jsonify({'status': 'queued'})
 
 
 @votebot.route('/confirm')
