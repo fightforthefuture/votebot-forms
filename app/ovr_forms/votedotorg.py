@@ -11,6 +11,7 @@ class VoteDotOrg(BaseOVRForm):
             VOTEORG_URL += '?partner=%s' % partner_id
         super(VoteDotOrg, self).__init__(VOTEORG_URL)
         self.add_required_fields(['political_party', 'email'])
+        self.success_string = "Almost done. You still need to print and mail your completed form."
 
     def parse_errors(self):
         messages = []
@@ -82,4 +83,8 @@ class VoteDotOrg(BaseOVRForm):
         self.full_registration(user)
         # return queue status immediately
         # check for pdf with get_download
-        return {'status': 'queued'}
+
+        if self.success_string in self.browser.parsed:
+            return {'status': 'queued'}
+        else:
+            return {'status': 'error'}
