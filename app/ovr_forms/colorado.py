@@ -8,7 +8,7 @@ class Colorado(BaseOVRForm):
         self.add_required_fields(['military_or_overseas', 'vote_by_mail', 'legal_resident',
                                  'political_party', 'email', 'gender',
                                  'will_be_18', 'consent_use_signature', 'confirm_name_address'])
-        # self.success_string = "TBD"
+        self.success_string = "Your changes have been submitted to your County Clerk and Recorder for processing. "
 
     def submit(self, user):
         self.validate(user)
@@ -33,12 +33,10 @@ class Colorado(BaseOVRForm):
             if errors or not step_form:
                 return {'status': 'error', 'errors': errors}
 
-        # TODO, when we know success_string
-        # if self.success_string in self.browser.parsed:
-        #     return {'status': 'success'}
-        # else:
-        #     return {'status': 'failure'}
-        return {'status': 'success'}
+        if self.success_string in self.browser.parsed:
+            return {'status': 'success'}
+        else:
+            return {'status': 'failure'}
 
     def parse_errors(self):
         if self.errors:
@@ -121,8 +119,14 @@ class Colorado(BaseOVRForm):
         # purposes and for income tax purposes.
         if user['legal_resident']:
             form['affirmationVoterForm:crimminalActId'].checked = 'checked'
+            form['affirmationVoterForm:crimminalActId'].value = 'on'
         else:
             self.add_error('You must be a legal resident of Colorado.', field='legal_resident')
+            return False
+
+        if not user['us_citizen']:
+            self.add_error('You must be a US citizen to register to vote.', field='us_citizen')
+            return False
 
 
         # I affirm that I am a citizen of the United States; I have been a
@@ -140,19 +144,21 @@ class Colorado(BaseOVRForm):
         # application is true to the best of my knowledge and belief;
         # and that I have not, nor will I, cast more than one ballot
         # in any election.
-        if user['will_be_18'] and user['legal_resident'] and user['confirm_name_address']:
+        if user['will_be_18'] and user['us_citizen'] and user['legal_resident'] and user['confirm_name_address']:
             form['affirmationVoterForm:affirmCtizId'].checked = 'checked'
+            form['affirmationVoterForm:affirmCtizId'].value = 'on'
         else:
             if not user['will_be_18']:
                 self.add_error('You must be 18 by Election Day in order to register to vote.', field='will_be_18')
 
-            if not user['eligible_and_providing_accurate_information']:
-                self.add_error('You must be eligible to vote and provide accurate information in order to register.', field='eligible_and_providing_accurate_information')
+            if not user['confirm_name_address']:
+                self.add_error('You must confirm your accurate name and address to register.', field='confirm_name_address')
 
         if user['consent_use_signature']:
             form['affirmationVoterForm:fromStatueId'].checked = 'checked'
+            form['affirmationVoterForm:fromStatueId'].value = 'on'
         else:
             self.add_error('You must consent to using your signature', field='consent_use_signature')
 
-        # self.browser.submit_form(form, submit=form['affirmationVoterForm:j_idt73'])
+        self.browser.submit_form(form, submit=form['affirmationVoterForm:j_idt73'])
  
