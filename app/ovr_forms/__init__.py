@@ -11,7 +11,7 @@ from colorado import Colorado
 OVR_FORMS = {
     #'AZ': Arizona,
     'CA': California,
-    'CO': Colorado,
+    #'CO': Colorado,
     #'GA': Georgia,
     #'IL': Illinois,
     'MA': Massachusetts,
