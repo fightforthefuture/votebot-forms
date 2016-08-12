@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm
-from form_utils import bool_to_string, split_date, options_dict, get_party_from_list
+from form_utils import bool_to_string, split_date, options_dict, get_party_from_list, clean_browser_response
 
 
 class California(BaseOVRForm):
@@ -7,7 +7,7 @@ class California(BaseOVRForm):
         super(California, self).__init__('https://covr.sos.ca.gov/?language=en-US')
         self.add_required_fields(['will_be_18', 'political_party', 'disenfranchised',
                                  'ssn_last4', 'county', 'consent_use_signature'])
-        self.success_string = "Your voter registration application is now complete. Please print a receipt for your records."
+        self.success_string = "Your voter registration application is now complete."
 
     def submit(self, user):
         # dict loses its order when iteritem()'ing
@@ -27,9 +27,11 @@ class California(BaseOVRForm):
             else:
                 return {'status': 'error', 'errors': self.parse_errors()}
 
-        if self.success_string in self.browser.parsed:
+        success_page = clean_browser_response(self.browser)
+        if self.success_string in success_page:
             return {'status': 'success'}
         else:
+            # TODO, handle gracefully
             return {'status': 'failure'}
 
     def parse_errors(self):
@@ -138,7 +140,6 @@ class California(BaseOVRForm):
         # also add "information is true and correct"?
         form['VoterInformation.isAffirmationSelected'].value = bool_to_string(user_is_eligible)
         form['VoterInformation.isAffirmationSelected'].checked = 'checked'
-        form['VoterInformation.isAffirmationSelected'].value = 'on'
 
         # seemingly very redundant, but in testing, curl's failed without these:
         form['VoterInformation.IsAPollWorker'].value = 'false'
