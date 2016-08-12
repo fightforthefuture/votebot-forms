@@ -25,11 +25,12 @@ class California(BaseOVRForm):
             if step_form:
                 function(step_form, user)
             else:
-                #log.error(self.parse_errors())
-                print self.parse_errors()
-                return False
+                return {'status': 'error', 'errors': self.parse_errors()}
 
-        return self.success_string in self.browser.parsed
+        if self.success_string in self.browser.parsed:
+            return {'status': 'success'}
+        else:
+            return {'status': 'failure'}
 
     def parse_errors(self):
         errors_dict = {}
