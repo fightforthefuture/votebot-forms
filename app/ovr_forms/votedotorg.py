@@ -11,6 +11,7 @@ class VoteDotOrg(BaseOVRForm):
             VOTEORG_URL += '?partner=%s' % partner_id
         super(VoteDotOrg, self).__init__(VOTEORG_URL)
         self.add_required_fields(['political_party', 'email'])
+        self.success_string = "Almost done. You still need to print and mail your completed form."
 
     def parse_errors(self):
         messages = []
@@ -37,7 +38,7 @@ class VoteDotOrg(BaseOVRForm):
         form['email'] = user.get('email')
         form['mobile_phone'] = user.get('phone')
 
-        #log_form(form)
+        #print(log_form(form))
         self.browser.submit_form(form)
 
         return form
@@ -46,7 +47,7 @@ class VoteDotOrg(BaseOVRForm):
         # if given choice to register online, choose pdf form
         if self.browser.get_form(id='state_ovr'):
             finish_form = self.browser.get_form(id='finish')
-            #log_form(finish_form)
+            #print(log_form(finish_form))
             self.browser.submit_form(finish_form)
 
         full_form = self.browser.get_form(id='full_registration')
@@ -64,7 +65,7 @@ class VoteDotOrg(BaseOVRForm):
             # why does the form require bool as string?
             full_form['us_citizen'].value = str(bool_to_int(user['us_citizen']))
 
-            #log_form(full_form)
+            #print(log_form(full_form))
             self.browser.submit_form(full_form)
 
         else:
@@ -82,4 +83,8 @@ class VoteDotOrg(BaseOVRForm):
         self.full_registration(user)
         # return queue status immediately
         # check for pdf with get_download
-        return {'status': 'queued'}
+
+        if self.success_string in self.browser.parsed:
+            return {'status': 'queued'}
+        else:
+            return {'status': 'error'}

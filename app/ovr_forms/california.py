@@ -7,6 +7,7 @@ class California(BaseOVRForm):
         super(California, self).__init__('https://covr.sos.ca.gov/?language=en-US')
         self.add_required_fields(['will_be_18', 'political_party', 'disenfranchised',
                                  'ssn_last4', 'county', 'consent_use_signature'])
+        self.success_string = "Your voter registration application is now complete. Please print a receipt for your records."
 
     def submit(self, user):
         # dict loses its order when iteritem()'ing
@@ -24,10 +25,12 @@ class California(BaseOVRForm):
             if step_form:
                 function(step_form, user)
             else:
-                #log.error(self.parse_errors())
-                print self.parse_errors()
-                return False
-        return True
+                return {'status': 'error', 'errors': self.parse_errors()}
+
+        if self.success_string in self.browser.parsed:
+            return {'status': 'success'}
+        else:
+            return {'status': 'failure'}
 
     def parse_errors(self):
         errors_dict = {}

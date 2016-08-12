@@ -1,6 +1,6 @@
 from flask import jsonify
 import requests
-from .app import rq
+from .app import rq, db
 
 
 @rq.job
@@ -13,10 +13,8 @@ def submit_form(form, user, callback_url):
         # TODO retry automatically if failed?
         get_pdf.queue(form, user, callback_url)
 
-
-    # TODO
     # log form.browser final state, so we can determine sucess or error strings
-    # send to votebot-api database, for simplicity
+    db.log_form(form, status)
 
     if callback_url:
         requests.post(callback_url, jsonify(status))
