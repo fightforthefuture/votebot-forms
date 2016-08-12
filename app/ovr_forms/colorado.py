@@ -5,12 +5,12 @@ from form_utils import bool_to_string, options_dict, split_date, get_party_from_
 class Colorado(BaseOVRForm):
     def __init__(self):
         super(Colorado, self).__init__('https://www.sos.state.co.us/voter-classic/pages/pub/olvr/verifyNewVoter.xhtml')
-        self.add_required_fields(['is_military', 'vote_by_mail', 'political_party', 'email',
-                'military_overseas', 'gender', 'legal_resident', 'consent_use_signature',
-                'will_be_18', 'eligible_and_providing_accurate_information'])
+        self.add_required_fields(['military_or_overseas', 'vote_by_mail', 'legal_resident',
+                                 'political_party', 'email', 'gender',
+                                 'will_be_18', 'consent_use_signature', 'confirm'])
+        # self.success_string = "TBD"
 
     def submit(self, user):
-
         self.validate(user)
 
         # format is: [kwargs to select / identify form, method to call with form]
@@ -31,9 +31,14 @@ class Colorado(BaseOVRForm):
             errors = self.parse_errors()
 
             if errors or not step_form:
-                return {'errors': errors}
+                return {'status': 'error', 'errors': errors}
 
-        return {'status': 'OK'}
+        # TODO, when we know success_string
+        # if self.success_string in self.browser.parsed:
+        #     return {'status': 'success'}
+        # else:
+        #     return {'status': 'failure'}
+        return {'status': 'success'}
 
     def parse_errors(self):
         if self.errors:
@@ -74,9 +79,9 @@ class Colorado(BaseOVRForm):
         
         form['editVoterForm:partyAffiliationId_input'].value = options_dict(form['editVoterForm:partyAffiliationId_input'])[party]
 
-        if user['is_military'] or user['military_overseas']:
+        if user['military_or_overseas']:
             form['editVoterForm:areUOCAVAId'].value = 'Y'
-            form['editVoterForm:uocavaTypeId'].value = 'a' if user['is_military'] else 'c'
+            form['editVoterForm:uocavaTypeId'].value = 'a' if user['military_overseas'] == 'military' else 'c'
         else:
             form['editVoterForm:areUOCAVAId'].value = 'N'
 
@@ -116,8 +121,6 @@ class Colorado(BaseOVRForm):
             self.add_error('You must be a legal resident of Colorado.', field='legal_resident')
 
 
-        # I might want some help dicing this up into fields:
-        
         # I affirm that I am a citizen of the United States; I have been a
         # resident of the state of Colorado for at least twenty-two
         # days immediately prior to an election in which I intend to
@@ -133,10 +136,9 @@ class Colorado(BaseOVRForm):
         # application is true to the best of my knowledge and belief;
         # and that I have not, nor will I, cast more than one ballot
         # in any election.
-        if user['will_be_18'] and user['legal_resident'] and user['eligible_and_providing_accurate_information']:
+        if user['will_be_18'] and user['legal_resident'] and user['confirm_name_address']:
             form['affirmationVoterForm:affirmCtizId'].checked = 'checked'
         else:
-            
             if not user['will_be_18']:
                 self.add_error('You must be 18 by Election Day in order to register to vote.', field='will_be_18')
 
@@ -149,9 +151,4 @@ class Colorado(BaseOVRForm):
             self.add_error('You must consent to using your signature', field='consent_use_signature')
 
         # self.browser.submit_form(form, submit=form['affirmationVoterForm:j_idt73'])
-
-
-
-
-
-
+ 
