@@ -17,7 +17,8 @@ class California(BaseOVRForm):
                     ['/?language=en-US', self.step1],
                     ['/Home/MainForm', self.step2],
                     ['/Home/MainForm2', self.step3],
-                    ['/Home/Review', self.step4]
+                    ['/Home/Review', self.step4],
+                    ['/Home/Confirmation', self.step5]
                 ]
 
         for action, function in forms:
@@ -74,7 +75,7 @@ class California(BaseOVRForm):
 
         form['VoterInformation.EmailId'].value = user.get('email', '')
         form['VoterInformation.ConfirmEmailId'].value = user.get('email', '')
-        #form['VoterInformation.PhoneNumber].value'] = user['phone']
+        #form['VoterInformation.PhoneNumber].value'] = user.get('phone', '')
 
         (year, month, day) = split_date(user['date_of_birth'], padding=False)
         form['VoterInformation.Month'].value = month
@@ -127,7 +128,6 @@ class California(BaseOVRForm):
         self.browser.submit_form(form, submit=next_button)
 
     def step3(self, form, user):
-        
         #  Vote by Mail
         form['VoterInformation.IsVoteByMail'].value = bool_to_string(user.get('vote_by_mail', False))
 
@@ -164,3 +164,8 @@ class California(BaseOVRForm):
         submit_button = form['command']
         submit_button.value = 'Submit'
         self.browser.submit_form(form, submit=submit_button)
+
+    def step5(self, form, user):
+        # Send an email receipt from the state
+        form['email'] = user['email']
+        self.browser.submit_form(form)
