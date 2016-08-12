@@ -3,6 +3,9 @@ from base_ovr_form import OVRError
 
 import datetime
 import difflib
+import json
+import re
+
 
 # todo: this should really come from teh app.config object itself
 # but I am in Python import hell with this for some reason.
@@ -19,6 +22,14 @@ def log_form(form):
     payload = form.serialize()
     serialized = payload.to_requests('POST')
     return serialized
+
+
+def clean_browser_response(browser):
+    html = """%s""" % browser.state.response.content  # wrap in multi-line string until we escape it
+    escaped_html = re.sub('[\"\']', '', html)              # remove quotes
+    escaped_html = re.sub('[\n\r\t]', '', escaped_html)    # and whitespace
+    escaped_html = json.dumps(escaped_html)                # let json escape everything else
+    return escaped_html
 
 
 def clean_sensitive_info(user, keys=['state_id_number', 'ssn_last4']):

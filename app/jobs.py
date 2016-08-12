@@ -14,7 +14,7 @@ def submit_form(form, user, callback_url):
         get_pdf.queue(form, user, callback_url)
 
     # log form.browser final state, so we can determine sucess or error strings
-    db.log_form(form, status)
+    db.log_response(form, status)
 
     if callback_url:
         requests.post(callback_url, status)

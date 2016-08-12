@@ -1,8 +1,8 @@
-import psycopg2
 import datetime
-import json
-import re
 from flask import current_app
+import json
+import psycopg2
+from ovr_forms.form_utils import clean_browser_response
 
 
 def init_db(app):
@@ -20,19 +20,13 @@ def init_db(app):
     return app
 
 
-def log_form(form, status):
+def log_response(form, status):
     cur = current_app.db.cursor()
     sql = "INSERT INTO logged_forms (ts, state, status, parsed) VALUES ('{}','{}','{}','{}');"
-
-    html = """%s""" % form.browser.state.response.content  # wrap in multi-line string until we escape it
-    escaped_html = re.sub('[\"\']', '', html)              # remove quotes
-    escaped_html = re.sub('[\n\r\t]', '', escaped_html)    # and whitespace
-    escaped_html = json.dumps(escaped_html)                # let json escape everything else
-
     cur.execute(sql.format(
         datetime.datetime.now(),
         form.__class__.__name__,
         json.dumps(status),
-        escaped_html
+        clean_browser_response(form.browser)
     ))
     current_app.db.commit()
