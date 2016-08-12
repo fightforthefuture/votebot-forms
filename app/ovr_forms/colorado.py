@@ -7,7 +7,7 @@ class Colorado(BaseOVRForm):
         super(Colorado, self).__init__('https://www.sos.state.co.us/voter-classic/pages/pub/olvr/verifyNewVoter.xhtml')
         self.add_required_fields(['military_or_overseas', 'vote_by_mail', 'legal_resident',
                                  'political_party', 'email', 'gender',
-                                 'will_be_18', 'consent_use_signature', 'confirm'])
+                                 'will_be_18', 'consent_use_signature', 'confirm_name_address'])
         # self.success_string = "TBD"
 
     def submit(self, user):
@@ -45,7 +45,11 @@ class Colorado(BaseOVRForm):
             return self.errors
 
         messages = []
+        # overall form errors
         for error in self.browser.select('.ui-messages-error-summary'):
+            messages.append({'error': error.text})
+        # individual fields
+        for error in self.browser.select('.ui-message-error-detail'):
             messages.append({'error': error.text})
         return messages
 
@@ -87,12 +91,12 @@ class Colorado(BaseOVRForm):
 
         form['editVoterForm:uocavaBallotMethodId'].value = 'Mail' if user['vote_by_mail'] else 'Email' # or 'Fax'
 
-        # todo: these seem optional or debatable
         # email, phone and gender are prefilled
         form['editVoterForm:emailId'].value = user['email']
-        if user['receive_election_info_by_email']:
-            form['editVoterForm:receiveEmailCommunicationId'].checked = 'checked'
-        form['editVoterForm:phoneId'].value = user['phone']
+        form['editVoterForm:receiveEmailCommunicationId'].checked = 'checked' if user['email'] else ''
+        if 'phone' in user:
+            # strip country prefix
+            form['editVoterForm:phoneId'].value = user['phone'].replace('+1', '')
         form['editVoterForm:genderSelectId'].value = '0' if user['gender'] == 'F' else '1'
 
         form['editVoterForm:resAddress'].value = user['address']
