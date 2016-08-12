@@ -1,6 +1,7 @@
 import psycopg2
 import datetime
 import json
+import re
 from flask import current_app
 
 
@@ -24,9 +25,9 @@ def log_form(form, status):
     sql = "INSERT INTO logged_forms (ts, state, status, parsed) VALUES ('{}','{}','{}','{}');"
 
     html = """%s""" % form.browser.state.response.content  # wrap in multi-line string until we escape it
-    escaped_html = html.replace("'", '')  # just strip single quotes
-    escaped_html = escaped_html.replace('"', '')  # and double quotes too
-    escaped_html = json.dumps(escaped_html)  # let json escape everything else
+    escaped_html = re.sub('[\"\']', '', html)              # remove quotes
+    escaped_html = re.sub('[\n\r\t]', '', escaped_html)    # and whitespace
+    escaped_html = json.dumps(escaped_html)                # let json escape everything else
 
     cur.execute(sql.format(
         datetime.datetime.now(),

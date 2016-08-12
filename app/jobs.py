@@ -17,7 +17,7 @@ def submit_form(form, user, callback_url):
     db.log_form(form, status)
 
     if callback_url:
-        requests.post(callback_url, jsonify(status))
+        requests.post(callback_url, status)
     return jsonify(status)
 
 
@@ -25,5 +25,5 @@ def submit_form(form, user, callback_url):
 def get_pdf(form, user, callback_url):
     status = form.get_download(user)
     if callback_url:
-        requests.post(callback_url, jsonify(status))
+        requests.post(callback_url, status)
     return jsonify(status)
