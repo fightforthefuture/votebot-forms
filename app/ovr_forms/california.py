@@ -138,6 +138,7 @@ class California(BaseOVRForm):
         # also add "information is true and correct"?
         form['VoterInformation.isAffirmationSelected'].value = bool_to_string(user_is_eligible)
         form['VoterInformation.isAffirmationSelected'].checked = 'checked'
+        form['VoterInformation.isAffirmationSelected'].value = 'on'
 
         # seemingly very redundant, but in testing, curl's failed without these:
         form['VoterInformation.IsAPollWorker'].value = 'false'
