@@ -50,6 +50,13 @@ def registration():
     else:
         # queue form submission and success callback
         jobs.submit_form.queue(form, user, callback_url=request_json.get('callback_url'))
+
+        if form.__class__.__name__ is 'VoteDotOrg':
+            # create new job for pdf check
+            # TODO delay a few seconds?
+            # TODO retry automatically if failed?
+            jobs.get_pdf.queue(form, user, callback_url=request_json.get('callback_url'))
+
         return jsonify({'status': 'queued'})
 
 
