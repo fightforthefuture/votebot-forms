@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import split_date, bool_to_int, log_form, get_party_from_list, options_dict
+from form_utils import split_date, bool_to_int, log_form, get_party_from_list, options_dict, clean_browser_response
 
 
 class VoteDotOrg(BaseOVRForm):
@@ -38,10 +38,14 @@ class VoteDotOrg(BaseOVRForm):
         form['email'] = user.get('email')
         form['mobile_phone'] = user.get('phone')
 
-        #print(log_form(form))
         self.browser.submit_form(form)
 
-        return form
+        success_page = clean_browser_response(self.browser)
+        if self.success_string in success_page:
+            return {'status': 'success'}
+        else:
+            # TODO, handle gracefully
+            return {'status': 'failure'}
 
     def full_registration(self, user):
         # if given choice to register online, choose pdf form
