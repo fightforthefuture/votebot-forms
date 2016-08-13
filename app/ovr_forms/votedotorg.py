@@ -40,18 +40,11 @@ class VoteDotOrg(BaseOVRForm):
 
         self.browser.submit_form(form)
 
-        success_page = clean_browser_response(self.browser)
-        if self.success_string in success_page:
-            return {'status': 'success'}
-        else:
-            # TODO, handle gracefully
-            return {'status': 'failure'}
 
     def full_registration(self, user):
         # if given choice to register online, choose pdf form
         if self.browser.get_form(id='state_ovr'):
             finish_form = self.browser.get_form(id='finish')
-            #print(log_form(finish_form))
             self.browser.submit_form(finish_form)
 
         full_form = self.browser.get_form(id='full_registration')
@@ -69,7 +62,6 @@ class VoteDotOrg(BaseOVRForm):
             # why does the form require bool as string?
             full_form['us_citizen'].value = str(bool_to_int(user['us_citizen']))
 
-            #print(log_form(full_form))
             self.browser.submit_form(full_form)
 
         else:
@@ -88,7 +80,10 @@ class VoteDotOrg(BaseOVRForm):
         # return queue status immediately
         # check for pdf with get_download
 
-        if self.success_string in self.browser.parsed:
-            return {'status': 'queued'}
+        success_page = clean_browser_response(self.browser)
+        if self.success_string in success_page:
+            return {'status': 'success'}
         else:
-            return {'status': 'error'}
+            # TODO, handle gracefully
+            return {'status': 'failure'}
+
