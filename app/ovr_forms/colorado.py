@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import bool_to_string, options_dict, split_date, get_party_from_list
+from form_utils import bool_to_string, options_dict, split_date, get_party_from_list, clean_browser_response
 
 
 class Colorado(BaseOVRForm):
@@ -33,7 +33,8 @@ class Colorado(BaseOVRForm):
             if errors or not step_form:
                 return {'status': 'error', 'errors': errors}
 
-        if self.success_string in self.browser.parsed:
+        success_page = clean_browser_response(self.browser)
+        if self.success_string in success_page:
             return {'status': 'success'}
         else:
             return {'status': 'failure'}
