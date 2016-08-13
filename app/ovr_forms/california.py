@@ -168,5 +168,5 @@ class California(BaseOVRForm):
     def step5(self, form, user):
         # Send an email receipt from the state
         if user.get('email'):
-            form['email'] = user['email']
+            form['Email'] = user['email']
             self.browser.submit_form(form)
