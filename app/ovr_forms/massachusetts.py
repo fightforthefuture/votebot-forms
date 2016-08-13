@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import get_address_components, options_dict, split_date, get_party_from_list
+from form_utils import get_address_components, options_dict, split_date, get_party_from_list, clean_browser_response
 
 
 class Massachusetts(BaseOVRForm):
@@ -8,6 +8,8 @@ class Massachusetts(BaseOVRForm):
         super(Massachusetts, self).__init__('https://www.sec.state.ma.us/OVR/Pages/MinRequirements.aspx?RMVId=True')
         self.add_required_fields(['will_be_18', 'legal_resident', 'consent_use_signature',
             'political_party', 'disenfranchised', 'disqualified'])
+        self.success_string = 'Your application for voter registration has been transmitted'
+        # careful of trailing spaces, that paragraph is hard wrapped
 
     def parse_errors(self):
         if self.errors:
@@ -43,7 +45,11 @@ class Massachusetts(BaseOVRForm):
             if errors or not step_form:
                 return {'errors': errors}
 
-        return {'status': 'OK'}
+        success_page = clean_browser_response(self.browser)
+        if self.success_string in success_page:
+            return {'status': 'success'}
+        else:
+            return {'status': 'failure'}
 
     def minimum_requirements(self, user, form):
 
@@ -173,4 +179,4 @@ class Massachusetts(BaseOVRForm):
         elif user['disqualified']:
             self.add_error("You must not be legally disqualified to vote, or under legal guardianship which prohibits your registering. ", field='disqualified')
 
-        # self.browser.submit_form(form)
+        self.browser.submit_form(form, submit=form['ctl00$MainContent$btnOnlineSubmitRev'])
