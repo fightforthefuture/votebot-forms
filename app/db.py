@@ -21,6 +21,9 @@ def init_db(app):
 
 
 def log_response(form, status):
+    if current_app.db.closed:
+        init_db(current_app)
+
     cur = current_app.db.cursor()
     sql = "INSERT INTO logged_forms (ts, state, status, parsed) VALUES ('{}','{}','{}','{}');"
     cur.execute(sql.format(
