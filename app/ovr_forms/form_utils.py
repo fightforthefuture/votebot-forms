@@ -1,5 +1,5 @@
 from smartystreets.client import Client
-from base_ovr_form import OVRError
+from base_ovr_form import ValidationError
 
 import datetime
 import difflib
@@ -71,12 +71,12 @@ def split_date(date, padding=True):
                     day = day[1]
             return (year, month, day)
         except:
-            raise OVRError('date must be in YYYY-MM-DD format')
+            raise ValidationError('date must be in YYYY-MM-DD format', payload=date)
 
 
 def bool_to_string(boolean, capitalize=False):
     if boolean is None:
-        raise OVRError("boolean shouldn't be None")
+        raise ValidationError("boolean shouldn't be None", payload=boolean)
     r = str(boolean)
     if capitalize:
         return r.capitalize()
@@ -86,7 +86,7 @@ def bool_to_string(boolean, capitalize=False):
 
 def bool_to_int(boolean):
     if boolean is None:
-        raise OVRError("boolean shouldn't be None")
+        raise ValidationError("boolean shouldn't be None", payload=boolean)
     r = int(boolean)
     return r
 
@@ -100,7 +100,12 @@ def get_address_components(address, city, state, zip):
 
     if not response or not response.get('analysis', False) or \
         response['analysis'].get('active', 'N') != 'Y':
-        raise OVRError("could not validate address")
+        raise ValidationError("could not validate address", payload={
+            "address": address,
+            "city": city,
+            "state": state,
+            "zip": zip
+            })
 
     return response['components']
 

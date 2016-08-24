@@ -1,4 +1,4 @@
-from base_ovr_form import BaseOVRForm
+from base_ovr_form import BaseOVRForm, OVRError, ValidationError
 from form_utils import bool_to_string, split_date, options_dict, get_party_from_list, clean_browser_response
 
 
@@ -10,30 +10,34 @@ class California(BaseOVRForm):
         self.success_string = "Your voter registration application is now complete."
 
     def submit(self, user):
-        # dict loses its order when iteritem()'ing
-        # there are probably more elegant approaches than lists,
-        # but for now...
-        forms = [
-                    ['/?language=en-US', self.step1],
-                    ['/Home/MainForm', self.step2],
-                    ['/Home/MainForm2', self.step3],
-                    ['/Home/Review', self.step4],
-                    ['/Home/Confirmation', self.step5]
-                ]
+        try:
+            # dict loses its order when iteritem()'ing
+            # there are probably more elegant approaches than lists,
+            # but for now...
+            forms = [
+                        ['/?language=en-US', self.step1],
+                        ['/Home/MainForm', self.step2],
+                        ['/Home/MainForm2', self.step3],
+                        ['/Home/Review', self.step4],
+                        ['/Home/Confirmation', self.step5]
+                    ]
 
-        for action, function in forms:
-            step_form = self.browser.get_form(action=action)
-            if step_form:
-                function(step_form, user)
+            for action, function in forms:
+                step_form = self.browser.get_form(action=action)
+                if step_form:
+                    function(step_form, user)
+                else:
+                    return {'status': 'error', 'errors': self.parse_errors()}
+
+            success_page = clean_browser_response(self.browser)
+            if self.success_string in success_page:
+                return {'status': 'success'}
             else:
-                return {'status': 'error', 'errors': self.parse_errors()}
-
-        success_page = clean_browser_response(self.browser)
-        if self.success_string in success_page:
-            return {'status': 'success'}
-        else:
-            # TODO, handle gracefully
-            return {'status': 'failure'}
+                # TODO, handle gracefully
+                return {'status': 'failure'}
+        except ValidationError, e:
+            raise OVRError(self, message=e.message, payload=e.payload)
+            
 
     def parse_errors(self):
         errors_dict = {}

@@ -1,4 +1,4 @@
-from base_ovr_form import BaseOVRForm
+from base_ovr_form import BaseOVRForm, OVRError, ValidationError
 from form_utils import split_date
 
 
@@ -9,10 +9,13 @@ class Arizona(BaseOVRForm):
         self.add_required_fields(['will_be_18', 'legal_resident', 'mentally_competent', 'ssn_last_4'])
 
     def submit(self, user):
-        self.language(user)
-        self.init_voter_registration(user)
-        self.eligibility(user)
-        self.personal_information(user)
+        try:
+            self.language(user)
+            self.init_voter_registration(user)
+            self.eligibility(user)
+            self.personal_information(user)
+        except ValidationError, e:
+            raise OVRError(self, message=e.message, payload=e.payload)
 
     def get_default_submit_headers(self):
         # AZ does a validation check on referer, so fill it in with the current URL

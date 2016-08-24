@@ -1,4 +1,4 @@
-from base_ovr_form import BaseOVRForm, OVRError
+from base_ovr_form import BaseOVRForm, OVRError, ValidationError
 from form_utils import get_address_components, options_dict, split_date, get_party_from_list, clean_browser_response
 
 
@@ -22,34 +22,39 @@ class Massachusetts(BaseOVRForm):
 
     def submit(self, user):
 
-        self.validate(user)
+        try:
+            self.validate(user)
 
-        # format is: [kwargs to select / identify form, method to call with form]
-        # frustratingly, MA uses the same methods and IDs for each form...
-        forms = [
-            [{'action': "./MinRequirements.aspx?RMVId=True"}, self.minimum_requirements],
-            [{'action': "./FormAndReview.aspx?RMVId=True"}, self.rmv_identification],
-            [{'action': "./FormAndReview.aspx?RMVId=True"}, self.complete_form],
-            [{'action': "./FormAndReview.aspx?RMVId=True"}, self.review]
-        ]
+            # format is: [kwargs to select / identify form, method to call with form]
+            # frustratingly, MA uses the same methods and IDs for each form...
+            forms = [
+                [{'action': "./MinRequirements.aspx?RMVId=True"}, self.minimum_requirements],
+                [{'action': "./FormAndReview.aspx?RMVId=True"}, self.rmv_identification],
+                [{'action': "./FormAndReview.aspx?RMVId=True"}, self.complete_form],
+                [{'action': "./FormAndReview.aspx?RMVId=True"}, self.review]
+            ]
 
-        for form_kwargs, handler in forms:
+            for form_kwargs, handler in forms:
 
-            step_form = self.browser.get_form(**form_kwargs)
+                step_form = self.browser.get_form(**form_kwargs)
 
-            if step_form:
-                handler(user, step_form)
+                if step_form:
+                    handler(user, step_form)
 
-            errors = self.parse_errors()
+                errors = self.parse_errors()
 
-            if errors or not step_form:
-                return {'errors': errors}
+                if errors or not step_form:
+                    return {'errors': errors}
 
-        success_page = clean_browser_response(self.browser)
-        if self.success_string in success_page:
-            return {'status': 'success'}
-        else:
-            return {'status': 'failure'}
+            success_page = clean_browser_response(self.browser)
+            if self.success_string in success_page:
+                return {'status': 'success'}
+            else:
+                return {'status': 'failure'}
+                
+        except ValidationError, e:
+            raise OVRError(self, message=e.message, payload=e.payload)
+
 
     def minimum_requirements(self, user, form):
 

@@ -1,4 +1,4 @@
-from base_ovr_form import BaseOVRForm
+from base_ovr_form import BaseOVRForm, OVRError, ValidationError
 from form_utils import split_date
 
 
@@ -53,7 +53,10 @@ class Georgia(BaseOVRForm):
         return registration_form
 
     def submit(self, user):
-        self.welcome()
-        self.minimum_requirements(user)
-        self.registration(user)
-        # todo: I need a valid GA driver's license.
+        try:
+            self.welcome()
+            self.minimum_requirements(user)
+            self.registration(user)
+            # todo: I need a valid GA driver's license.
+        except ValidationError, e:
+            raise OVRError(self, message=e.message, payload=e.payload)

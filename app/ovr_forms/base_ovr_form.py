@@ -1,4 +1,5 @@
 from robobrowser import RoboBrowser
+import json
 
 BASE_REQUIRED_FIELDS = [
     'first_name',
@@ -31,30 +32,45 @@ class BaseOVRForm(object):
 
     def check_required_fields(self, user):
         for field in self.required_fields:
-            if field not in user:
+            # if field not in user:
+            if field not in user or user[field] == None:
                 self.add_error('%s is required' % field.replace('_', ' '), field=field)
 
     def validate(self, user):
         self.check_required_fields(user)
         if self.errors:
-            raise OVRError(message='missing_fields', payload=self.errors)
+            raise ValidationError(message='missing_fields', payload=self.errors)
 
     def submit(self, user):
         raise NotImplemented('subclass a new submit function for %s' % self.__class__)
 
 
+class ValidationError(Exception):
+    status_code = 400
+
+    def __init__(self, message, payload=None):
+        self.message = message
+        self.payload = payload
+
+
 class OVRError(Exception):
     status_code = 400
 
-    def __init__(self, message, status_code=None, payload=None):
+    def __init__(self, form, message, status_code=None, payload=None):
         Exception.__init__(self)
+        self.form = form
         self.message = message
         if status_code is not None:
             self.status_code = status_code
         self.payload = payload
 
+
     def to_dict(self):
         rv = {}
-        rv['payload'] = self.payload
+        try:
+            json.dumps(self.payload)
+            rv['payload'] = self.payload    
+        except:
+            rv['payload'] = '(Could not be JSON-encoded)'        
         rv['message'] = self.message
         return rv

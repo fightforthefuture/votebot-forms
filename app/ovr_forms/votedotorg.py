@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from base_ovr_form import BaseOVRForm, OVRError
+from base_ovr_form import BaseOVRForm, OVRError, ValidationError
 from form_utils import split_date, bool_to_int, log_form, get_party_from_list, options_dict, clean_browser_response
 
 
@@ -66,7 +66,7 @@ class VoteDotOrg(BaseOVRForm):
 
         else:
             errors_string = ','.join(self.parse_errors())
-            raise OVRError('unable to get_form full_registration: ' + errors_string, payload=self.browser.parsed)
+            raise OVRError(self, message='unable to get_form full_registration: ' + errors_string, payload=self.browser.parsed)
 
     def get_download(self, user):
         self.browser.open('https://register.vote.org/downloads.json')
@@ -75,15 +75,19 @@ class VoteDotOrg(BaseOVRForm):
             return True
 
     def submit(self, user):
-        self.get_started(user)
-        self.full_registration(user)
-        # return queue status immediately
-        # check for pdf with get_download
+        try:
+            self.get_started(user)
+            self.full_registration(user)
+            # return queue status immediately
+            # check for pdf with get_download
 
-        success_page = clean_browser_response(self.browser)
-        if self.success_string in success_page:
-            return {'status': 'success'}
-        else:
-            # TODO, handle gracefully
-            return {'status': 'failure'}
+            success_page = clean_browser_response(self.browser)
+            if self.success_string in success_page:
+                return {'status': 'success'}
+            else:
+                # TODO, handle gracefully
+                return {'status': 'failure'}
+        except ValidationError, e:
+            raise OVRError(self, message=e.message, payload=e.payload)
+
 

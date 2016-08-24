@@ -1,4 +1,4 @@
-from base_ovr_form import BaseOVRForm, OVRError
+from base_ovr_form import BaseOVRForm, OVRError, ValidationError
 from form_utils import split_date
 
 from robobrowser import RoboBrowser
@@ -11,14 +11,18 @@ class Virginia(BaseOVRForm):
         self.add_required_fields(['ssn_last_4', 'lawful_affirmation', 'county'])
 
     def submit(self, user):
-        self.access_voter_record(user)
-        # todo: get some VA voter registration data
+        try:
+            self.access_voter_record(user)
+            # todo: get some VA voter registration data
 
-        # also, don't break the law:
-        # "I certify and affirm that the information provided
-        # to access my voter registration is my own. I understand
-        # that it is unlawful to access the record of any other
-        # voter, punishable as computer fraud under Va. Code 18.2.152.3.*"
+            # also, don't break the law:
+            # "I certify and affirm that the information provided
+            # to access my voter registration is my own. I understand
+            # that it is unlawful to access the record of any other
+            # voter, punishable as computer fraud under Va. Code 18.2.152.3.*"
+        except ValidationError, e:
+            raise OVRError(self, message=e.message, payload=e.payload)
+            
 
     def access_voter_record(self, user):
         voter_record_form = self.browser.get_form()

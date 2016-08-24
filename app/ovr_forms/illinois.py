@@ -1,4 +1,4 @@
-from base_ovr_form import BaseOVRForm
+from base_ovr_form import BaseOVRForm, OVRError, ValidationError
 from form_utils import split_date
 
 
@@ -8,11 +8,14 @@ class Illinois(BaseOVRForm):
         super(Illinois, self).__init__('https://ova.elections.il.gov/Step0.aspx')
 
     def submit(self, user):
-        self.drivers_license(user)
-        self.citizenship(user)
-        self.age_verification(user)
-        self.application_type(user)
-        self.illinois_identification(user)
+        try:
+            self.drivers_license(user)
+            self.citizenship(user)
+            self.age_verification(user)
+            self.application_type(user)
+            self.illinois_identification(user)
+        except ValidationError, e:
+            raise OVRError(self, message=e.message, payload=e.payload)
 
     def drivers_license(self, user):
         drivers_license_form = self.browser.get_form()
