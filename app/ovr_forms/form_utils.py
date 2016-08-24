@@ -1,19 +1,11 @@
 from smartystreets.client import Client
-from base_ovr_form import ValidationError
 
 import datetime
 import difflib
 import json
 import re
 
-
-# todo: this should really come from teh app.config object itself
-# but I am in Python import hell with this for some reason.
-# from app import app
-
-# so pull the values themselves
-from app.config import SMARTY_STREETS_AUTH_ID, SMARTY_STREETS_AUTH_TOKEN
-
+from ..config import SMARTY_STREETS_AUTH_ID, SMARTY_STREETS_AUTH_TOKEN
 
 #  TODO, move some of these into a fork of robobrowser?
 
@@ -129,3 +121,11 @@ def get_party_from_list(party, party_list):
         except IndexError:
             # need some kind of graceful fallback here.
             return None
+
+
+class ValidationError(Exception):
+    status_code = 400
+
+    def __init__(self, message, payload=None):
+        self.message = message
+        self.payload = payload

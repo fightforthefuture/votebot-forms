@@ -1,5 +1,5 @@
-from base_ovr_form import BaseOVRForm, OVRError, ValidationError
-from form_utils import split_date
+from base_ovr_form import BaseOVRForm, OVRError
+from form_utils import split_date, ValidationError
 
 
 class Arizona(BaseOVRForm):

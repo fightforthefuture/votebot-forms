@@ -1,5 +1,5 @@
-from base_ovr_form import BaseOVRForm, OVRError, ValidationError
-from form_utils import get_address_components, options_dict, split_date, get_party_from_list, clean_browser_response
+from base_ovr_form import BaseOVRForm, OVRError
+from form_utils import get_address_components, options_dict, split_date, get_party_from_list, clean_browser_response, ValidationError
 
 
 class Massachusetts(BaseOVRForm):
@@ -51,7 +51,7 @@ class Massachusetts(BaseOVRForm):
                 return {'status': 'success'}
             else:
                 return {'status': 'failure'}
-                
+
         except ValidationError, e:
             raise OVRError(self, message=e.message, payload=e.payload)
 

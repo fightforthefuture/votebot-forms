@@ -1,5 +1,5 @@
-from base_ovr_form import BaseOVRForm, OVRError, ValidationError
-from form_utils import bool_to_string, split_date, options_dict, get_party_from_list, clean_browser_response
+from base_ovr_form import BaseOVRForm, OVRError
+from form_utils import bool_to_string, split_date, options_dict, get_party_from_list, clean_browser_response, ValidationError
 
 
 class California(BaseOVRForm):
@@ -37,7 +37,7 @@ class California(BaseOVRForm):
                 return {'status': 'failure'}
         except ValidationError, e:
             raise OVRError(self, message=e.message, payload=e.payload)
-            
+
 
     def parse_errors(self):
         errors_dict = {}

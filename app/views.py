@@ -1,8 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from ovr_forms import OVR_FORMS
-from ovr_forms.base_ovr_form import OVRError, ValidationError
-from ovr_forms.form_utils import clean_sensitive_info
-from .app import db
+from ovr_forms.base_ovr_form import OVRError
+from ovr_forms.form_utils import clean_sensitive_info, ValidationError
 import jobs
 
 votebot = Blueprint('votebot', __name__)
@@ -11,11 +10,6 @@ votebot = Blueprint('votebot', __name__)
 @votebot.errorhandler(OVRError)
 def handle_ovr_error(error):
     error_dict = error.to_dict()
-    db.log_response(error.form, {
-        "message": error_dict["message"],
-        "payload": error_dict["payload"],
-        "status": error.status_code
-    })
     return render_error(
         error.status_code,
         "form_error",

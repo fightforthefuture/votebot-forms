@@ -1,5 +1,5 @@
-from base_ovr_form import BaseOVRForm, OVRError, ValidationError
-from form_utils import bool_to_string, options_dict, split_date, get_party_from_list, clean_browser_response
+from base_ovr_form import BaseOVRForm, OVRError
+from form_utils import bool_to_string, options_dict, split_date, get_party_from_list, clean_browser_response, ValidationError
 
 
 class Colorado(BaseOVRForm):

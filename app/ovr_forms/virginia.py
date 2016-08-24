@@ -1,5 +1,5 @@
-from base_ovr_form import BaseOVRForm, OVRError, ValidationError
-from form_utils import split_date
+from base_ovr_form import BaseOVRForm, OVRError
+from form_utils import split_date, ValidationError
 
 from robobrowser import RoboBrowser
 
@@ -22,7 +22,7 @@ class Virginia(BaseOVRForm):
             # voter, punishable as computer fraud under Va. Code 18.2.152.3.*"
         except ValidationError, e:
             raise OVRError(self, message=e.message, payload=e.payload)
-            
+
 
     def access_voter_record(self, user):
         voter_record_form = self.browser.get_form()

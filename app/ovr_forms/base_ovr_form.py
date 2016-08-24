@@ -1,5 +1,9 @@
 from robobrowser import RoboBrowser
 import json
+import sys
+from ..db import log_response
+from form_utils import ValidationError
+
 
 BASE_REQUIRED_FIELDS = [
     'first_name',
@@ -45,14 +49,6 @@ class BaseOVRForm(object):
         raise NotImplemented('subclass a new submit function for %s' % self.__class__)
 
 
-class ValidationError(Exception):
-    status_code = 400
-
-    def __init__(self, message, payload=None):
-        self.message = message
-        self.payload = payload
-
-
 class OVRError(Exception):
     status_code = 400
 
@@ -63,6 +59,12 @@ class OVRError(Exception):
         if status_code is not None:
             self.status_code = status_code
         self.payload = payload
+
+        log_response(form, {
+            "message": self.message,
+            "payload": self.payload,
+            "status": self.status_code
+        })
 
 
     def to_dict(self):

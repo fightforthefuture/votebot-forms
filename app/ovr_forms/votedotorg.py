@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
-from base_ovr_form import BaseOVRForm, OVRError, ValidationError
-from form_utils import split_date, bool_to_int, log_form, get_party_from_list, options_dict, clean_browser_response
+from base_ovr_form import BaseOVRForm, OVRError
+from form_utils import split_date, bool_to_int, log_form, get_party_from_list, options_dict, clean_browser_response, ValidationError
 
 
 class VoteDotOrg(BaseOVRForm):

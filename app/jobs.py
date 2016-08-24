@@ -1,6 +1,7 @@
 from flask import jsonify
 import requests
-from .app import rq, db
+from .app import rq
+from db import log_response
 
 
 @rq.job
@@ -8,7 +9,7 @@ def submit_form(form, user, callback_url):
     status = form.submit(user)
 
     # log form.browser final state, so we can determine sucess or error strings
-    db.log_response(form, status)
+    log_response(form, status)
 
     if callback_url:
         requests.post(callback_url, status)
