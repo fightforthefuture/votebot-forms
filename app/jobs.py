@@ -5,8 +5,10 @@ from db import log_response
 
 
 @rq.job
-def submit_form(form, user, callback_url):
-    status = form.submit(user)
+def submit_form(form, user, callback_url=None):
+    status = form.submit(user, callback_url)
+
+    status["form_class"] = form.__class__.__name__
 
     # log form.browser final state, so we can determine sucess or error strings
     log_response(form, status)
@@ -17,7 +19,7 @@ def submit_form(form, user, callback_url):
 
 
 @rq.job
-def get_pdf(form, user, callback_url):
+def get_pdf(form, user, callback_url=None):
     status = form.get_download(user)
     if callback_url:
         requests.post(callback_url, status)

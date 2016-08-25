@@ -3,6 +3,7 @@ import json
 import sys
 from ..db import log_response
 from form_utils import ValidationError
+import requests
 
 
 BASE_REQUIRED_FIELDS = [
@@ -19,6 +20,9 @@ BASE_REQUIRED_FIELDS = [
 
 
 class BaseOVRForm(object):
+
+    error_callback_url = None
+
     def __init__(self, start_url):
         self.browser = RoboBrowser(parser='html.parser', user_agent='HelloVote.org', history=True)
         self.browser.open(start_url)
@@ -45,14 +49,14 @@ class BaseOVRForm(object):
         if self.errors:
             raise ValidationError(message='missing_fields', payload=self.errors)
 
-    def submit(self, user):
+    def submit(self, user, error_callback_url=None):
         raise NotImplemented('subclass a new submit function for %s' % self.__class__)
 
 
 class OVRError(Exception):
     status_code = 400
 
-    def __init__(self, form, message, status_code=None, payload=None):
+    def __init__(self, form, message, status_code=None, payload=None, error_callback_url=None):
         Exception.__init__(self)
         self.form = form
         self.message = message
@@ -60,11 +64,21 @@ class OVRError(Exception):
             self.status_code = status_code
         self.payload = payload
 
-        log_response(form, {
-            "message": self.message,
-            "payload": self.payload,
-            "status": self.status_code
-        })
+        safety_first = self.to_dict()
+        error = {
+            "message": safety_first["message"],
+            "payload": safety_first["payload"],
+            "status": "failure",
+            "code": self.status_code,
+            "form_class": form.__class__.__name__
+        }
+
+        log_id = log_response(form, error)
+
+        error["reference"] = log_id
+
+        if error_callback_url:
+            requests.post(error_callback_url, error)
 
 
     def to_dict(self):

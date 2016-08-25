@@ -1,6 +1,6 @@
 from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import split_date, ValidationError
-
+import sys, traceback
 
 class Arizona(BaseOVRForm):
 
@@ -8,14 +8,22 @@ class Arizona(BaseOVRForm):
         super(Arizona, self).__init__('https://servicearizona.com/webapp/evoter/selectLanguage')
         self.add_required_fields(['will_be_18', 'legal_resident', 'mentally_competent', 'ssn_last_4'])
 
-    def submit(self, user):
+    def submit(self, user, error_callback_url = None):
+
+        self.error_callback_url = error_callback_url
+
         try:
             self.language(user)
             self.init_voter_registration(user)
             self.eligibility(user)
             self.personal_information(user)
+        
         except ValidationError, e:
-            raise OVRError(self, message=e.message, payload=e.payload)
+            raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
+
+        except Exception, e:
+            ex_type, ex, tb = sys.exc_info()
+            raise OVRError(self, message="%s %s" % (ex_type, ex), payload=traceback.format_tb(tb), error_callback_url=self.error_callback_url)
 
     def get_default_submit_headers(self):
         # AZ does a validation check on referer, so fill it in with the current URL

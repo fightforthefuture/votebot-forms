@@ -74,18 +74,20 @@ def registration(request, registration_type="vote_dot_org"):
         return render_error(400, "missing_fields", "Missing required fields", e.payload)
 
     # for local development / testing.
-    if current_app.config.get('SYNCHRONOUS_SUBMIT', False):
+    synchronous_submit = current_app.config.get('SYNCHRONOUS_SUBMIT', False)
+    if synchronous_submit == False or synchronous_submit == 'False':
         return jobs.submit_form(form, user, callback_url=request_json.get('callback_url'))
 
     else:
         # queue form submission and success callback
         jobs.submit_form.queue(form, user, callback_url=request_json.get('callback_url'))
 
-        if form.__class__.__name__ is 'VoteDotOrg':
+        # if form.__class__.__name__ is 'VoteDotOrg':
             # create new job for pdf check
             # TODO delay a few seconds?
             # TODO retry automatically if failed?
-            jobs.get_pdf.queue(form, user, callback_url=request_json.get('callback_url'))
+            # jobs.get_pdf.queue(form, user, callback_url=request_json.get('callback_url'))
+            # jobs.get_pdf.queue(form, user, callback_url=None)
 
         return jsonify({'status': 'queued'})
 

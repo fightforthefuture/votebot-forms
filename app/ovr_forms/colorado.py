@@ -1,6 +1,6 @@
 from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import bool_to_string, options_dict, split_date, get_party_from_list, clean_browser_response, ValidationError
-
+import sys, traceback
 
 class Colorado(BaseOVRForm):
     def __init__(self):
@@ -10,7 +10,10 @@ class Colorado(BaseOVRForm):
                                  'will_be_18', 'consent_use_signature', 'confirm_name_address'])
         self.success_string = "Your changes have been submitted to your County Clerk and Recorder for processing. "
 
-    def submit(self, user):
+    def submit(self, user, error_callback_url = None):
+
+        self.error_callback_url = error_callback_url
+
         try:
             self.validate(user)
 
@@ -39,8 +42,13 @@ class Colorado(BaseOVRForm):
                 return {'status': 'success'}
             else:
                 return {'status': 'failure'}
+
         except ValidationError, e:
-            raise OVRError(self, message=e.message, payload=e.payload)
+            raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
+
+        except Exception, e:
+            ex_type, ex, tb = sys.exc_info()
+            raise OVRError(self, message="%s %s" % (ex_type, ex), payload=traceback.format_tb(tb), error_callback_url=self.error_callback_url)
 
     def parse_errors(self):
         if self.errors:

@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import split_date, bool_to_int, log_form, get_party_from_list, options_dict, clean_browser_response, ValidationError
-
+import sys, traceback
 
 class VoteDotOrg(BaseOVRForm):
 
@@ -58,6 +58,10 @@ class VoteDotOrg(BaseOVRForm):
             full_form['state_id_number'].value = user['state_id_number']
 
             party_translated = get_party_from_list(user.get('political_party'), options_dict(full_form['political_party']).keys())
+            
+            if not party_translated:
+                party_translated = 'No party'
+
             full_form['political_party'].value = options_dict(full_form['political_party'])[party_translated]
             # why does the form require bool as string?
             full_form['us_citizen'].value = str(bool_to_int(user['us_citizen']))
@@ -66,7 +70,7 @@ class VoteDotOrg(BaseOVRForm):
 
         else:
             errors_string = ','.join(self.parse_errors())
-            raise OVRError(self, message='unable to get_form full_registration: ' + errors_string, payload=self.browser.parsed)
+            raise OVRError(self, message='unable to get_form full_registration: ' + errors_string, payload=self.browser.parsed, error_callback_url=self.error_callback_url)
 
     def get_download(self, user):
         self.browser.open('https://register.vote.org/downloads.json')
@@ -74,7 +78,10 @@ class VoteDotOrg(BaseOVRForm):
         if download_response['status'] == 'ready':
             return True
 
-    def submit(self, user):
+    def submit(self, user, error_callback_url = None):
+
+        self.error_callback_url = error_callback_url
+
         try:
             self.get_started(user)
             self.full_registration(user)
@@ -88,6 +95,8 @@ class VoteDotOrg(BaseOVRForm):
                 # TODO, handle gracefully
                 return {'status': 'failure'}
         except ValidationError, e:
-            raise OVRError(self, message=e.message, payload=e.payload)
+            raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
 
-
+        except Exception, e:
+            ex_type, ex, tb = sys.exc_info()
+            raise OVRError(self, message="%s %s" % (ex_type, ex), payload=traceback.format_tb(tb), error_callback_url=self.error_callback_url)

@@ -6,6 +6,7 @@ from illinois import Illinois
 from massachusetts import Massachusetts
 from virginia import Virginia
 from colorado import Colorado
+from minnesota_test import MinnesotaTest
 
 
 OVR_FORMS = {
@@ -15,6 +16,7 @@ OVR_FORMS = {
     #'GA': Georgia,
     #'IL': Illinois,
     'MA': Massachusetts,
+    # 'MN': MinnesotaTest, # JL DEBUG ~ disable in production
     #'VA': Virginia,
     'default': VoteDotOrg
 }

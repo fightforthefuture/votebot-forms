@@ -14,7 +14,7 @@ def get_db():
 
     # create table
     cur = db.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS logged_forms (id serial PRIMARY KEY, ts timestamp, state varchar, status json, parsed text); ")
+    cur.execute("CREATE TABLE IF NOT EXISTS logged_forms (id serial PRIMARY KEY, ts timestamp, state varchar, status json, failed boolean default false, parsed text); ")
     db.commit()
 
     return db
@@ -23,12 +23,16 @@ def get_db():
 def log_response(form, status):
     db = get_db()
     cur = db.cursor()
-    sql = "INSERT INTO logged_forms (ts, state, status, parsed) VALUES ('{}','{}','{}','{}');"
-    cur.execute(sql.format(
-        datetime.datetime.now(),
+    sql = "INSERT INTO logged_forms (ts, state, status, failed, parsed) VALUES (NOW(), %s, %s, %s, %s) RETURNING id;"
+    cur.execute(sql, (
         form.__class__.__name__,
         json.dumps(status),
-        clean_browser_response(form.browser)
+        True if "status" not in status or not status["status"] == "success" else False,
+        str(form.browser)
     ))
+    id_of_new_row = cur.fetchone()[0]
+
     db.commit()
     db.close()
+
+    return id_of_new_row

@@ -1,6 +1,6 @@
 from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import split_date, ValidationError
-
+import sys, traceback
 from robobrowser import RoboBrowser
 
 
@@ -10,7 +10,10 @@ class Virginia(BaseOVRForm):
         super(Virginia, self).__init__('https://vote.elections.virginia.gov/VoterInformation')
         self.add_required_fields(['ssn_last_4', 'lawful_affirmation', 'county'])
 
-    def submit(self, user):
+    def submit(self, user, error_callback_url = None):
+
+        self.error_callback_url = error_callback_url
+
         try:
             self.access_voter_record(user)
             # todo: get some VA voter registration data
@@ -21,7 +24,11 @@ class Virginia(BaseOVRForm):
             # that it is unlawful to access the record of any other
             # voter, punishable as computer fraud under Va. Code 18.2.152.3.*"
         except ValidationError, e:
-            raise OVRError(self, message=e.message, payload=e.payload)
+            raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
+
+        except Exception, e:
+            ex_type, ex, tb = sys.exc_info()
+            raise OVRError(self, message="%s %s" % (ex_type, ex), payload=traceback.format_tb(tb), error_callback_url=self.error_callback_url)
 
 
     def access_voter_record(self, user):

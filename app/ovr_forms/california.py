@@ -1,6 +1,6 @@
 from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import bool_to_string, split_date, options_dict, get_party_from_list, clean_browser_response, ValidationError
-
+import sys, traceback
 
 class California(BaseOVRForm):
     def __init__(self):
@@ -9,7 +9,10 @@ class California(BaseOVRForm):
                                  'ssn_last4', 'county', 'consent_use_signature'])
         self.success_string = "Your voter registration application is now complete."
 
-    def submit(self, user):
+    def submit(self, user, error_callback_url = None):
+
+        self.error_callback_url = error_callback_url
+
         try:
             # dict loses its order when iteritem()'ing
             # there are probably more elegant approaches than lists,
@@ -35,8 +38,13 @@ class California(BaseOVRForm):
             else:
                 # TODO, handle gracefully
                 return {'status': 'failure'}
+
         except ValidationError, e:
-            raise OVRError(self, message=e.message, payload=e.payload)
+            raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
+
+        except Exception, e:
+            ex_type, ex, tb = sys.exc_info()
+            raise OVRError(self, message="%s %s" % (ex_type, ex), payload=traceback.format_tb(tb), error_callback_url=self.error_callback_url)
 
 
     def parse_errors(self):

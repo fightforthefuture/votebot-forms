@@ -1,6 +1,6 @@
 from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import split_date, ValidationError
-
+import sys, traceback
 
 class Georgia(BaseOVRForm):
     def __init__(self):
@@ -52,11 +52,18 @@ class Georgia(BaseOVRForm):
         self.browser.submit_form(registration_form, submit=registration_form['next'])
         return registration_form
 
-    def submit(self, user):
+    def submit(self, user, error_callback_url = None):
+
+        self.error_callback_url = error_callback_url
+
         try:
             self.welcome()
             self.minimum_requirements(user)
             self.registration(user)
             # todo: I need a valid GA driver's license.
         except ValidationError, e:
-            raise OVRError(self, message=e.message, payload=e.payload)
+            raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
+
+        except Exception, e:
+            ex_type, ex, tb = sys.exc_info()
+            raise OVRError(self, message="%s %s" % (ex_type, ex), payload=traceback.format_tb(tb), error_callback_url=self.error_callback_url)

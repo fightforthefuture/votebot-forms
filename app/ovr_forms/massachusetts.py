@@ -1,6 +1,6 @@
 from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import get_address_components, options_dict, split_date, get_party_from_list, clean_browser_response, ValidationError
-
+import sys, traceback
 
 class Massachusetts(BaseOVRForm):
 
@@ -20,7 +20,14 @@ class Massachusetts(BaseOVRForm):
             messages.append({'error': error.text})
         return messages
 
-    def submit(self, user):
+    def submit(self, user, error_callback_url = None):
+
+        self.error_callback_url = error_callback_url
+
+        # JL DEBUG ~ Always fail MA
+        # -------------------------
+        # raise OVRError(self, message="JL DEBUG ~", payload="JL DEBUG ~", error_callback_url=self.error_callback_url)
+        # -------------------------
 
         try:
             self.validate(user)
@@ -53,7 +60,11 @@ class Massachusetts(BaseOVRForm):
                 return {'status': 'failure'}
 
         except ValidationError, e:
-            raise OVRError(self, message=e.message, payload=e.payload)
+            raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
+
+        except Exception, e:
+            ex_type, ex, tb = sys.exc_info()
+            raise OVRError(self, message="%s %s" % (ex_type, ex), payload=traceback.format_tb(tb), error_callback_url=self.error_callback_url)
 
 
     def minimum_requirements(self, user, form):
