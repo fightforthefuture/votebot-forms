@@ -70,7 +70,7 @@ class VoteDotOrg(BaseOVRForm):
 
         else:
             errors_string = ','.join(self.parse_errors())
-            raise OVRError(self, message='unable to get_form full_registration: ' + errors_string, payload=self.browser.parsed, error_callback_url=self.error_callback_url)
+            raise ValidationError(message='unable to get_form full_registration.', payload=errors_string)
 
     def get_download(self, user):
         self.browser.open('https://register.vote.org/downloads.json')
@@ -94,6 +94,7 @@ class VoteDotOrg(BaseOVRForm):
             else:
                 # TODO, handle gracefully
                 return {'status': 'failure'}
+        
         except ValidationError, e:
             raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
 

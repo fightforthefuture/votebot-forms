@@ -28,7 +28,7 @@ def log_response(form, status):
         form.__class__.__name__,
         json.dumps(status),
         True if "status" not in status or not status["status"] == "success" else False,
-        str(form.browser)
+        str(form.browser.parsed)
     ))
     id_of_new_row = cur.fetchone()[0]
 

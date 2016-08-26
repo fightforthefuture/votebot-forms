@@ -130,14 +130,16 @@ class Massachusetts(BaseOVRForm):
 
         form['ctl00$MainContent$txtZip'].value = user['zip']
 
-        user_party = user['political_party']
+        user_party = user['political_party'].strip()
         parties = options_dict(form['ctl00$MainContent$ddlPartyList'])
         designations = options_dict(form['ctl00$MainContent$ddlPoliticalDesig'])
 
         party = get_party_from_list(user_party, parties.keys())
         designation = get_party_from_list(user_party, designations.keys())
 
-        if user_party and user_party.lower().strip() != 'independent':
+        user_party = user_party.lower()
+
+        if user_party and user_party != 'independent' and user_party != 'none':
 
             if party:
                 form['ctl00$MainContent$PartyEnrolled'].value = 'rdoBtnParty'

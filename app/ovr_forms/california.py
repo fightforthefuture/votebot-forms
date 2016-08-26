@@ -120,8 +120,16 @@ class California(BaseOVRForm):
                                                                                        ethnicity_options['Other'])
 
         #  Political Party Preference
-        if user['political_party'] is 'No party preference':
-            form['VoterInformation.isPoliticalPrefSelected'].value = bool_to_string(False, capitalize=True)
+        user["political_party"] = user["political_party"].strip()
+
+        if user['political_party'].lower() == 'independent' or user['political_party'].lower() == "none":
+
+            # JL HACK ~ JL NOTE ~ RoboBrowser has a bug where it's not pulling in the
+            # "False" radio button, so we're manually mucking with its internal stuff
+            form['VoterInformation.isPoliticalPrefSelected'].options.append('False')
+            #########################################################################
+
+            form['VoterInformation.isPoliticalPrefSelected'].value = "False"
         else:
             form['VoterInformation.isPoliticalPrefSelected'].value = bool_to_string(True, capitalize=True)
             party_options = options_dict(form['VoterInformation.PoliticalPartyIdKey'])
@@ -140,6 +148,7 @@ class California(BaseOVRForm):
         self.browser.submit_form(form, submit=next_button)
 
     def step3(self, form, user):
+
         #  Vote by Mail
         form['VoterInformation.IsVoteByMail'].value = bool_to_string(user.get('vote_by_mail', False))
 
