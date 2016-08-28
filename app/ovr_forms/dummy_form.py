@@ -1,11 +1,11 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import split_date, ValidationError
+from form_utils import ValidationError
 import sys, traceback
 
-class MinnesotaTest(BaseOVRForm):
+class DummyForm(BaseOVRForm):
 
     def __init__(self):
-        super(MinnesotaTest, self).__init__('https://www.hellovote.org')
+        super(DummyForm, self).__init__('https://www.hellovote.org')
 
     def submit(self, user, error_callback_url = None):
 
