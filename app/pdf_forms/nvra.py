@@ -12,6 +12,7 @@ PDFTK_BIN = os.environ.get('PDFTK_BIN', '/usr/local/bin/pdftk')
 class NVRA(BaseOVRForm):
     def __init__(self):
         super(NVRA, self).__init__()
+        self.coversheet = os.path.abspath('app/pdf_forms/templates/coversheet.pdf')
         self.form_template = os.path.abspath('app/pdf_forms/templates/nvra-fillable.pdf')
         self.add_required_fields(['us_citizen', 'will_be_18', 'political_party', 'state_id_number'])
 
@@ -59,14 +60,24 @@ class NVRA(BaseOVRForm):
         return form
 
     def generate_pdf(self, user):
+        # generate fdf data
         fdf_stream = forge_fdf(fdf_data_strings=user)
 
-        pdftk_cmd = [PDFTK_BIN, self.form_template, 'fill_form', '-', 'output', '-', 'flatten']
-        pdftk_cmd = ' '.join(pdftk_cmd)
-
-        process = subprocess.Popen(pdftk_cmd, stdin=subprocess.PIPE,
-                                   stdout=subprocess.PIPE, shell=True)
+        # fill out form template
+        pdftk_fill = [PDFTK_BIN,
+                     self.form_template, 'fill_form', '-',
+                     'output', '-', 'flatten']
+        process = subprocess.Popen(' '.join(pdftk_fill), shell=True,
+                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         (stdout, stderr) = process.communicate(input=fdf_stream)
+
+        # join with coversheet
+        pdftk_join = [PDFTK_BIN,
+                     self.coversheet, '-', 'cat',
+                     'output', '-']
+        process = subprocess.Popen(' '.join(pdftk_join), shell=True,
+                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        (stdout, stderr) = process.communicate(input=stdout)
         self.pdftk_output = "'%s'" % stdout
         return stdout
 
