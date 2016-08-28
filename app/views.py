@@ -89,7 +89,10 @@ def registration(request, registration_type="vote_dot_org"):
             # jobs.get_pdf.queue(form, user, callback_url=request_json.get('callback_url'))
             # jobs.get_pdf.queue(form, user, callback_url=None)
 
-        return jsonify({'status': 'queued'})
+        return jsonify({
+            'status': 'queued',
+            'uid': str(form.get_uid())
+        })
 
 
 @votebot.route('/confirm')

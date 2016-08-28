@@ -14,7 +14,8 @@ def get_db():
 
     # create table
     cur = db.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS logged_forms (id serial PRIMARY KEY, ts timestamp, state varchar, status json, failed boolean default false, parsed text); ")
+    cur.execute("CREATE TABLE IF NOT EXISTS logged_forms (id serial PRIMARY KEY, uid varchar(255), ts timestamp, state varchar, status json, failed boolean default false, parsed text); ")
+    cur.execute("CREATE INDEX IF NOT EXISTS logged_forms_uid on logged_forms (uid);")
     db.commit()
 
     return db
@@ -23,8 +24,9 @@ def get_db():
 def log_response(form, status):
     db = get_db()
     cur = db.cursor()
-    sql = "INSERT INTO logged_forms (ts, state, status, failed, parsed) VALUES (NOW(), %s, %s, %s, %s) RETURNING id;"
+    sql = "INSERT INTO logged_forms (ts, uid, state, status, failed, parsed) VALUES (NOW(), %s, %s, %s, %s, %s) RETURNING id;"
     cur.execute(sql, (
+        str(form.get_uid()),
         form.__class__.__name__,
         json.dumps(status),
         True if "status" not in status or not status["status"] == "success" else False,

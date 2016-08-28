@@ -11,7 +11,10 @@ def submit_form(form, user, callback_url=None):
     status["form_class"] = form.__class__.__name__
 
     # log form.browser final state, so we can determine sucess or error strings
-    log_response(form, status)
+    log_id = log_response(form, status)
+
+    status["reference"] = log_id
+    status["uid"] = str(form.get_uid())
 
     if callback_url:
         requests.post(callback_url, status)

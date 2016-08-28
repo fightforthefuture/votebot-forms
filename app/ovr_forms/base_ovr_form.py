@@ -4,6 +4,7 @@ import sys
 from ..db import log_response
 from form_utils import ValidationError
 import requests
+import uuid
 
 
 BASE_REQUIRED_FIELDS = [
@@ -27,7 +28,11 @@ class BaseOVRForm(object):
         self.browser = RoboBrowser(parser='html.parser', user_agent='HelloVote.org', history=True)
         self.browser.open(start_url)
         self.required_fields = BASE_REQUIRED_FIELDS
+        self.uid = uuid.uuid4()
         self.errors = []
+
+    def get_uid(self):
+        return self.uid
 
     def add_error(self, message, field='error'):
         self.errors.append({field: message})
@@ -64,6 +69,8 @@ class OVRError(Exception):
             self.status_code = status_code
         self.payload = payload
 
+        print "OMG FAIL: %s" % str(form.get_uid())
+
         safety_first = self.to_dict()
         error = {
             "message": safety_first["message"],
@@ -76,6 +83,7 @@ class OVRError(Exception):
         log_id = log_response(form, error)
 
         error["reference"] = log_id
+        error["uid"] = str(form.get_uid())
 
         if error_callback_url:
             requests.post(error_callback_url, error)
