@@ -28,9 +28,9 @@ def render_error(status_code, str_code, message=None, payload=None):
     response.status_code = status_code
     return response
 
-@votebot.route('/vote_dot_org', methods=['POST'])
+@votebot.route('/generate_pdf', methods=['POST'])
 def vote_dot_org():
-    return registration(request, "vote_dot_org")
+    return registration(request, "generate_pdf")
 
 
 @votebot.route('/ovr', methods=['POST'])
@@ -38,7 +38,7 @@ def ovr():
     return registration(request, "ovr")
 
 
-def registration(request, registration_type="vote_dot_org"):
+def registration(request, registration_type="generate_pdf"):
     request_json = request.get_json(force=True)  # so we don't have to set mimetype
     if not "user" in request_json:
         return render_error(400, "missing_user_data", "No user data specified.")
@@ -52,8 +52,8 @@ def registration(request, registration_type="vote_dot_org"):
         del user['settings']
 
     state = user['state']
-    if registration_type == "vote_dot_org":
-        form = OVR_FORMS['default'](current_app.config.get('VOTEORG_PARTNER'))
+    if registration_type == "generate_pdf":
+        form = OVR_FORMS['default']()
     elif state in OVR_FORMS:
         form = OVR_FORMS[state]()
     else:
