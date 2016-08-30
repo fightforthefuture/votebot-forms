@@ -4,6 +4,7 @@ from app.ovr_forms.form_utils import ValidationError, split_date
 from fdfgen import forge_fdf
 import subprocess
 import tempfile
+import json
 import os, sys, traceback
 
 PDFTK_BIN = os.environ.get('PDFTK_BIN', '/usr/local/bin/pdftk')
@@ -13,49 +14,51 @@ class NVRA(BaseOVRForm):
     def __init__(self):
         super(NVRA, self).__init__()
         self.coversheet = os.path.abspath('app/pdf_forms/templates/coversheet.pdf')
-        self.form_template = os.path.abspath('app/pdf_forms/templates/nvra-fillable.pdf')
+        self.form_template = os.path.abspath('app/pdf_forms/templates/eac-nvra.pdf')
         self.add_required_fields(['us_citizen', 'will_be_18', 'political_party', 'state_id_number'])
 
     def match_fields(self, user):
         form = {}
         if user['us_citizen']:
-            form['citizen'] = True
+            form['us_citizen_yes'] = True
         else:
             self.add_error('You must be a US citizen to register to vote.', field='us_citizen')
             return False
 
         if user['will_be_18']:
-            form['18-years-old'] = True
+            form['will_be_18_yes'] = True
         else:
             self.add_error('You must be 18 by Election Day in order to register to vote.', field='will_be_18')
             return False
 
-        form['Suffix'] = user.get('suffix')
         if user.get('gender') == 'M':
-            form['title'] = 'Mr'
-        else:
-            form['title'] = 'Ms'
+            form['title_mr'] = True
+        elif user.get('gender') == 'F':
+            form['title_ms'] = True
         # TODO handle Miss, Mrs?
             
         form['first_name'] = user.get('first_name')
         # form['middle_name'] = user.get('middle_name')
         form['last_name'] = user.get('last_name')
-        form['home_street'] = user.get('address')
-        form['home_unit'] = user.get('apt')
+        form['home_address'] = user.get('address')
+        form['home_apt'] = user.get('apt')
         form['home_city'] = user.get('city')
         form['home_state'] = user.get('state')
-        form['home_zip5'] = user.get('zip')
+        form['home_state'] = user.get('zip')
         (year, month, day) = split_date(user.get('date_of_birth'))
-        form['dob'] = ' / '.join((month, day, year))
+        form['date_of_birth'] = ' / '.join((month, day, year))
         form['phone_number'] = user.get('phone')
-        form['party'] = user.get('political_party')
-        form['state_id_number'] = user.get('state_id_number')
-
+        form['political_party'] = user.get('political_party')
+        form['id_number'] = user.get('state_id_number')
+        form['race_ethnic_group'] = user.get('ethnicity')
+        
         # TODO get local election offical address from Google Civic or US OVF
-        form['submission_address_1'] = 'TEST ADDRESS'
-        form['submission_address_2'] = 'STATE OFFICE'
-        form['submission_address_3'] = 'CAPITOL CITY'
-        form['submission_address_4'] = 'ANY STATE'
+        # until Google Civic updates, use statewide address
+        form['mailto_line_1'] = 'TEST ADDRESS'
+        form['mailto_line_2'] = 'STATE OFFICE'
+        form['mailto_line_3'] = 'CAPITOL CITY'
+        form['mailto_line_4'] = 'ANY STATE'
+        form['mailto_line_5'] = 'ANY STATE'
 
         return form
 
