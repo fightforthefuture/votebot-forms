@@ -8,7 +8,7 @@ import json
 import os, sys, traceback
 
 PDFTK_BIN = os.environ.get('PDFTK_BIN', '/usr/local/bin/pdftk')
-
+SOS_ADDRESS = json.load(open('app/pdf_forms/sos_address.json', 'r'))
 
 class NVRA(BaseOVRForm):
     def __init__(self):
@@ -41,30 +41,36 @@ class NVRA(BaseOVRForm):
         # form['middle_name'] = user.get('middle_name')
         form['last_name'] = user.get('last_name')
         form['home_address'] = user.get('address')
-        form['home_apt'] = user.get('apt')
+        form['home_apt'] = user.get('apt', '')
         form['home_city'] = user.get('city')
         form['home_state'] = user.get('state')
-        form['home_state'] = user.get('zip')
+        form['home_zip'] = user.get('zip')
         (year, month, day) = split_date(user.get('date_of_birth'))
         form['date_of_birth'] = ' / '.join((month, day, year))
-        form['phone_number'] = user.get('phone')
-        form['political_party'] = user.get('political_party')
-        form['id_number'] = user.get('state_id_number')
-        form['race_ethnic_group'] = user.get('ethnicity')
+        form['phone_number'] = user.get('phone', '')
+        form['choice_of_party'] = user.get('political_party', '')
+        form['id_number'] = user.get('state_id_number', '')
+        form['race_ethnic_group'] = user.get('ethnicity', '')
         
         # TODO get local election offical address from Google Civic or US OVF
         # until Google Civic updates, use statewide address
-        form['mailto_line_1'] = 'TEST ADDRESS'
-        form['mailto_line_2'] = 'STATE OFFICE'
-        form['mailto_line_3'] = 'CAPITOL CITY'
-        form['mailto_line_4'] = 'ANY STATE'
-        form['mailto_line_5'] = 'ANY STATE'
+        sos_address = SOS_ADDRESS.get(user.get('state'))
+        if sos_address:
+            form['mailto_line_1'] = sos_address[0]
+            if len(sos_address) > 1:
+                form['mailto_line_2'] = sos_address[1]
+            if len(sos_address) > 2:
+                form['mailto_line_3'] = sos_address[2]
+            if len(sos_address) > 3:
+                form['mailto_line_4'] = sos_address[3]
+            if len(sos_address) > 4:
+                form['mailto_line_5'] = sos_address[4]
 
         return form
 
     def generate_pdf(self, user):
         # generate fdf data
-        fdf_stream = forge_fdf(fdf_data_strings=user)
+        fdf_stream = forge_fdf(fdf_data_strings=user, checkbox_checked_name="On")
 
         # fill out form template
         pdftk_fill = [PDFTK_BIN,
