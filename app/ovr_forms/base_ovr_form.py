@@ -69,8 +69,6 @@ class OVRError(Exception):
             self.status_code = status_code
         self.payload = payload
 
-        print "OMG FAIL: %s" % str(form.get_uid())
-
         safety_first = self.to_dict()
         error = {
             "message": safety_first["message"],

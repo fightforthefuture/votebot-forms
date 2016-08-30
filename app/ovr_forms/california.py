@@ -30,7 +30,7 @@ class California(BaseOVRForm):
                 if step_form:
                     function(step_form, user)
                 else:
-                    return {'status': 'error', 'errors': self.parse_errors()}
+                    return {'status': 'failure', 'errors': self.parse_errors()}
 
             success_page = clean_browser_response(self.browser)
             if self.success_string in success_page:

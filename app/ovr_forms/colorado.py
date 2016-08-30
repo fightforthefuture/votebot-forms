@@ -35,7 +35,7 @@ class Colorado(BaseOVRForm):
                 errors = self.parse_errors()
 
                 if errors or not step_form:
-                    return {'status': 'error', 'errors': errors}
+                    return {'status': 'failure', 'errors': errors}
 
             success_page = clean_browser_response(self.browser)
             if self.success_string in success_page:
