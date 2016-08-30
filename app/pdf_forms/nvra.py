@@ -41,7 +41,7 @@ class NVRA(BaseOVRForm):
         # form['middle_name'] = user.get('middle_name')
         form['last_name'] = user.get('last_name')
         form['home_address'] = user.get('address')
-        form['home_apt'] = user.get('apt', '')
+        form['home_apt'] = user.get('address_unit', '')
         form['home_city'] = user.get('city')
         form['home_state'] = user.get('state')
         form['home_zip'] = user.get('zip')
