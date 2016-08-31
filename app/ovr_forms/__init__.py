@@ -16,7 +16,7 @@ OVR_FORMS = {
     #'GA': Georgia,
     #'IL': Illinois,
     'MA': Massachusetts,
-    # 'MN': MinnesotaTest, # JL DEBUG ~ disable in production
+    'MN': MinnesotaTest, # JL DEBUG ~ disable in production
     #'VA': Virginia,
     'default': VoteDotOrg
 }
