@@ -40,7 +40,7 @@ get a POST to your callback_url like
 ```
 {
     "status": "generated_pdf", // for print and mail
-    "pdf_url": "https://hellovote.s3.amazonaws.com/votebot-forms/UID.pdf?access_token"
+    "pdf_url": "https://hellovote.s3.amazonaws.com/print/UUID.pdf?access_token"
 }
 ```
 or 

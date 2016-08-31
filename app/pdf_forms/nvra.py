@@ -1,9 +1,10 @@
 from app.ovr_forms.base_ovr_form import BaseOVRForm, OVRError
 from app.ovr_forms.form_utils import ValidationError, split_date
 
+import storage
+
 from fdfgen import forge_fdf
 import subprocess
-import tempfile
 import json
 import os, sys, traceback
 
@@ -90,16 +91,6 @@ class NVRA(BaseOVRForm):
         self.pdftk_output = "'%s'" % stdout
         return stdout
 
-    def write_to_tmp(self, pdf_stream):
-        tmp = tempfile.NamedTemporaryFile(delete=False)
-        tmp.write(pdf_stream)
-        tmp.close()
-        return tmp.name
-
-    def upload_to_s3(self, pdf_stream):
-        pass
-        # TODO upload to s3 via boto
-
     def submit(self, user, error_callback_url=None):
         self.error_callback_url = error_callback_url
 
@@ -107,8 +98,8 @@ class NVRA(BaseOVRForm):
             form_data = self.match_fields(user)
             pdf_file = self.generate_pdf(form_data)
             if pdf_file:
-                pdf_url = self.write_to_tmp(pdf_file)
-                return {'status': 'success', 'pdf_url': pdf_url}
+                pdf_url = storage.upload_to_s3(pdf_file, 'print/%s.pdf' % self.uid)
+                return {'status': 'generated_pdf', 'pdf_url': pdf_url}
             else:
                 return {'status': 'error', 'message': 'unable to generate NVRA pdf'}
 

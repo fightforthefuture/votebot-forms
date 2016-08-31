@@ -6,6 +6,9 @@ RQ_REDIS_URL = REDIS_URL
 
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgres://localhost:5432/votebot-forms')
 
+AWS_ACCESS_KEY = os.environ.get('AWS_ACCESS_KEY')
+AWS_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')
+
 SENTRY_DSN = os.environ.get('SENTRY_DSN')
 
 SMARTY_STREETS_AUTH_ID = os.environ.get('SMARTY_STREETS_AUTH_ID')
