@@ -39,14 +39,15 @@ receive a response like
 get a POST to your callback_url like
 ```
 {
-    "pdf_url": "https://hellovote.s3.amazonaws.com/forms/user_XXXXXX_YYYYMMDDHHMMSS_HASH.pdf?access_token" // for print and mail
+    "status": "generated_pdf", // for print and mail
+    "pdf_url": "https://hellovote.s3.amazonaws.com/votebot-forms/UID.pdf?access_token"
 }
 ```
 or 
 ```
 {
-    "status": "success" // for state OVR
-    "missing_fields": [],
+    "status": "success", // for state OVR
+    "missing_fields": []
 }
 ```
 
@@ -97,4 +98,6 @@ To create a new state integration:
 
 ## Deployment
 - run on Heroku under uwsgi w/ gevent
-- TBD
+- use included compiled pdftk 2.02 binaries with
+  `heroku config:set LD_LIBRARY_PATH=/app/.heroku/vendor/lib:/app/vendor/pdftk/lib`
+  `heroku config:set PATH=/app/.heroku/python/bin:/usr/local/bin:/usr/bin:/bin:/app/vendor/pdftk/bin`
