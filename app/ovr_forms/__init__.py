@@ -20,7 +20,7 @@ OVR_FORMS = {
     'MA': Massachusetts,
     # 'MN': DummyForm, # JL DEBUG ~ disable in production
     #'VA': Virginia,
-    #'default': VoteDotOrg
-    'default': NVRA
+    'ZZ': NVRA,
+    'default': VoteDotOrg
 }
 # ONLY ENABLE FORMS HERE THAT ACTUALLY WORK AND HAVE BEEN TESTED END-END

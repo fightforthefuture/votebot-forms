@@ -73,21 +73,13 @@ def registration(request, registration_type="generate_pdf"):
             current_app.sentry.user_context(user_filtered)
         return render_error(400, "missing_fields", "Missing required fields", e.payload)
 
-    # for local development / testing.
-    synchronous_submit = current_app.config.get('SYNCHRONOUS_SUBMIT', False)
-    if synchronous_submit == False or synchronous_submit == 'False':
+    debug_submit = current_app.config.get('DEBUG_SUBMIT', False)
+    if debug_submit:
+        # return job submit immediately
         return jobs.submit_form(form, user, callback_url=request_json.get('callback_url'))
-
     else:
-        # queue form submission and success callback
+        # queue asynchronous form submission via redis
         jobs.submit_form.queue(form, user, callback_url=request_json.get('callback_url'))
-
-        # if form.__class__.__name__ is 'VoteDotOrg':
-            # create new job for pdf check
-            # TODO delay a few seconds?
-            # TODO retry automatically if failed?
-            # jobs.get_pdf.queue(form, user, callback_url=request_json.get('callback_url'))
-            # jobs.get_pdf.queue(form, user, callback_url=None)
 
         return jsonify({
             'status': 'queued',

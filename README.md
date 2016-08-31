@@ -14,6 +14,7 @@ POST to '/registration' with json like
     "last_name":"Public",
     "date_of_birth":"1950-12-25",
     "address":"314 Test St",
+    "address_unit": "#1"
     "city":"Schenectady",
     "state":"NY",
     "zip":"12345",
