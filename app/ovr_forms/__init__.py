@@ -14,7 +14,7 @@ OVR_FORMS = {
     'CA': California,
     'CO': Colorado,
     #'GA': Georgia,
-    #'IL': Illinois,
+    'IL': Illinois,
     'MA': Massachusetts,
     'MN': MinnesotaTest, # JL DEBUG ~ disable in production
     #'VA': Virginia,
