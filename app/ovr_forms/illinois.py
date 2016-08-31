@@ -17,6 +17,9 @@ class Illinois(BaseOVRForm):
             self.age_verification(user)
             self.application_type(user)
             self.illinois_identification(user)
+
+            return {'status': 'failure', 'note': 'JL NOTE ~ Not sure what to do...'}
+
         except ValidationError, e:
             raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
 
