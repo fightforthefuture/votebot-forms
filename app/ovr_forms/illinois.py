@@ -103,7 +103,9 @@ class Illinois(BaseOVRForm):
             frm['ctl00$MainContent$ddlResidentStreetDirection'].value = options_dict(frm['ctl00$MainContent$ddlResidentStreetDirection'])[address_components['street_predirection'].upper()]
 
         frm['ctl00$MainContent$tbResidentStreetName'].value = address_components['street_name']
-        frm['ctl00$MainContent$ddlResidentStreetType'].value = options_dict(frm['ctl00$MainContent$ddlResidentStreetType'])[address_components['street_suffix'].upper()]
+        
+        if 'street_suffix' in address_components:
+            frm['ctl00$MainContent$ddlResidentStreetType'].value = options_dict(frm['ctl00$MainContent$ddlResidentStreetType'])[address_components['street_suffix'].upper()]
 
         if 'street_postdirection' in address_components:
             frm['ctl00$MainContent$ddlResidentPostDirection'].value = options_dict(frm['ctl00$MainContent$ddlResidentPostDirection'])[address_components['street_postdirection'].upper()]
@@ -196,7 +198,9 @@ class Illinois(BaseOVRForm):
                 frm['ctl00$MainContent$ddlFormerStreetDirection'].value = options_dict(frm['ctl00$MainContent$ddlFormerStreetDirection'])[address_components['street_predirection'].upper()]
 
             frm['ctl00$MainContent$tbFormerStreetName'].value = address_components['street_name']
-            frm['ctl00$MainContent$ddlFormerStreetType'].value = options_dict(frm['ctl00$MainContent$ddlFormerStreetType'])[address_components['street_suffix'].upper()]
+
+            if 'street_suffix' in address_components:
+                frm['ctl00$MainContent$ddlFormerStreetType'].value = options_dict(frm['ctl00$MainContent$ddlFormerStreetType'])[address_components['street_suffix'].upper()]
 
             if 'street_postdirection' in address_components:
                 frm['ctl00$MainContent$ddlFormerPostDirection'].value = options_dict(frm['ctl00$MainContent$ddlFormerPostDirection'])[address_components['street_postdirection'].upper()]

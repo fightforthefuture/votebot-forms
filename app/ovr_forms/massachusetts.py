@@ -136,7 +136,9 @@ class Massachusetts(BaseOVRForm):
             form['ctl00$MainContent$txtUnitApt'].value = user.get('apartment')
 
         # todo: these two seem fraught for IndexErrors
-        form['ctl00$MainContent$ddlStreetSuffix'].value = options_dict(form['ctl00$MainContent$ddlStreetSuffix'])[address_components['street_suffix'].upper()]
+        if 'street_suffix' in address_components:
+            form['ctl00$MainContent$ddlStreetSuffix'].value = options_dict(form['ctl00$MainContent$ddlStreetSuffix'])[address_components['street_suffix'].upper()]
+            
         form['ctl00$MainContent$ddlCityTown'].value = options_dict(form['ctl00$MainContent$ddlCityTown'])[user['city']]
 
         form['ctl00$MainContent$txtZip'].value = user['zip']
