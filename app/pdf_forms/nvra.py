@@ -99,7 +99,7 @@ class NVRA(BaseOVRForm):
             pdf_file = self.generate_pdf(form_data)
             if pdf_file:
                 pdf_url = storage.upload_to_s3(pdf_file, 'print/%s.pdf' % self.uid)
-                return {'status': 'generated_pdf', 'pdf_url': pdf_url}
+                return {'status': 'success', 'pdf_url': pdf_url}
             else:
                 return {'status': 'error', 'message': 'unable to generate NVRA pdf'}
 
