@@ -17,6 +17,8 @@ class Arizona(BaseOVRForm):
             self.init_voter_registration(user)
             self.eligibility(user)
             self.personal_information(user)
+            
+            return {'status': 'failure', 'note': 'JL NOTE ~ Not sure what to do...'}
         
         except ValidationError, e:
             raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
