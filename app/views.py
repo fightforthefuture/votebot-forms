@@ -28,7 +28,7 @@ def render_error(status_code, str_code, message=None, payload=None):
     response.status_code = status_code
     return response
 
-@votebot.route('/generate_pdf', methods=['POST'])
+@votebot.route('/pdf', methods=['POST'])
 def vote_dot_org():
     return registration(request, "generate_pdf")
 
