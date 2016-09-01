@@ -28,10 +28,13 @@ def render_error(status_code, str_code, message=None, payload=None):
     response.status_code = status_code
     return response
 
+@votebot.route('/vote_dot_org', methods=['POST'])
+def vote_dot_org():
+    return registration(request, "vote_dot_org")
+
 @votebot.route('/pdf', methods=['POST'])
 def vote_dot_org():
     return registration(request, "generate_pdf")
-
 
 @votebot.route('/ovr', methods=['POST'])
 def ovr():
@@ -53,7 +56,9 @@ def registration(request, registration_type="generate_pdf"):
 
     state = user['state']
     if registration_type == "generate_pdf":
-        form = OVR_FORMS['default']()
+        form = OVR_FORMS['NVRA']()
+    elif registration_type == "vote_dot_org":
+        form = OVR_FORMS['VoteDotOrg']()
     elif state in OVR_FORMS:
         form = OVR_FORMS[state]()
     else:
