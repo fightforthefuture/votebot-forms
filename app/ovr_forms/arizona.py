@@ -6,7 +6,7 @@ class Arizona(BaseOVRForm):
 
     def __init__(self):
         super(Arizona, self).__init__('https://servicearizona.com/webapp/evoter/selectLanguage')
-        self.add_required_fields(['will_be_18', 'legal_resident', 'mentally_competent', 'ssn_last_4'])
+        self.add_required_fields(['will_be_18', 'legal_resident', 'incompetent', 'ssn_last4'])
 
     def submit(self, user, error_callback_url = None):
 
@@ -50,8 +50,8 @@ class Arizona(BaseOVRForm):
         eligibility_form['felon'].checked = 'checked' if not user['disenfranchised'] else ''
         eligibility_form['felon'].value = 'true' if not user['disenfranchised'] else 'false'
         
-        eligibility_form['competent'].checked = 'checked' if user['mentally_competent'] else ''
-        eligibility_form['competent'].value = 'true' if user['mentally_competent'] else 'false'
+        eligibility_form['competent'].checked = 'checked' if not user['incompetent'] else ''
+        eligibility_form['competent'].value = 'true' if not user['incompetent'] else 'false'
         
         # these are more straightforward
         eligibility_form['citizenCheck'].value = 'on' if user['us_citizen'] else 'no'
@@ -67,7 +67,7 @@ class Arizona(BaseOVRForm):
         year, month, day = split_date(user['date_of_birth'])
         personal_info_form['dob'].value = '/'.join([month, day, year])
 
-        personal_info_form['ssn3'].value = user['ssn_last_4']
+        personal_info_form['ssn3'].value = user['ssn_last4']
         personal_info_form['dln'].value = user['state_id_number']
 
         # specify the Continue button, not the "what if I don't know my DL number?" button, also a submit
