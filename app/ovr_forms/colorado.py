@@ -107,7 +107,7 @@ class Colorado(BaseOVRForm):
         if 'phone' in user:
             # strip country prefix
             form['editVoterForm:phoneId'].value = user['phone'].replace('+1', '')
-        form['editVoterForm:genderSelectId'].value = '0' if user['gender'] == 'F' else '1'
+        form['editVoterForm:genderSelectId'].value = '0' if 'f' in user['gender'].lower() else '1'
 
         form['editVoterForm:resAddress'].value = user['address']
         form['editVoterForm:resCity'].value = user['city']

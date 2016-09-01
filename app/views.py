@@ -75,7 +75,7 @@ def registration(request, registration_type="vote_dot_org"):
 
     # for local development / testing.
     synchronous_submit = current_app.config.get('SYNCHRONOUS_SUBMIT', False)
-    if synchronous_submit == False or synchronous_submit == 'False':
+    if synchronous_submit == True or synchronous_submit == 'True':
         return jobs.submit_form(form, user, callback_url=request_json.get('callback_url'))
 
     else:

@@ -122,7 +122,18 @@ class Massachusetts(BaseOVRForm):
         address_components = get_address_components(user['address'], user['city'], user['state'], user['zip'])
 
         form['ctl00$MainContent$txtStNum'].value = address_components['primary_number']
-        form['ctl00$MainContent$txStNameSuffix'].value = address_components['street_name']
+        street_name = address_components['street_name']
+
+        if 'street_predirection' in address_components:
+            street_name = "%s %s" % (address_components['street_predirection'], street_name)
+
+        if 'street_postdirection' in address_components:
+            street_name = "%s %s" % (street_name, address_components['street_postdirection'])
+
+        form['ctl00$MainContent$txStNameSuffix'].value = street_name
+
+        if user.get('apartment') and not user.get('apartment').lower == "none":
+            form['ctl00$MainContent$txtUnitApt'].value = user.get('apartment')
 
         # todo: these two seem fraught for IndexErrors
         form['ctl00$MainContent$ddlStreetSuffix'].value = options_dict(form['ctl00$MainContent$ddlStreetSuffix'])[address_components['street_suffix'].upper()]
