@@ -1,7 +1,7 @@
 # VoteBot-Forms
 
 ## Motivation
-Online voter registration should be easy. Unfortunately, each state has their own form design. This application provides a nice API that abstracts across them, and falls back to the National Voter Registration Application when online registration is not possible.
+Online voter registration should be easy. Unfortunately, each state has their own form design. This application provides a nice API that abstracts across them, and falls back to the National Mail Voter Registration Form PDF when online registration is not possible.
 
 ## Usage
 POST to '/registration' with json like
@@ -40,7 +40,7 @@ receive a response like
 get a POST to your callback_url like
 ```
 {
-    "status": "generated_pdf", // for print and mail
+    "status": "success", // for print and mail
     "pdf_url": "https://hellovote.s3.amazonaws.com/print/UUID.pdf?access_token"
 }
 ```
