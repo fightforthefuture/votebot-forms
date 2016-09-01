@@ -15,4 +15,4 @@ VOTEORG_PARTNER = os.environ.get('VOTEORG_PARTNER')
 
 PRESERVE_CONTEXT_ON_EXCEPTION = False
 
-SYNCHRONOUS_SUBMIT = bool(os.environ.get('SYNCHRONOUS_SUBMIT', None))
+DEBUG_SUBMIT = bool(os.environ.get('DEBUG_SUBMIT', None))

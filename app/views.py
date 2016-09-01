@@ -73,16 +73,18 @@ def registration(request, registration_type="vote_dot_org"):
             current_app.sentry.user_context(user_filtered)
         return render_error(400, "missing_fields", "Missing required fields", e.payload)
 
-    # JL DEBUG ~ the environment variable to control synchronous submission was glitchy
-    # so I am just commenting this out
-    # return jobs.submit_form(form, user, callback_url=request_json.get('callback_url'))
+    debug_submit = current_app.config.get('DEBUG_SUBMIT', False)
+    if debug_submit:
+        # return job submit immediately
+        return jobs.submit_form(form, user, callback_url=request_json.get('callback_url'))
+    else:
+        # queue asynchronous form submission via redis
+        jobs.submit_form.queue(form, user, callback_url=request_json.get('callback_url'))
 
-    jobs.submit_form.queue(form, user, callback_url=request_json.get('callback_url'))
-
-    return jsonify({
-        'status': 'queued',
-        'uid': str(form.get_uid())
-    })
+        return jsonify({
+            'status': 'queued',
+            'uid': str(form.get_uid())
+        })
 
 
 @votebot.route('/confirm')
