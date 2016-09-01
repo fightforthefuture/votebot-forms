@@ -86,12 +86,14 @@ def bool_to_int(boolean):
 def get_address_components(address, city, state, zip):
     client = Client(auth_id=SMARTY_STREETS_AUTH_ID, auth_token=SMARTY_STREETS_AUTH_TOKEN)
 
+    # reassemble components into string
     # smarty streets specifically wants strings (not unicode) so...
-    response = client.street_address("%(address)s, %(city)s, %(state)s, %(zip)s" % \
-                                    {'address': str(address), 'city': str(city), 'state': str(state), 'zip': str(zip)})
+    full_address = "%(address)s, %(city)s, %(state)s, %(zip)s" % \
+        {'address': str(address), 'city': str(city), 'state': str(state), 'zip': str(zip)}
+    response = client.street_address(str(full_address))
 
     if not response or not response.get('analysis', False) or \
-        response['analysis'].get('active', 'N') != 'Y':
+      response['analysis'].get('active', 'N') != 'Y':
         raise ValidationError("could not validate address", payload={
             "address": address,
             "city": city,
@@ -99,20 +101,23 @@ def get_address_components(address, city, state, zip):
             "zip": zip
             })
 
-    return response['components']
+    # merge county into components dict
+    d = response['components']
+    d['county_name'] = response['metadata']['county_name']
+    return d
+
 
 def get_address_from_freeform(address):
     client = Client(auth_id=SMARTY_STREETS_AUTH_ID, auth_token=SMARTY_STREETS_AUTH_TOKEN)
-    
     response = client.street_address(str(address))
 
     if not response or not response.get('analysis', False) or \
-        response['analysis'].get('active', 'N') != 'Y':
+      response['analysis'].get('active', 'N') != 'Y':
         raise ValidationError("could not validate freeform address", payload={
             "address": address
             })
 
-    return response 
+    return response
 
 
 def get_party_from_list(party, party_list):
