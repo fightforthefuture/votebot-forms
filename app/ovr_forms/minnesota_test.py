@@ -11,10 +11,5 @@ class MinnesotaTest(BaseOVRForm):
 
         self.error_callback_url = error_callback_url
 
-        try:
-            raise OVRError(self, message="Always fail", payload=self.browser.parsed, error_callback_url=self.error_callback_url)
-        except ValidationError, e:
-            raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
-        except Exception, e:
-            ex_type, ex, tb = sys.exc_info()
-            raise OVRError(self, message="%s %s" % (ex_type, ex), payload=traceback.format_tb(tb), error_callback_url=self.error_callback_url)
+        raise OVRError(self, message="Always fail", payload=self.browser.parsed, error_callback_url=self.error_callback_url)
+        
