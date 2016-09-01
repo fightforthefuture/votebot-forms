@@ -1,7 +1,7 @@
 from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import get_address_components, options_dict, split_date, clean_browser_response, ValidationError, log_form
 import sys, traceback
-
+import requests
 
 class Georgia(BaseOVRForm):
     def __init__(self):
@@ -38,9 +38,11 @@ class Georgia(BaseOVRForm):
     def personal_information(self, user, form):
         form = self.browser.get_form("formId")
 
+        # update form action, this happens in javascript on validateForm
+        form.action = 'reqConsentAndDecline.do'
+
         # new voter
         form['changeType'].value = 'NV'
-        form['changeType'].checked = 'checked'
 
         # county select from list
         form['county'].value = options_dict(form['county'])[user['county'].upper()]
@@ -54,24 +56,50 @@ class Georgia(BaseOVRForm):
         form['ddsId'].value = user['state_id_number']
 
         self.browser.submit_form(form, submit=form['next'])
+
         return form
 
     def consent_use_signature(self, user, form):
-        form['consent'].value = user.get('consent_use_signature')
+        if user.get('consent_use_signature'):
+            form['consent'].value = '1'
         self.browser.submit_form(form, submit=form['next'])
         return form
 
     def residence_address(self, user, form):
+        # reassemble address_components to match street name dropdowns
+        # in the browser this autofills, but we get to do it manually
         address_components = get_address_components(user['address'], user['city'], user['state'], user['zip'])
-        # in browser this autofills, but I think we can do it manually
+
         form['streetNum'].value = address_components['primary_number']
-        form['streetName1'].value = options_dict(form['streetName1'])[address_components['street_name'].upper()]
-        form['city'].value = address_components['city']
-        form['state'].value = address_components['state']
-        form['zip'].value = address_components['zip']
+
+        full_street_name = address_components['street_name']
+        if 'street_predirection' in address_components:
+            full_street_name = address_components['street_predirection'] + ' ' + full_street_name
+
+        if 'street_suffix' in address_components:
+            full_street_name += ' %s' % address_components['street_suffix']
+
+        form['streetName1'].value = options_dict(form['streetName1'])[full_street_name.upper()]
+
+        street_value = form['streetName1'].value
+        city_value = self.get_postal_city(street_value, address_components['county_name'])
+        # add city option to dropdown
+        form['city'].options.append(city_value)
+        form['city'].value = city_value
+
+        form['state'].value = address_components['state_abbreviation']
+        form['zip5'].value = address_components['zipcode']
 
         self.browser.submit_form(form, submit=form['next'])
         return form
+
+    def get_postal_city(self, street_value, county):
+        # GA does clever stuff with modifying the select options in javascript
+        # use the same request session from browser to maintain cookies
+        r = self.browser.session.request("GET", "https://registertovote.sos.ga.gov/GAOLVR/getPostalCities.do",
+                     params={'streetName': street_value, 'countyName': county.upper()})
+        p = r.json()
+        return p[0]['key']
 
     def general_information(self, user, form):
         # these fields are all optional, fill in only if defined
@@ -129,7 +157,7 @@ class Georgia(BaseOVRForm):
             forms = [
                 [{'action': "beginRegistration.do"}, self.welcome],
                 [{'action': "registrationRequestToStep1.do"}, self.minimum_requirements],
-                [{'action': "/GAOLVR/registrationRequestToStep1.do"}, self.personal_information],
+                [{'id': 'formId'}, self.personal_information],
                 [{'action': "regStep3.do"}, self.consent_use_signature],
                 [{'action': "/GAOLVR/regStep3.do"}, self.residence_address],
                 [{'action': "/GAOLVR/regStep4.do"}, self.general_information],
@@ -141,11 +169,17 @@ class Georgia(BaseOVRForm):
                 step_form = self.browser.get_form(**form_kwargs)
 
                 if step_form:
+                    print "running handler", handler.__name__
                     handler(user, step_form)
 
                 errors = self.parse_errors()
-                if errors or not step_form:
+                if errors:
+                    print "errors", errors
                     return {'status': 'failure', 'step': handler.__name__, 'errors': errors}
+
+                if not step_form:
+                    print "no form", form_kwargs
+                    return {'status': 'failure', 'step': handler.__name__, 'error': 'no form %s' % form_kwargs}
 
             success_page = clean_browser_response(self.browser)
             if self.success_string in success_page:
