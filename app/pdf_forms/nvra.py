@@ -8,7 +8,7 @@ import subprocess
 import json
 import os, sys, traceback
 
-PDFTK_BIN = os.environ.get('PDFTK_BIN', '/usr/local/bin/pdftk')
+PDFTK_BIN = os.environ.get('PDFTK_BIN', 'pdftk')
 SOS_ADDRESS = json.load(open('app/pdf_forms/sos_address.json', 'r'))
 
 class NVRA(BaseOVRForm):
