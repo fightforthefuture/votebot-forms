@@ -1,0 +1,357 @@
+---
+FieldType: Button
+FieldName: title_mr
+FieldNameAlt: Salutation: Mr.
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: title_mrs
+FieldNameAlt: Mrs.
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: title_miss
+FieldNameAlt: Miss 
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Text
+FieldName: last_name
+FieldNameAlt: Last Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: first_name
+FieldNameAlt: First Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: middle_name
+FieldNameAlt: Middle Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: home_address
+FieldNameAlt: Home Address
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: home_apt
+FieldNameAlt: Apartment or Lot Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: home_city
+FieldNameAlt: City / Town
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: home_state
+FieldNameAlt: State
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: home_zip
+FieldNameAlt: Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: mailing_address
+FieldNameAlt: Address where you get your mail if different from your home address above.
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: mailing_city
+FieldNameAlt: City /  Town
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: mailing_state
+FieldNameAlt: State
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: mailing_zip
+FieldNameAlt: Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: date_of_birth
+FieldNameAlt: Date of Birth. Please enter the date with 2 digits each for month, day, and year, in that order. Do Not Use Separators. Example, January First Two Thousand Eight is entered as Zero One, Zero One, Zero Eight.
+FieldFlags: 8388610
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: phone_number
+FieldNameAlt: Please Enter Your 10 Digit Phone Number, beginning with the Area Code. Do Not Use Separators.
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: id_number
+FieldNameAlt: Identification Number. Refer to item 6 in the instructions for your state for valid options. Enter the number in the format provided on the identification card, using appropriate separators.
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: choice_of_party
+FieldNameAlt: Choice of Party. Refer to item 7 in the instructions for your state.
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: race_ethnic_group
+FieldNameAlt: Race or Ethnic Group. Refer to item 8 in the instructions for you state.
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: change_last_name
+FieldNameAlt: Last Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: change_first_name
+FieldNameAlt: First Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: change_middle_name
+FieldNameAlt: Middle Name
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: change_address
+FieldNameAlt: If you were registered before but this is the 1st time you are registering from the home address provided above, provide the address where you were registered before. Street or route and box number.
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: change_apt
+FieldNameAlt: Apartment or Lot Number
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: change_city
+FieldNameAlt: City / Town / County
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: change_state
+FieldNameAlt: State
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: change_zip
+FieldNameAlt: Zip Code
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: helped_applicant
+FieldNameAlt: If the applicant is unable to sign, who helped the applicant fill out this application? Give name, address, and phone number (phone number is optional).
+FieldFlags: 8392704
+FieldJustification: Left
+---
+FieldType: Button
+FieldName: us_citizen_yes
+FieldNameAlt: Are you a citizen of the United States of America? Check if Yes
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: us_citizen_no
+FieldNameAlt: Are you a citizen of the United States of America? Check if No
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: will_be_18_no
+FieldNameAlt: Will you be 18 years old on or before election day? Check if No
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: will_be_18_yes
+FieldNameAlt: Will you be 18 years old on or before election day? Check if Yes
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: title_ms
+FieldNameAlt: Ms.
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: suffix_jr
+FieldNameAlt: Name Suffix: Junior
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: suffix_sr
+FieldNameAlt: Senior 
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: suffix_ii
+FieldNameAlt: The Second
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: suffix_iii
+FieldNameAlt: The Third
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: suffix_iv
+FieldNameAlt: The Fourth
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: change_suffix_jr
+FieldNameAlt: Name Suffix: Junior
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: change_suffix_sr
+FieldNameAlt: Senior
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: change_suffix_ii
+FieldNameAlt: The Second
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: change_suffix_iii
+FieldNameAlt: The Third
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: change_suffix_iv
+FieldNameAlt: The Fourth
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: change_title_mr
+FieldNameAlt: Salutation: Mr.
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: change_title_mrs
+FieldNameAlt: Mrs.
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: change_title_miss
+FieldNameAlt: Miss
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Button
+FieldName: change_title_ms
+FieldNameAlt: Ms.
+FieldFlags: 0
+FieldJustification: Left
+FieldStateOption: Off
+FieldStateOption: On
+---
+FieldType: Text
+FieldName: mailto_line_1
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: mailto_line_2
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: mailto_line_3
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: mailto_line_4
+FieldFlags: 0
+FieldJustification: Left
+---
+FieldType: Text
+FieldName: mailto_line_5
+FieldFlags: 0
+FieldJustification: Left

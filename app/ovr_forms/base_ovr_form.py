@@ -1,6 +1,5 @@
 from robobrowser import RoboBrowser
 import json
-import sys
 from ..db import log_response
 from form_utils import ValidationError
 import requests
@@ -24,9 +23,10 @@ class BaseOVRForm(object):
 
     error_callback_url = None
 
-    def __init__(self, start_url):
+    def __init__(self, start_url=None):
         self.browser = RoboBrowser(parser='html.parser', user_agent='HelloVote.org', history=True)
-        self.browser.open(start_url)
+        if start_url:
+            self.browser.open(start_url)
         self.required_fields = BASE_REQUIRED_FIELDS
         self.uid = uuid.uuid4()
         self.errors = []
@@ -86,13 +86,12 @@ class OVRError(Exception):
         if error_callback_url:
             requests.post(error_callback_url, error)
 
-
     def to_dict(self):
         rv = {}
         try:
             json.dumps(self.payload)
-            rv['payload'] = self.payload    
+            rv['payload'] = self.payload
         except:
-            rv['payload'] = '(Could not be JSON-encoded)'        
+            rv['payload'] = '(Could not be JSON-encoded)'
         rv['message'] = self.message
         return rv
