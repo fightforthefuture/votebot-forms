@@ -10,7 +10,7 @@ from minnesota_test import MinnesotaTest
 
 
 OVR_FORMS = {
-    #'AZ': Arizona,
+    'AZ': Arizona,
     'CA': California,
     'CO': Colorado,
     #'GA': Georgia,

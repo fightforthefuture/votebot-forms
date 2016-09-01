@@ -73,26 +73,16 @@ def registration(request, registration_type="vote_dot_org"):
             current_app.sentry.user_context(user_filtered)
         return render_error(400, "missing_fields", "Missing required fields", e.payload)
 
-    # for local development / testing.
-    synchronous_submit = current_app.config.get('SYNCHRONOUS_SUBMIT', False)
-    if synchronous_submit == False or synchronous_submit == 'False':
-        return jobs.submit_form(form, user, callback_url=request_json.get('callback_url'))
+    # JL DEBUG ~ the environment variable to control synchronous submission was glitchy
+    # so I am just commenting this out
+    # return jobs.submit_form(form, user, callback_url=request_json.get('callback_url'))
 
-    else:
-        # queue form submission and success callback
-        jobs.submit_form.queue(form, user, callback_url=request_json.get('callback_url'))
+    jobs.submit_form.queue(form, user, callback_url=request_json.get('callback_url'))
 
-        # if form.__class__.__name__ is 'VoteDotOrg':
-            # create new job for pdf check
-            # TODO delay a few seconds?
-            # TODO retry automatically if failed?
-            # jobs.get_pdf.queue(form, user, callback_url=request_json.get('callback_url'))
-            # jobs.get_pdf.queue(form, user, callback_url=None)
-
-        return jsonify({
-            'status': 'queued',
-            'uid': str(form.get_uid())
-        })
+    return jsonify({
+        'status': 'queued',
+        'uid': str(form.get_uid())
+    })
 
 
 @votebot.route('/confirm')

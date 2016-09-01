@@ -101,6 +101,19 @@ def get_address_components(address, city, state, zip):
 
     return response['components']
 
+def get_address_from_freeform(address):
+    client = Client(auth_id=SMARTY_STREETS_AUTH_ID, auth_token=SMARTY_STREETS_AUTH_TOKEN)
+    
+    response = client.street_address(str(address))
+
+    if not response or not response.get('analysis', False) or \
+        response['analysis'].get('active', 'N') != 'Y':
+        raise ValidationError("could not validate freeform address", payload={
+            "address": address
+            })
+
+    return response 
+
 
 def get_party_from_list(party, party_list):
 
