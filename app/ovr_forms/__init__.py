@@ -13,7 +13,7 @@ OVR_FORMS = {
     'AZ': Arizona,
     'CA': California,
     'CO': Colorado,
-    #'GA': Georgia,
+    'GA': Georgia,
     'IL': Illinois,
     'MA': Massachusetts,
     'MN': MinnesotaTest, # JL DEBUG ~ disable in production

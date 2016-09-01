@@ -3,11 +3,11 @@ from form_utils import get_address_components, options_dict, split_date, clean_b
 import sys, traceback
 import requests
 
+
 class Georgia(BaseOVRForm):
     def __init__(self):
         super(Georgia, self).__init__('https://registertovote.sos.ga.gov/GAOLVR/welcometoga.do')
-        # todo: you can check if you are registered at https://www.mvp.sos.ga.gov/MVP/mvp.do
-        self.success_string = 'TBD'
+        self.success_string = 'You should receive a voter precinct card in the mail.'
         self.add_required_fields(['will_be_18', 'legal_resident', 'disenfranchised', 'incompetent'])
 
     def parse_errors(self):
@@ -80,26 +80,36 @@ class Georgia(BaseOVRForm):
             full_street_name += ' %s' % address_components['street_suffix']
 
         form['streetName1'].value = options_dict(form['streetName1'])[full_street_name.upper()]
-
         street_value = form['streetName1'].value
-        city_value = self.get_postal_city(street_value, address_components['county_name'])
+
+        # look up postal city key and rural_flag from street_value
+        postal_city = self.get_postal_city(street_value, address_components['county_name'])
         # add city option to dropdown
-        form['city'].options.append(city_value)
-        form['city'].value = city_value
+        form['city'].options.append(postal_city['key'])
+        form['city'].labels.append(user['city'].upper())
+        form['city'].value = postal_city['key']
+        form['ruralcityFlag'].value = postal_city['fl_Rural_Flag'].lower()
 
         form['state'].value = address_components['state_abbreviation']
         form['zip5'].value = address_components['zipcode']
+
+        # update form action, this happens in javascript on validateForm
+        form.action = 'regStep4.do'
 
         self.browser.submit_form(form, submit=form['next'])
         return form
 
     def get_postal_city(self, street_value, county):
         # GA does clever stuff with modifying the select options in javascript
-        # use the same request session from browser to maintain cookies
-        r = self.browser.session.request("GET", "https://registertovote.sos.ga.gov/GAOLVR/getPostalCities.do",
-                     params={'streetName': street_value, 'countyName': county.upper()})
+        # try to mimic it without mucking with main browser.session
+
+        # copy sessionid cookie and send via separate request
+        jsessionid = self.browser.session.cookies['JSESSIONID']
+        r = requests.get("https://registertovote.sos.ga.gov/GAOLVR/getPostalCities.do",
+                     params={'streetName': street_value, 'countyName': county.upper()},
+                     cookies={'JSESSIONID': jsessionid})
         p = r.json()
-        return p[0]['key']
+        return p[0]
 
     def general_information(self, user, form):
         # these fields are all optional, fill in only if defined
@@ -116,7 +126,10 @@ class Georgia(BaseOVRForm):
             # format?
         # ethnicity requires a dropdown, and is optional
         # skip it
+
+        form.action = 'summary.do'
         self.browser.submit_form(form, submit=form['next'])
+
         return form
 
     def review_information(self, user, form):
@@ -138,30 +151,31 @@ class Georgia(BaseOVRForm):
             self.add_error('You must not have been judicially declared to be mentally incompetent.', field='incompetent')
 
         user_is_eligible = user['legal_resident'] and (not user['disenfranchised']) and (not user['incompetent'])
+
         if user_is_eligible:
+            form['checkbox'].checked = "checked"
             form['checkbox'].value = "on"
 
         if self.errors:
             return False
 
-        # ENABLE WHEN DEPLOY
-        #self.browser.submit_form(form, submit=form['submitBtn'])
+        form.action = 'success.do'
+        self.browser.submit_form(form, submit=form['submitBtn'])
+        #  TODO, also pull reference number from the final page?
 
     def submit(self, user, error_callback_url=None):
         self.error_callback_url = error_callback_url
 
         try:
             # format is: [kwargs to select / identify form, method to call with form]
-            # frustratingly, GA uses the same methods and IDs for each form
-            # and inconsistent GAOLVR prefixing...
             forms = [
-                [{'action': "beginRegistration.do"}, self.welcome],
-                [{'action': "registrationRequestToStep1.do"}, self.minimum_requirements],
-                [{'id': 'formId'}, self.personal_information],
-                [{'action': "regStep3.do"}, self.consent_use_signature],
-                [{'action': "/GAOLVR/regStep3.do"}, self.residence_address],
-                [{'action': "/GAOLVR/regStep4.do"}, self.general_information],
-                [{'action': "/GAOLVR/summary.do"}, self.review_information],
+                [{}, self.welcome],
+                [{}, self.minimum_requirements],
+                [{}, self.personal_information],
+                [{}, self.consent_use_signature],
+                [{'id': 'formId'}, self.residence_address],  # there are two forms on this page, but one is blank
+                [{}, self.general_information],
+                [{}, self.review_information],
             ]
 
             for form_kwargs, handler in forms:
@@ -169,7 +183,6 @@ class Georgia(BaseOVRForm):
                 step_form = self.browser.get_form(**form_kwargs)
 
                 if step_form:
-                    print "running handler", handler.__name__
                     handler(user, step_form)
 
                 errors = self.parse_errors()
