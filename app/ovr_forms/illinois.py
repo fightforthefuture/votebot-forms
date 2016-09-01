@@ -226,8 +226,8 @@ class Illinois(BaseOVRForm):
 
         user_is_eligible = user['us_citizen'] and user['will_be_18']
 
-        form['ctl00$MainContent$cbLegalConfirmation'].value = bool_to_string(user_is_eligible)
-        form['ctl00$MainContent$cbLegalConfirmation'].checked = 'checked'
+        frm['ctl00$MainContent$cbLegalConfirmation'].value = bool_to_string(user_is_eligible)
+        frm['ctl00$MainContent$cbLegalConfirmation'].checked = 'checked'
 
         self.browser.submit_form(frm, submit=frm['ctl00$MainContent$btnFinish'])
 
