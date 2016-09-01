@@ -33,7 +33,7 @@ def vote_dot_org():
     return registration(request, "vote_dot_org")
 
 @votebot.route('/pdf', methods=['POST'])
-def vote_dot_org():
+def generate_pdf():
     return registration(request, "generate_pdf")
 
 @votebot.route('/ovr', methods=['POST'])
