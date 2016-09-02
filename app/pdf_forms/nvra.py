@@ -82,8 +82,6 @@ class NVRA(BaseOVRForm):
         process = subprocess.Popen(' '.join(pdftk_fill), shell=True,
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         (stdout, stderr) = process.communicate(input=fdf_stream)
-
-        self.pdftk_output = "'%s'" % stdout
         return stdout
 
     def submit(self, user, error_callback_url=None):
@@ -93,8 +91,8 @@ class NVRA(BaseOVRForm):
             form_data = self.match_fields(user)
             pdf_file = self.generate_pdf(form_data)
             if pdf_file:
-                pdf_url = storage.upload_to_s3(pdf_file, 'print/%s.pdf' % self.uid)
-                return {'status': 'success', 'pdf_url': pdf_url}
+                self.pdf_url = storage.upload_to_s3(pdf_file, 'print/%s.pdf' % self.uid)
+                return {'status': 'success', 'pdf_url': self.pdf_url}
             else:
                 return {'status': 'error', 'message': 'unable to generate NVRA pdf'}
 
