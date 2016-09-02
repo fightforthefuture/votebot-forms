@@ -14,8 +14,7 @@ SOS_ADDRESS = json.load(open('app/pdf_forms/sos_address.json', 'r'))
 class NVRA(BaseOVRForm):
     def __init__(self):
         super(NVRA, self).__init__()
-        self.coversheet = os.path.abspath('app/pdf_forms/templates/coversheet.pdf')
-        self.form_template = os.path.abspath('app/pdf_forms/templates/eac-nvra.pdf')
+        self.form_template = os.path.abspath('app/pdf_forms/templates/coversheet+form.pdf')
         self.add_required_fields(['us_citizen', 'will_be_18', 'political_party', 'state_id_number'])
 
     def match_fields(self, user):
@@ -57,6 +56,7 @@ class NVRA(BaseOVRForm):
         # until Google Civic updates, use statewide address
         sos_address = SOS_ADDRESS.get(user.get('state'))
         if sos_address:
+            form['mailto'] = '\n'.join(sos_address)
             form['mailto_line_1'] = sos_address[0]
             if len(sos_address) > 1:
                 form['mailto_line_2'] = sos_address[1]
@@ -67,11 +67,13 @@ class NVRA(BaseOVRForm):
             if len(sos_address) > 4:
                 form['mailto_line_5'] = sos_address[4]
 
+        form['registration_deadline'] = user.get('registration_deadline', 'Put the form in the mail at least 15 days before election day')
+
         return form
 
-    def generate_pdf(self, user):
+    def generate_pdf(self, form_data):
         # generate fdf data
-        fdf_stream = forge_fdf(fdf_data_strings=user, checkbox_checked_name="On")
+        fdf_stream = forge_fdf(fdf_data_strings=form_data, checkbox_checked_name="On")
 
         # fill out form template
         pdftk_fill = [PDFTK_BIN,
@@ -81,13 +83,6 @@ class NVRA(BaseOVRForm):
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         (stdout, stderr) = process.communicate(input=fdf_stream)
 
-        # join with coversheet
-        pdftk_join = [PDFTK_BIN,
-                     self.coversheet, '-', 'cat',
-                     'output', '-']
-        process = subprocess.Popen(' '.join(pdftk_join), shell=True,
-                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        (stdout, stderr) = process.communicate(input=stdout)
         self.pdftk_output = "'%s'" % stdout
         return stdout
 
