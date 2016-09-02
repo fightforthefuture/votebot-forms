@@ -32,13 +32,16 @@ def render_error(status_code, str_code, message=None, payload=None):
 def vote_dot_org():
     return registration(request, "vote_dot_org")
 
+@votebot.route('/pdf', methods=['POST'])
+def generate_pdf():
+    return registration(request, "generate_pdf")
 
 @votebot.route('/ovr', methods=['POST'])
 def ovr():
     return registration(request, "ovr")
 
 
-def registration(request, registration_type="vote_dot_org"):
+def registration(request, registration_type="generate_pdf"):
     request_json = request.get_json(force=True)  # so we don't have to set mimetype
     if not "user" in request_json:
         return render_error(400, "missing_user_data", "No user data specified.")
@@ -52,8 +55,10 @@ def registration(request, registration_type="vote_dot_org"):
         del user['settings']
 
     state = user['state']
-    if registration_type == "vote_dot_org":
-        form = OVR_FORMS['default'](current_app.config.get('VOTEORG_PARTNER'))
+    if registration_type == "generate_pdf":
+        form = OVR_FORMS['NVRA']()
+    elif registration_type == "vote_dot_org":
+        form = OVR_FORMS['VoteDotOrg']()
     elif state in OVR_FORMS:
         form = OVR_FORMS[state]()
     else:
@@ -73,16 +78,18 @@ def registration(request, registration_type="vote_dot_org"):
             current_app.sentry.user_context(user_filtered)
         return render_error(400, "missing_fields", "Missing required fields", e.payload)
 
-    # JL DEBUG ~ the environment variable to control synchronous submission was glitchy
-    # so I am just commenting this out
-    # return jobs.submit_form(form, user, callback_url=request_json.get('callback_url'))
+    debug_submit = current_app.config.get('DEBUG_SUBMIT', False)
+    if debug_submit:
+        # return job submit immediately
+        return jobs.submit_form(form, user, callback_url=request_json.get('callback_url'))
+    else:
+        # queue asynchronous form submission via redis
+        jobs.submit_form.queue(form, user, callback_url=request_json.get('callback_url'))
 
-    jobs.submit_form.queue(form, user, callback_url=request_json.get('callback_url'))
-
-    return jsonify({
-        'status': 'queued',
-        'uid': str(form.get_uid())
-    })
+        return jsonify({
+            'status': 'queued',
+            'uid': str(form.get_uid())
+        })
 
 
 @votebot.route('/confirm')

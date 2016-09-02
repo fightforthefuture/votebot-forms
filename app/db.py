@@ -30,7 +30,7 @@ def log_response(form, status):
         form.__class__.__name__,
         json.dumps(status),
         True if "status" not in status or not status["status"] == "success" else False,
-        str(form.browser.parsed)
+        str(form.browser.parsed) if form.browser._cursor > 0 else "PDFTK_OUTPUT"  #str(form.pdftk_output)
     ))
     id_of_new_row = cur.fetchone()[0]
 

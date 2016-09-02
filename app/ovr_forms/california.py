@@ -107,7 +107,7 @@ class California(BaseOVRForm):
 
         #  Home and Mailing Address
         form['VoterInformation.AddressStreet1'].value = user['address']
-        form['VoterInformation.AddressStreet2'].value = user.get('apartment')
+        form['VoterInformation.AddressStreet2'].value = user.get('address_unit')
         form['VoterInformation.AddressCity'].value = user['city']
         form['VoterInformation.AddressZip'].value = user['zip']
         county_options = options_dict(form['VoterInformation.CountyIdKey'])

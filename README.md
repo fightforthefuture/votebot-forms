@@ -1,7 +1,7 @@
 # VoteBot-Forms
 
 ## Motivation
-Online voter registration should be easy. Unfortunately, each state has their own form design. This application provides a nice API that abstracts across them, and falls back to the National Voter Registration Form when online registration is not possible.
+Online voter registration should be easy. Unfortunately, each state has their own form design. This application provides a nice API that abstracts across them, and falls back to the National Mail Voter Registration Form PDF when online registration is not possible.
 
 ## Usage
 POST to '/registration' with json like
@@ -14,6 +14,7 @@ POST to '/registration' with json like
     "last_name":"Public",
     "date_of_birth":"1950-12-25",
     "address":"314 Test St",
+    "address_unit": "#1"
     "city":"Schenectady",
     "state":"NY",
     "zip":"12345",
@@ -39,14 +40,15 @@ receive a response like
 get a POST to your callback_url like
 ```
 {
-    "pdf_url": "https://ldv-bullwinkle-production.s3.amazonaws.com/voter_registration_forms/user_XXXXXX_YYYYMMDDHHMMSS_HASH.pdf?access_token" // for print and mail
+    "status": "success", // for print and mail
+    "pdf_url": "https://hellovote.s3.amazonaws.com/print/UUID.pdf?access_token"
 }
 ```
 or 
 ```
 {
-    "status": "success" // for state OVR
-    "missing_fields": [],
+    "status": "success", // for state OVR
+    "missing_fields": []
 }
 ```
 
@@ -97,4 +99,6 @@ To create a new state integration:
 
 ## Deployment
 - run on Heroku under uwsgi w/ gevent
-- TBD
+- use included compiled pdftk 2.02 binaries with
+  `heroku config:set LD_LIBRARY_PATH=/app/.heroku/vendor/lib:/app/vendor/pdftk/lib`
+  `heroku config:set PATH=/app/.heroku/python/bin:/usr/local/bin:/usr/bin:/bin:/app/vendor/pdftk/bin`
