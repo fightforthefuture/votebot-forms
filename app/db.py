@@ -25,12 +25,19 @@ def log_response(form, status):
     db = get_db()
     cur = db.cursor()
     sql = "INSERT INTO logged_forms (ts, uid, state, status, failed, parsed) VALUES (NOW(), %s, %s, %s, %s, %s) RETURNING id;"
+    parsed = "OMG"
+    
+    if form.__class__.__name__ == "NVRA":
+        parsed = str(form.pdf_url)
+    elif form.browser._cursor > 0:
+        parsed = str(form.browser.parsed)
+
     cur.execute(sql, (
         str(form.get_uid()),
         form.__class__.__name__,
         json.dumps(status),
         True if "status" not in status or not status["status"] == "success" else False,
-        str(form.browser.parsed) if form.browser._cursor > 0 else str(form.pdf_url)
+        parsed
     ))
     id_of_new_row = cur.fetchone()[0]
 
