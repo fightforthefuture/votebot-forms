@@ -95,7 +95,7 @@ class Colorado(BaseOVRForm):
 
         if user['military_or_overseas']:
             form['editVoterForm:areUOCAVAId'].value = 'Y'
-            form['editVoterForm:uocavaTypeId'].value = 'a' if user['military_overseas'] == 'military' else 'c'
+            form['editVoterForm:uocavaTypeId'].value = 'a' if user['military_or_overseas'] == 'military' else 'c'
         else:
             form['editVoterForm:areUOCAVAId'].value = 'N'
 
