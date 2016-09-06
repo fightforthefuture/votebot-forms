@@ -132,8 +132,8 @@ class Massachusetts(BaseOVRForm):
 
         form['ctl00$MainContent$txStNameSuffix'].value = street_name
 
-        if user.get('apartment') and not user.get('apartment').lower == "none":
-            form['ctl00$MainContent$txtUnitApt'].value = user.get('apartment')
+        if user.get('address_unit') and not user.get('address_unit').lower() == "none":
+            form['ctl00$MainContent$txtUnitApt'].value = user.get('address_unit')
 
         # todo: these two seem fraught for IndexErrors
         if 'street_suffix' in address_components:

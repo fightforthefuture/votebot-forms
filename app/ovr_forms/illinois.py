@@ -110,8 +110,8 @@ class Illinois(BaseOVRForm):
         if 'street_postdirection' in address_components:
             frm['ctl00$MainContent$ddlResidentPostDirection'].value = options_dict(frm['ctl00$MainContent$ddlResidentPostDirection'])[address_components['street_postdirection'].upper()]
 
-        if user.get('apartment') and not user.get('apartment').lower == "none":
-            frm['ctl00$MainContent$tbResidentAptRmSuite'].value = user.get('apartment')
+        if user.get('address_unit') and not user.get('address_unit').lower() == "none":
+            frm['ctl00$MainContent$tbResidentAptRmSuite'].value = user.get('address_unit')
 
             if 'secondary_designator' in address_components:
                 try:
