@@ -90,9 +90,3 @@ def registration(request, registration_type="generate_pdf"):
             'status': 'queued',
             'uid': str(form.get_uid())
         })
-
-
-@votebot.route('/confirm')
-def confirm(user):
-    # status = send_email(confirmation, user)
-    return jsonify({'status': True})
