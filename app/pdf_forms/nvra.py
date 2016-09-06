@@ -16,6 +16,7 @@ class NVRA(BaseOVRForm):
         super(NVRA, self).__init__()
         self.form_template = os.path.abspath('app/pdf_forms/templates/combined-template.pdf')
         self.add_required_fields(['us_citizen', 'will_be_18', 'political_party', 'state_id_number'])
+        self.pdf_url = ''
 
     def match_fields(self, user):
         form = {}
@@ -52,6 +53,8 @@ class NVRA(BaseOVRForm):
         form['id_number'] = user.get('state_id_number', '')
         form['race_ethnic_group'] = user.get('ethnicity', '')
         
+        form['registration_deadline'] = user.get('registration_deadline', 'Put the form in the mail at least 15 days before election day')
+
         # TODO get local election offical address from Google Civic or US OVF
         # until Google Civic updates, use statewide address
         sos_address = SOS_ADDRESS.get(user.get('state'))
@@ -67,8 +70,14 @@ class NVRA(BaseOVRForm):
             if len(sos_address) > 4:
                 form['mailto_line_5'] = sos_address[4]
 
-        form['registration_deadline'] = user.get('registration_deadline', 'Put the form in the mail at least 15 days before election day')
-
+        form['return_address'] = '\n'.join([
+            "{first_name} {last_name}".format(**user),
+            "{address} {unit}".format(
+                address=user.get('address'),
+                unit=user.get('address_unit', '')  # default to avoid KeyError
+            ),
+            "{city} {state} {zip}".format(**user)
+        ])
         return form
 
     def generate_pdf(self, form_data):
