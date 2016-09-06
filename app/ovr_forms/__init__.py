@@ -1,6 +1,4 @@
-from votedotorg import VoteDotOrg
 from ..pdf_forms.nvra import NVRA
-
 from arizona import Arizona
 from california import California
 from georgia import Georgia
@@ -20,8 +18,7 @@ OVR_FORMS = {
     'MA': Massachusetts,
     # 'MN': DummyForm, # JL DEBUG ~ disable in production
     #'VA': Virginia,
-    'NVRA': NVRA,
-    'VoteDotOrg': VoteDotOrg
+    'NVRA': NVRA
 }
-OVR_FORMS['default'] = OVR_FORMS['VoteDotOrg']
+OVR_FORMS['default'] = OVR_FORMS['NVRA']
 # ONLY ENABLE FORMS HERE THAT ACTUALLY WORK AND HAVE BEEN TESTED END-END
