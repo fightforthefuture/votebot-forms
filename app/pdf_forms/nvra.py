@@ -14,7 +14,7 @@ SOS_ADDRESS = json.load(open('app/pdf_forms/sos_address.json', 'r'))
 class NVRA(BaseOVRForm):
     def __init__(self):
         super(NVRA, self).__init__()
-        self.form_template = os.path.abspath('app/pdf_forms/templates/coversheet+form.pdf')
+        self.form_template = os.path.abspath('app/pdf_forms/templates/combined-template.pdf')
         self.add_required_fields(['us_citizen', 'will_be_18', 'political_party', 'state_id_number'])
 
     def match_fields(self, user):
