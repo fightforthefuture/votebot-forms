@@ -29,8 +29,10 @@ def log_response(form, status):
     
     if form.__class__.__name__ == "NVRA":
         parsed = str(form.pdf_url)
-    elif form.browser._cursor > 0:
+    elif form and form.browser._cursor > 0:
         parsed = str(form.browser.parsed)
+    else:
+        parsed = "unable to log form response"
 
     cur.execute(sql, (
         str(form.get_uid()),
