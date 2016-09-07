@@ -17,7 +17,7 @@ OVR_FORMS = {
     'IL': Illinois,
     'MA': Massachusetts,
     # 'MN': DummyForm, # JL DEBUG ~ disable in production
-    #'VA': Virginia,
+    'VA': Virginia,
     'NVRA': NVRA
 }
 OVR_FORMS['default'] = OVR_FORMS['NVRA']

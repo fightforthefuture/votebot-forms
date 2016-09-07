@@ -36,7 +36,7 @@ class Virginia(BaseOVRForm):
                 [{}, self.absentee_ballot],
                 [{}, self.residence_address],
                 [{}, self.contact_information],
-                # [{}, self.affirmation],   
+                [{}, self.affirmation]
             ]
 
             for form_kwargs, handler in forms:
