@@ -25,19 +25,22 @@ class California(BaseOVRForm):
                         ['/Home/Confirmation', self.step5]
                     ]
 
-            for action, function in forms:
+            for action, handler in forms:
                 step_form = self.browser.get_form(action=action)
                 if step_form:
-                    function(step_form, user)
-                else:
-                    return {'status': 'failure', 'errors': self.parse_errors()}
+                    handler(step_form, user)
 
+                errors = self.parse_errors()
+                if errors:
+                    raise ValidationError(message='field_errors', payload=errors)
+                if not step_form:
+                    raise ValidationError(message='no_form_found', payload=handler.__name__)
+            
             success_page = clean_browser_response(self.browser)
             if self.success_string in success_page:
                 return {'status': 'success'}
             else:
-                # TODO, handle gracefully
-                return {'status': 'failure'}
+                raise ValidationError(message='no_success_string')
 
         except ValidationError, e:
             raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
@@ -45,7 +48,6 @@ class California(BaseOVRForm):
         except Exception, e:
             ex_type, ex, tb = sys.exc_info()
             raise OVRError(self, message="%s %s" % (ex_type, ex), payload=traceback.format_tb(tb), error_callback_url=self.error_callback_url)
-
 
     def parse_errors(self):
         errors_dict = {}

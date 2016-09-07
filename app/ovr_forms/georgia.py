@@ -187,18 +187,16 @@ class Georgia(BaseOVRForm):
 
                 errors = self.parse_errors()
                 if errors:
-                    print "errors", errors
-                    return {'status': 'failure', 'step': handler.__name__, 'errors': errors}
+                    raise ValidationError(message='field_errors', payload=errors)
 
                 if not step_form:
-                    print "no form", form_kwargs
-                    return {'status': 'failure', 'step': handler.__name__, 'error': 'no form %s' % form_kwargs}
+                    raise ValidationError(message='no_form_found', payload=handler.__name__)
 
             success_page = clean_browser_response(self.browser)
             if self.success_string in success_page:
                 return {'status': 'success'}
             else:
-                return {'status': 'failure'}
+                raise ValidationError(message='no_success_string')
 
         except ValidationError, e:
             raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)

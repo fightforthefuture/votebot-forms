@@ -48,20 +48,14 @@ class Virginia(BaseOVRForm):
 
                 errors = self.parse_errors()
                 if errors:
-                    print "errors", errors
-                    print clean_browser_response(self.browser)
-                    return {'status': 'failure', 'step': handler.__name__, 'errors': errors}
-
+                    raise ValidationError(message='field_errors', payload=errors)
                 if not step_form:
-                    print "no form", form_kwargs
-                    print clean_browser_response(self.browser)
-                    return {'status': 'failure', 'step': handler.__name__, 'error': 'no form %s' % form_kwargs}
+                    raise ValidationError(message='no_form_found', payload=handler.__name__)
 
             success_page = clean_browser_response(self.browser)
             if self.success_string in success_page:
                 return {'status': 'success'}
             else:
-                print success_page
                 return {'status': 'failure'}
 
         except ValidationError, e:
@@ -199,13 +193,11 @@ class Virginia(BaseOVRForm):
         # try to match locality by county name
         locality = user.get('county').upper()
         locality_options = options_dict(form['CurrentAddress.Address.LocalityUId'])
-        print locality_options
         if locality in locality_options:
             form['CurrentAddress.Address.LocalityUId'] = locality_options[locality]
         else:
             locality = locality + " COUNTY"
             form['CurrentAddress.Address.LocalityUId'] = locality_options[locality]
-
         self.browser.submit_form(form)
 
     def contact_information(self, user, form):

@@ -10,7 +10,7 @@ class Colorado(BaseOVRForm):
                                  'will_be_18', 'consent_use_signature', 'confirm_name_address'])
         self.success_string = "Your changes have been submitted to your County Clerk and Recorder for processing. "
 
-    def submit(self, user, error_callback_url = None):
+    def submit(self, user, error_callback_url=None):
 
         self.error_callback_url = error_callback_url
 
@@ -33,15 +33,16 @@ class Colorado(BaseOVRForm):
                     handler(user, step_form)
 
                 errors = self.parse_errors()
-
-                if errors or not step_form:
-                    return {'status': 'failure', 'errors': errors}
+                if errors:
+                    raise ValidationError(message='field_errors', payload=errors)
+                if not step_form:
+                    raise ValidationError(message='no_form_found', payload=handler.__name__)
 
             success_page = clean_browser_response(self.browser)
             if self.success_string in success_page:
                 return {'status': 'success'}
             else:
-                return {'status': 'failure'}
+                raise ValidationError(message='no_success_string')
 
         except ValidationError, e:
             raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
