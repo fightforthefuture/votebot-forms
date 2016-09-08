@@ -96,3 +96,4 @@ tests/.cassettes
 
 # API testing PAW
 *.paw
+charles-ssl-proxying-certificate.pem

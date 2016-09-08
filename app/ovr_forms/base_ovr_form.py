@@ -25,6 +25,9 @@ class BaseOVRForm(object):
 
     def __init__(self, start_url=None):
         self.browser = RoboBrowser(parser='html.parser', user_agent='HelloVote.org', history=True)
+        # TESTING, disable SSL cert validation
+        # self.browser.session.verify = 'charles-ssl-proxying-certificate.pem'
+
         if start_url:
             self.browser.open(start_url)
         self.required_fields = BASE_REQUIRED_FIELDS
