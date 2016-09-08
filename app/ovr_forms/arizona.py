@@ -2,28 +2,38 @@ from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import split_date, ValidationError, get_address_from_freeform, options_dict, get_party_from_list, clean_browser_response
 import sys, traceback
 
+
 class Arizona(BaseOVRForm):
 
     def __init__(self):
         super(Arizona, self).__init__('https://servicearizona.com/webapp/evoter/selectLanguage')
         self.add_required_fields(['will_be_18', 'legal_resident', 'incompetent', 'disenfranchised', 'ssn_last4', 'has_separate_mailing_address', 'political_party'])
-        self.success_string = 'TBD'
+        self.success_string = 'Your application for voter registration has been successfully completed.'
 
-    def submit(self, user, error_callback_url = None):
+    def submit(self, user, error_callback_url=None):
 
         self.error_callback_url = error_callback_url
 
         try:
-            self.language(user)
-            self.init_voter_registration(user)
-            self.eligibility(user)
-            self.personal_information(user)
-            self.change_of_address(user)
-            self.update_address(user)
-            self.confirm_address(user)
-            self.register_to_vote(user)
-            self.verify_voter_registration(user)
+            forms = [
+                self.language,
+                self.init_voter_registration,
+                self.eligibility,
+                self.personal_information,
+                self.change_of_address,
+                self.update_address,
+                self.confirm_address,
+                self.register_to_vote,
+                self.verify_voter_registration,
+                self.vote_by_mail
+            ]
 
+            for handler in forms:
+                handler(user)
+                errors = self.parse_errors()
+                if errors:
+                    raise ValidationError(message='field_errors', payload=errors)
+                
             success_page = clean_browser_response(self.browser)
             if self.success_string in success_page:
                 return {'status': 'success'}
@@ -36,6 +46,16 @@ class Arizona(BaseOVRForm):
         except Exception, e:
             ex_type, ex, tb = sys.exc_info()
             raise OVRError(self, message="%s %s" % (ex_type, ex), payload=traceback.format_tb(tb), error_callback_url=self.error_callback_url)
+
+    def parse_errors(self):
+        if self.errors:
+            return self.errors
+        messages = []
+        errorSel = ['.formError', '.pageError']
+        for selector in errorSel:
+            for error in self.browser.select(selector):
+                messages.append({'error': error.text})
+        return messages
 
     def get_default_submit_headers(self):
         # AZ does a validation check on referer, so fill it in with the current URL
@@ -106,6 +126,7 @@ class Arizona(BaseOVRForm):
     
     def update_address(self, user):
         frm = self.browser.get_form()
+        print frm
 
         frm['resAddr'].value = user['address']
         frm['resCity'].value = user['city']
@@ -166,3 +187,11 @@ class Arizona(BaseOVRForm):
     def verify_voter_registration(self, user):
         frm = self.browser.get_form()
         self.browser.submit_form(frm, submit=frm['_eventId_finish'], headers=self.get_default_submit_headers())
+
+    def vote_by_mail(self, user):
+        frm = self.browser.get_form()
+        if user.get('vote_by_mail'):
+            submit_choice = frm['_eventId_votemail']
+        else:
+            submit_choice = frm['_eventId_votepolls']
+        self.browser.submit_form(frm, submit=submit_choice, headers=self.get_default_submit_headers())
