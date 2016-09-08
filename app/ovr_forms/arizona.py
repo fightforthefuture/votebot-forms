@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import split_date, ValidationError, get_address_from_freeform, options_dict, get_party_from_list
+from form_utils import split_date, ValidationError, get_address_from_freeform, options_dict, get_party_from_list, clean_browser_response
 import sys, traceback
 
 class Arizona(BaseOVRForm):
@@ -7,6 +7,7 @@ class Arizona(BaseOVRForm):
     def __init__(self):
         super(Arizona, self).__init__('https://servicearizona.com/webapp/evoter/selectLanguage')
         self.add_required_fields(['will_be_18', 'legal_resident', 'incompetent', 'disenfranchised', 'ssn_last4', 'has_separate_mailing_address', 'political_party'])
+        self.success_string = ''
 
     def submit(self, user, error_callback_url = None):
 
@@ -21,8 +22,13 @@ class Arizona(BaseOVRForm):
             self.update_address(user)
             self.confirm_address(user)
             self.register_to_vote(user)
+            self.verify_voter_registration(user)
 
-            return {'status': 'failure', 'note': 'JL NOTE ~ Not sure what to do...'}
+            success_page = clean_browser_response(self.browser)
+            if self.success_string in success_page:
+                return {'status': 'success'}
+            else:
+                raise ValidationError(message='no_success_string')
         
         except ValidationError, e:
             raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
@@ -157,4 +163,6 @@ class Arizona(BaseOVRForm):
 
         self.browser.submit_form(frm, submit=frm['_eventId_register'], headers=self.get_default_submit_headers())
 
-
+    def verify_voter_registration(self, user):
+        frm = self.browser.get_form()
+        self.browser.submit_form(frm, submit=frm['_eventId_finish'], headers=self.get_default_submit_headers())
