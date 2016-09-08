@@ -1,13 +1,13 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import get_address_components, options_dict, split_date, clean_browser_response, ValidationError, log_form
+from form_utils import get_address_components, options_dict, split_date, clean_browser_response, ValidationError
+import robobrowser
 import sys, traceback
-import requests
 
 
 class Georgia(BaseOVRForm):
     def __init__(self):
         super(Georgia, self).__init__('https://registertovote.sos.ga.gov/GAOLVR/welcometoga.do')
-        self.success_string = 'You should receive a voter precinct card in the mail.'
+        self.success_string = 'You are NOT officially registered to vote until this application is approved.'
         self.add_required_fields(['will_be_18', 'legal_resident', 'disenfranchised', 'incompetent'])
 
     def parse_errors(self):
@@ -25,11 +25,25 @@ class Georgia(BaseOVRForm):
         return form
 
     def minimum_requirements(self, user, form):
-        form['citizenVer'].checked = user['us_citizen']
-        form['ageVer'].checked = user['will_be_18']
-        form['stateVer'].checked = user['legal_resident']
-        form['felonyVer'].checked = not user['disenfranchised']
-        form['mentally'].checked = not user['incompetent']
+        if user['us_citizen']:
+            form['citizenVer'].checked = True
+            form['citizenVer'].value = "on"
+
+        if user['will_be_18']:
+            form['ageVer'].checked = True
+            form['ageVer'].value = "on"
+
+        if user['legal_resident']:
+            form['stateVer'].checked = True
+            form['stateVer'].value = "on"
+
+        if not user['disenfranchised']:
+            form['felonyVer'].checked = True
+            form['felonyVer'].value = "on"
+
+        if not user['incompetent']:
+            form['mentally'].checked = True
+            form['mentally'].value = "on"
 
         # every GA form has a "back" button which also does a submit, so we have to specify
         self.browser.submit_form(form, submit=form['beginReg'])
@@ -61,7 +75,7 @@ class Georgia(BaseOVRForm):
 
     def consent_use_signature(self, user, form):
         if user.get('consent_use_signature'):
-            form['consent'].value = '1'
+            form['consent'].value = '0'  # incredibly, this means "yes", 1 means "no"
         self.browser.submit_form(form, submit=form['next'])
         return form
 
@@ -83,15 +97,27 @@ class Georgia(BaseOVRForm):
         street_value = form['streetName1'].value
 
         # look up postal city key and rural_flag from street_value
-        postal_city = self.get_postal_city(street_value, address_components['county_name'])
-        # add city option to dropdown
-        form['city'].options.append(postal_city['key'])
-        form['city'].labels.append(user['city'].upper())
-        form['city'].value = postal_city['key']
-        form['ruralcityFlag'].value = postal_city['fl_Rural_Flag'].lower()
+        postal_city = self.get_postal_city(street_value, address_components['county_name'])[0]
+        rural_flag = postal_city['fl_Rural_Flag']
+        form['ruralcityFlag'].value = rural_flag.lower()
+        if rural_flag == "Y":
+            form['rural_city'].options = (postal_city['key'], )
+            form['rural_city'].value = str(postal_city['key'])
+        else:
+            # replace weird city selector with a regular input
+            form.fields.pop('city')
+            city_field = robobrowser.forms.fields.Input('<input type="hidden" id="city" name="city"></input>')
+            city_field.value = str(postal_city['key'])
+            form.add_field(city_field)
+
+        # of course, there's also a hidden cityName field to append
+        city_name = robobrowser.forms.fields.Input('<input type="hidden" id="cityName" name="cityName"></input>')
+        city_name.value = address_components['city_name'].upper()
+        form.add_field(city_name)
 
         form['state'].value = address_components['state_abbreviation']
         form['zip5'].value = address_components['zipcode']
+        form['countyS3'].value = address_components['county_name'].upper()
 
         # update form action, this happens in javascript on validateForm
         form.action = 'regStep4.do'
@@ -101,20 +127,16 @@ class Georgia(BaseOVRForm):
 
     def get_postal_city(self, street_value, county):
         # GA does clever stuff with modifying the select options in javascript
-        # try to mimic it without mucking with main browser.session
-
-        # copy sessionid cookie and send via separate request
-        jsessionid = self.browser.session.cookies['JSESSIONID']
-        r = requests.get("https://registertovote.sos.ga.gov/GAOLVR/getPostalCities.do",
-                     params={'streetName': street_value, 'countyName': county.upper()},
-                     cookies={'JSESSIONID': jsessionid})
-        p = r.json()
-        return p[0]
+        # try to mimic it
+        r = self.browser.session.get("https://registertovote.sos.ga.gov/GAOLVR/getPostalCities.do",
+                     params={'streetName': street_value, 'countyName': county.upper()})
+        return r.json()
 
     def general_information(self, user, form):
         # these fields are all optional, fill in only if defined
         if user.get('gender'):
-            form['gender'] = user['gender'].capitalize()
+            form['gender'].options = ['Male', 'Female']  # they have two buttons with the same name but different ids
+            form['gender'].value = user['gender'].capitalize()
         # poll_worker
         if user.get('ssn_last_4'):
             form['ssnId'] = user['ssn_last_4']
@@ -159,9 +181,18 @@ class Georgia(BaseOVRForm):
         if self.errors:
             return False
 
+        # mimic their javascript as closely as possible
+        hidden_clicker = robobrowser.forms.fields.Input('<input type="hidden" id="confirmSubmit_Clicker" name="confirmSubmit_Clicker"></input>')
+        form.add_field(hidden_clicker)
         form.action = 'success.do'
+
         self.browser.submit_form(form, submit=form['submitBtn'])
-        #  TODO, also pull reference number from the final page?
+
+    def confirmation_email(self, user, form):
+        # send user email confirmation with reference number
+        if user.get('email'):
+            r = self.browser.session.get('https://registertovote.sos.ga.gov/GAOLVR/sendMail.do',
+                params={'emailId': user['email'], 'referenceNumber': form['referenceNumber'].value})
 
     def submit(self, user, error_callback_url=None):
         self.error_callback_url = error_callback_url
@@ -176,6 +207,7 @@ class Georgia(BaseOVRForm):
                 [{'id': 'formId'}, self.residence_address],  # there are two forms on this page, but one is blank
                 [{}, self.general_information],
                 [{}, self.review_information],
+                [{}, self.confirmation_email],
             ]
 
             for form_kwargs, handler in forms:
