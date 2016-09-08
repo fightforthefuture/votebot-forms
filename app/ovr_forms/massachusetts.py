@@ -160,11 +160,15 @@ class Massachusetts(BaseOVRForm):
                 # crucial - un-disable the designation list
                 del self.browser.select('select[name="ctl00$MainContent$ddlPoliticalDesig"]')[0]['disabled']
                 form['ctl00$MainContent$ddlPoliticalDesig'].value = designations[designation]
+
+            else:
+                # unable to match designation, unenrolled
+                self.add_error("We were unable to match that political designation", field='political_party')
+                form['ctl00$MainContent$PartyEnrolled'].value = 'rdoBtnNoParty'
             
         else:
             # No Party (Unenrolled, commonly referred to as ''Independent'')
             form['ctl00$MainContent$PartyEnrolled'].value = 'rdoBtnNoParty'
-        
 
         # possible todos, all optional:
         # former name
