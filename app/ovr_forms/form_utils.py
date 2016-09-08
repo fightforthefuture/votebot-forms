@@ -20,7 +20,7 @@ def clean_browser_response(browser):
     html = """%s""" % browser.state.response.content  # wrap in multi-line string until we escape it
     escaped_html = re.sub('[\"\']', '', html)              # remove quotes
     escaped_html = re.sub('[\n\r\t]', '', escaped_html)    # and whitespace
-    escaped_html = json.dumps(escaped_html)                # let json escape everything else
+    escaped_html = json.dumps(escaped_html, ensure_ascii=False)  # let json escape everything else
     return escaped_html
 
 
