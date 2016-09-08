@@ -11,11 +11,12 @@ import os, sys, traceback
 PDFTK_BIN = os.environ.get('PDFTK_BIN', 'pdftk')
 SOS_ADDRESS = json.load(open('app/pdf_forms/sos_address.json', 'r'))
 
+
 class NVRA(BaseOVRForm):
     def __init__(self):
         super(NVRA, self).__init__()
         self.form_template = os.path.abspath('app/pdf_forms/templates/combined-template.pdf')
-        self.add_required_fields(['us_citizen', 'will_be_18', 'political_party', 'state_id_number'])
+        self.add_required_fields(['us_citizen', 'will_be_18', 'state_id_number'])
         self.pdf_url = ''
 
     def match_fields(self, user):
