@@ -7,7 +7,7 @@ class Arizona(BaseOVRForm):
     def __init__(self):
         super(Arizona, self).__init__('https://servicearizona.com/webapp/evoter/selectLanguage')
         self.add_required_fields(['will_be_18', 'legal_resident', 'incompetent', 'disenfranchised', 'ssn_last4', 'has_separate_mailing_address', 'political_party'])
-        self.success_string = ''
+        self.success_string = 'TBD'
 
     def submit(self, user, error_callback_url = None):
 
