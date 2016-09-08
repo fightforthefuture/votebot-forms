@@ -8,7 +8,7 @@ class Colorado(BaseOVRForm):
         self.add_required_fields(['military_or_overseas', 'vote_by_mail', 'legal_resident',
                                  'political_party', 'email', 'gender',
                                  'will_be_18', 'consent_use_signature', 'confirm_name_address'])
-        self.success_string = "Your changes have been submitted to your County Clerk and Recorder for processing. "
+        self.success_string = "Your changes have been submitted to your County Clerk and Recorder for processing"
 
     def submit(self, user, error_callback_url=None):
 
@@ -86,13 +86,13 @@ class Colorado(BaseOVRForm):
 
     def edit_voter_information(self, user, form):
 
-        party = get_party_from_list(user['political_party'], options_dict(form['editVoterForm:partyAffiliationId_input']))
+        party = get_party_from_list(user['political_party'], options_dict(form['editVoterForm:partyAffiliationId']))
         
         # it is required. if we haven't found a match, defer to 'Unaffiliated'
         if not party:
             party = 'Unaffiliated'
         
-        form['editVoterForm:partyAffiliationId_input'].value = options_dict(form['editVoterForm:partyAffiliationId_input'])[party]
+        form['editVoterForm:partyAffiliationId'].value = options_dict(form['editVoterForm:partyAffiliationId'])[party]
 
         if user['military_or_overseas']:
             form['editVoterForm:areUOCAVAId'].value = 'Y'
@@ -113,15 +113,15 @@ class Colorado(BaseOVRForm):
         form['editVoterForm:resAddress'].value = user['address']
         form['editVoterForm:resCity'].value = user['city']
 
-        form['editVoterForm:resCounty_input'].value = options_dict(form['editVoterForm:resCounty_input'])[user['county']]
+        form['editVoterForm:resCounty'].value = options_dict(form['editVoterForm:resCounty'])[user['county']]
 
         form['editVoterForm:resZip'].value = user['zip']
 
-        self.browser.submit_form(form, submit=form['editVoterForm:j_idt113'])
+        self.browser.submit_form(form, submit=form['editVoterForm:j_idt114'])
 
     def review(self, user, form):
         # noop
-        self.browser.submit_form(form, submit=form['reviewVoterForm:j_idt86'])
+        self.browser.submit_form(form, submit=form['reviewVoterForm:j_idt88'])
 
     def affirmation(self, user, form):
         # this field name jumps out at me...
