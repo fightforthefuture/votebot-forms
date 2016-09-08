@@ -1,14 +1,16 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import split_date, ValidationError, get_address_components, options_dict, get_address_from_freeform, bool_to_string
+from form_utils import split_date, ValidationError, get_address_components, options_dict, get_address_from_freeform, clean_browser_response
 import sys, traceback
+
 
 class Illinois(BaseOVRForm):
 
     def __init__(self):
         super(Illinois, self).__init__('https://ova.elections.il.gov/Step0.aspx')
         self.add_required_fields(['will_be_18', 'state_id_issue_date', 'ssn_last4',
-            'county', 'gender', 'has_previous_name',
-            'has_previous_address'])
+            'county', 'gender', 'has_previous_name', 'has_previous_address',
+            'confirm_name_address', 'consent_use_signature', 'reviewed_information'])
+        self.success_string = 'TBD'
 
     def submit(self, user, error_callback_url):
 
@@ -31,7 +33,11 @@ class Illinois(BaseOVRForm):
             self.illinois_assisting(user)
             self.illinois_summary(user)
 
-            return {'status': 'failure', 'note': 'JL NOTE ~ Not sure what to do...'}
+            success_page = clean_browser_response(self.browser)
+            if self.success_string in success_page:
+                return {'status': 'success'}
+            else:
+                raise ValidationError(message='no_success_string')
 
         except ValidationError, e:
             raise OVRError(self, message=e.message, payload=e.payload, error_callback_url=self.error_callback_url)
@@ -228,10 +234,19 @@ class Illinois(BaseOVRForm):
         self.browser.open('https://ova.elections.il.gov/Step12.aspx')
         frm = self.browser.get_form()
 
-        user_is_eligible = user['us_citizen'] and user['will_be_18']
+        user_is_eligible = (user['us_citizen']
+            and user['will_be_18']
+            and user['legal_resident']
+            and user['confirm_name_address']
+            and user['consent_use_signature']
+        )
 
-        frm['ctl00$MainContent$cbLegalConfirmation'].value = bool_to_string(user_is_eligible)
+        frm['ctl00$MainContent$cbLegalConfirmation'].value = user_is_eligible
         frm['ctl00$MainContent$cbLegalConfirmation'].checked = 'checked'
+
+        if user['reviewed_information']:
+            frm['MainContent_cbFinalAffirmation'].value = True
+            frm['ctl00$MainContent$cbLegalConfirmation'].checked = 'checked'
 
         self.browser.submit_form(frm, submit=frm['ctl00$MainContent$btnFinish'])
 
@@ -255,7 +270,3 @@ class Illinois(BaseOVRForm):
             return 'COOK - SUBURBS'
         else:
             return county.upper()
-
-
-
-        
