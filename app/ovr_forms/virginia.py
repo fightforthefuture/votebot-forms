@@ -188,7 +188,7 @@ class Virginia(BaseOVRForm):
         form['CurrentAddress.Address.Line1'] = user.get('address').upper()
         form['CurrentAddress.Address.Line2'] = user.get('address_unit', '')
         form['CurrentAddress.Address.City'] = user.get('city').upper()
-        form['CurrentAddress.Address.ZipCode'] = user.get('zipcode')
+        form['CurrentAddress.Address.ZipCode'] = user.get('zip')
 
         # try to match locality by county name
         locality = user.get('county').upper()
@@ -201,8 +201,12 @@ class Virginia(BaseOVRForm):
         self.browser.submit_form(form)
 
     def contact_information(self, user, form):
-        # optional, but send if we have it for official receipt
-        form['ContactInformation.EmailAddress'] = user.get('email', '')
+        if user.get('email'):
+            form['ContactInformation.EmailAddress'] = user.get('email', '')
+            form['ContactInformation.EmailContactPreference'] = 1
+
+        form['ContactInformation.PhoneNumber'] = user.get('phone', '')
+
         self.browser.submit_form(form)
 
     def affirmation(self, user, form):
