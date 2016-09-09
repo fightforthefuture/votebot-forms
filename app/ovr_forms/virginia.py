@@ -10,7 +10,7 @@ class Virginia(BaseOVRForm):
         super(Virginia, self).__init__('https://vote.elections.virginia.gov/Registration/Eligibility')
         self.add_required_fields(['county', 'legal_resident', 'incompetent', 'disenfranchised', 'ssn', 'gender',
                                  'privacy_notice', 'consent_use_signature', 'confirm_name_address', 'authorize_cancellation'])
-        self.success_string = 'TBD'
+        self.success_string = 'Your voter registration application has been submitted.'
 
     def parse_errors(self):
         if self.errors:
@@ -203,9 +203,12 @@ class Virginia(BaseOVRForm):
     def contact_information(self, user, form):
         if user.get('email'):
             form['ContactInformation.EmailAddress'] = user.get('email', '')
-            form['ContactInformation.EmailContactPreference'] = 1
+            form['ContactInformation.EmailContactPreference'] = ''
 
         form['ContactInformation.PhoneNumber'] = user.get('phone', '')
+
+        # this appears to be required
+        form['Assistant.InterestedInElectionOfficial'] = 'false'
 
         self.browser.submit_form(form)
 
