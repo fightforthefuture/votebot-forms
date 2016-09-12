@@ -241,11 +241,11 @@ class Illinois(BaseOVRForm):
             and user['consent_use_signature']
         )
 
-        frm['ctl00$MainContent$cbLegalConfirmation'].value = user_is_eligible
-        frm['ctl00$MainContent$cbLegalConfirmation'].checked = 'checked'
-
+        if user_is_eligible:
+            frm['ctl00$MainContent$cbLegalConfirmation'].value = 'on'
+            frm['ctl00$MainContent$cbLegalConfirmation'].checked = 'checked'
         if user['reviewed_information']:
-            frm['MainContent_cbFinalAffirmation'].value = True
+            frm['ctl00$MainContent$cbLegalConfirmation'].value = 'on'
             frm['ctl00$MainContent$cbLegalConfirmation'].checked = 'checked'
 
         self.browser.submit_form(frm, submit=frm['ctl00$MainContent$btnFinish'])
