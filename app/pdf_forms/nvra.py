@@ -2,6 +2,7 @@ from app.ovr_forms.base_ovr_form import BaseOVRForm, OVRError
 from app.ovr_forms.form_utils import ValidationError, split_date
 
 import storage
+import postage
 import election_mail
 
 from fdfgen import forge_fdf
@@ -69,7 +70,7 @@ class NVRA(BaseOVRForm):
         ])
         return form
 
-    def generate_pdf(self, form_data):
+    def generate_pdf(self, form_data, include_postage=False):
         # generate fdf data
         fdf_stream = forge_fdf(fdf_data_strings=form_data, checkbox_checked_name="On")
 
@@ -80,6 +81,21 @@ class NVRA(BaseOVRForm):
         process = subprocess.Popen(' '.join(pdftk_fill), shell=True,
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         (stdout, stderr) = process.communicate(input=fdf_stream)
+
+        if include_postage:
+            to_address = election_mail.get_mailto_address(form_data.get('state'))
+            from_address = {
+                "name": "{first_name} {last_name}".format(**form_data),
+                "street1": form_data.get('home_address'),
+                "street2": form_data.get('home_apt'),
+                "city": form_data.get('home_city'),
+                "state": form_data.get('home_state'),
+                "zip": form_data.get('home_zip'),
+                "country": 'US',
+            }
+            mailing_label = postage.buy_mailing_label(from_address, to_address)
+            
+
         return stdout
 
     def submit(self, user, error_callback_url=None):
@@ -87,7 +103,7 @@ class NVRA(BaseOVRForm):
 
         try:
             form_data = self.match_fields(user)
-            pdf_file = self.generate_pdf(form_data)
+            pdf_file = self.generate_pdf(form_data, user.get('include_postage', False))
             if pdf_file:
                 self.pdf_url = storage.upload_to_s3(pdf_file, 'print/%s.pdf' % self.uid)
                 return {'status': 'success', 'pdf_url': self.pdf_url}
