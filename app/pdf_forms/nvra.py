@@ -2,14 +2,13 @@ from app.ovr_forms.base_ovr_form import BaseOVRForm, OVRError
 from app.ovr_forms.form_utils import ValidationError, split_date
 
 import storage
+import election_mail
 
 from fdfgen import forge_fdf
 import subprocess
-import json
 import os, sys, traceback
 
 PDFTK_BIN = os.environ.get('PDFTK_BIN', 'pdftk')
-SOS_ADDRESS = json.load(open('app/pdf_forms/sos_address.json', 'r'))
 
 
 class NVRA(BaseOVRForm):
@@ -56,20 +55,9 @@ class NVRA(BaseOVRForm):
         
         form['registration_deadline'] = user.get('registration_deadline', 'Put the form in the mail at least 15 days before election day')
 
-        # TODO get local election offical address from Google Civic or US OVF
-        # until Google Civic updates, use statewide address
-        sos_address = SOS_ADDRESS.get(user.get('state'))
-        if sos_address:
-            form['mailto'] = '\n'.join(sos_address)
-            form['mailto_line_1'] = sos_address[0]
-            if len(sos_address) > 1:
-                form['mailto_line_2'] = sos_address[1]
-            if len(sos_address) > 2:
-                form['mailto_line_3'] = sos_address[2]
-            if len(sos_address) > 3:
-                form['mailto_line_4'] = sos_address[3]
-            if len(sos_address) > 4:
-                form['mailto_line_5'] = sos_address[4]
+        mailto_address = election_mail.get_mailto_address(user.get('state'))
+        if mailto_address:
+            form['mailto'] = '\n'.join(mailto_address.values())
 
         form['return_address'] = '\n'.join([
             "{first_name} {last_name}".format(**user),
