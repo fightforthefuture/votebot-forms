@@ -11,11 +11,13 @@ class TestCalifornia(BaseTestCase):
 
     def setUp(self):
         super(TestCalifornia, self).setUp()
-        self.user = self.test_data[self.state]
+        self.user = self.test_data.get(self.state)
+        if not self.user:
+            self.skip('CA')
 
     def test_has_user(self):
         self.assertIsNotNone(self.user)
 
-    def test_user_has_required_fields(self):        
+    def test_user_has_required_fields(self):
         for f in self.form.required_fields:
             self.assertIn(f, self.user)

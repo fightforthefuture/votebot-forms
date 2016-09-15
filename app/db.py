@@ -1,5 +1,5 @@
 import datetime
-# from flask import current_app
+from flask import current_app
 import json
 import psycopg2
 from ovr_forms.form_utils import clean_browser_response
@@ -22,6 +22,9 @@ def get_db():
 
 
 def log_response(form, status):
+    if current_app.config.TESTING:
+        return False
+
     db = get_db()
     cur = db.cursor()
     sql = "INSERT INTO logged_forms (ts, uid, state, status, failed, parsed) VALUES (NOW(), %s, %s, %s, %s, %s) RETURNING id;"

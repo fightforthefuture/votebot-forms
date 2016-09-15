@@ -14,7 +14,9 @@ class TestColorado(BaseTestCase):
 
     def setUp(self):
         super(TestColorado, self).setUp()
-        self.user = self.test_data[self.state]
+        self.user = self.test_data.get(self.state)
+        if not self.user:
+            self.skip('CO')
 
     def test_has_user(self):
         self.assertIsNotNone(self.user)

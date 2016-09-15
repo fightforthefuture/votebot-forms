@@ -15,5 +15,8 @@ class BaseTestCase(TestCase):
         self.test_data = yaml.load(f)
         logging.info("got %d test users" % len(self.test_data.keys()))
 
+    def skip(self, test_name):
+        raise nose.SkipTest("Test %s is skipped" % test_name)
+
 if __name__ == '__main__':
     nose.main()
