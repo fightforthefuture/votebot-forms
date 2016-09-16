@@ -17,6 +17,7 @@ class NVRA(BaseOVRForm):
     def __init__(self):
         super(NVRA, self).__init__()
         self.coversheet_template = os.path.abspath('app/pdf_forms/templates/coversheet.pdf')
+        self.coversheet_postage_template = os.path.abspath('app/pdf_forms/templates/coversheet-postage.pdf')
         self.form_template = os.path.abspath('app/pdf_forms/templates/eac-nvra.pdf')
         self.add_required_fields(['us_citizen', 'will_be_18', 'state_id_number'])
         self.pdf_url = ''
@@ -101,7 +102,7 @@ class NVRA(BaseOVRForm):
             mailing_label = postage.buy_mailing_label(to_address, from_address)
 
             # write it to a tempfile, so we can adjust it to fit
-            mailing_label_tmp = tempfile.NamedTemporaryFile()
+            mailing_label_tmp = tempfile.NamedTemporaryFile(delete=False)
             mailing_label_tmp.write(mailing_label)
             mailing_label_tmp.close()
 
@@ -116,17 +117,16 @@ class NVRA(BaseOVRForm):
             process = subprocess.Popen(' '.join(gs_offset), shell=True)
             (offset_out, offset_err) = process.communicate()
 
+            # delete mailing label file
+            os.remove(mailing_label_tmp.name)
+
             # stamp it on the coversheet
             pdftk_stamp_coversheet = [PDFTK_BIN,
-                 self.coversheet_template, 'stamp', '-',
+                 self.coversheet_postage_template, 'stamp', '-',
                  'output', coversheet_tmp.name]
             process = subprocess.Popen(' '.join(pdftk_stamp_coversheet), shell=True,
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             (coversheet_out, coversheet_err) = process.communicate(input=stamp_tmp.read())
-
-            # clean up tempfiles
-            # os.remove(mailing_label_tmp.name)
-            #os.remove(stamp_tmp.name)
         else:
             # fill out coversheet with mailto field from fdf_stream
             pdftk_fill_coversheet = [PDFTK_BIN,
