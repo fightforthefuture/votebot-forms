@@ -52,6 +52,15 @@ or
 }
 ```
 
+## PDF Form
+The PDF form is generated from the [National Mail Voter Registration Form](http://www.eac.gov/voter_resources/register_to_vote.aspx), with a custom instructions and mailing page. These are combined with PDFTK and filled in with an FDF data stream before being uploaded to Amazon S3 for user download.
+
+If the registration POST data has a flag `include_postage` set to true, we will generate an stamp a pre-paid USPS mailing label to from the user's home address to their local election official with EasyPost. This costs us real money, so don't enable the flag unless we've confirmed that the user does not have access to a printer and stamp at home.
+
+If the registration POST data has a flag `mail_letter` set to true, we will print and mail the generated form to the user with Lob.com. This costs us real money, so don't enable the flag unless we've confirmed that the user does not have access to a printer and stamp at home.
+
+The `include_postage` and `mail_letter` flags are not mutually exclusive, you must enable both to mail a letter with an included postage label.
+
 ## Development
 - `virtualenv .venv; source .venv/bin/activate`
 - `pip install -r requirements/development.txt`
@@ -70,11 +79,6 @@ To create a new state integration:
 - finish the form with a volunteer's ID, after getting one from the FFTF volunteer coordinator
 - add unit tests to `tests/ovr_forms/test_STATE.py`
 - when the form is tested, add it to the OVR_FORMS dict in `app/ovr_forms/__init__.py`
-
-## PDF Form
-The PDF form is generated from the [National Mail Voter Registration Form](http://www.eac.gov/voter_resources/register_to_vote.aspx), with a custom instructions and mailing page. These are combined with PDFTK and filled in with an FDF data stream before being uploaded to Amazon S3 for user download.
-
-If the registration POST data has a flag `include_postage` set to true, we will generate an stamp a pre-paid USPS mailing label with EasyPost. This costs us real money, so don't enable the flag unless we've confirmed that the user does not have access to a printer and stamp at home.
 
 ## Testing
 - fill `tests/secrets.yml` with valid identification information. ensure dates are iso-formatted strings
