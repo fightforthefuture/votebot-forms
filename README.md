@@ -4,7 +4,7 @@
 Online voter registration should be easy. Unfortunately, each state has their own form design. This application provides a nice API that abstracts across them, and falls back to the National Mail Voter Registration Form PDF when online registration is not possible.
 
 ## Usage
-POST to '/registration' with json like
+POST to your desired form endpoint ('/pdf' or '/ovr') with json like
 ```
 { 
   callback_url: '/callback',
@@ -72,7 +72,9 @@ To create a new state integration:
 - when the form is tested, add it to the OVR_FORMS dict in `app/ovr_forms/__init__.py`
 
 ## PDF Form
-The PDF form is generated from the [National Mail Voter Registration Form](http://www.eac.gov/voter_resources/register_to_vote.aspx), with a custom instructions and mailing page. These are combined with PDFTK, and filled in with an FDF data stream before being uploaded to Amazon S3 for user download. If changes are made to the instructions or mailing page, regenerate the combined template file with `pdftk A=coversheet.pdf B=eac-nvra.pdf cat A B1 output combined-template.pdf`
+The PDF form is generated from the [National Mail Voter Registration Form](http://www.eac.gov/voter_resources/register_to_vote.aspx), with a custom instructions and mailing page. These are combined with PDFTK and filled in with an FDF data stream before being uploaded to Amazon S3 for user download.
+
+If the registration POST data has a flag `include_postage` set to true, we will generate an stamp a pre-paid USPS mailing label with EasyPost. This costs us real money, so don't enable the flag unless we've confirmed that the user does not have access to a printer and stamp at home.
 
 ## Testing
 - fill `tests/secrets.yml` with valid identification information. ensure dates are iso-formatted strings
