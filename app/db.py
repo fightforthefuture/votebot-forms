@@ -22,7 +22,7 @@ def get_db():
 
 
 def log_response(form, status):
-    if current_app.config.TESTING:
+    if current_app.config.get('TESTING'):
         return False
 
     db = get_db()

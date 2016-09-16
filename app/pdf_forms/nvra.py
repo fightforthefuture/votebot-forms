@@ -7,6 +7,7 @@ import election_mail
 
 from fdfgen import forge_fdf
 import subprocess
+import tempfile
 import os, sys, traceback
 
 PDFTK_BIN = os.environ.get('PDFTK_BIN', 'pdftk')
@@ -15,7 +16,8 @@ PDFTK_BIN = os.environ.get('PDFTK_BIN', 'pdftk')
 class NVRA(BaseOVRForm):
     def __init__(self):
         super(NVRA, self).__init__()
-        self.form_template = os.path.abspath('app/pdf_forms/templates/combined-template.pdf')
+        self.coversheet_template = os.path.abspath('app/pdf_forms/templates/coversheet.pdf')
+        self.form_template = os.path.abspath('app/pdf_forms/templates/eac-nvra.pdf')
         self.add_required_fields(['us_citizen', 'will_be_18', 'state_id_number'])
         self.pdf_url = ''
 
@@ -74,16 +76,19 @@ class NVRA(BaseOVRForm):
         # generate fdf data
         fdf_stream = forge_fdf(fdf_data_strings=form_data, checkbox_checked_name="On")
 
-        # fill out form template
+        # fill out form template to tempfile
+        filled_form_tmp = tempfile.NamedTemporaryFile()
         pdftk_fill = [PDFTK_BIN,
                      self.form_template, 'fill_form', '-',
-                     'output', '-', 'flatten']
+                     'output', filled_form_tmp.name, 'flatten']
         process = subprocess.Popen(' '.join(pdftk_fill), shell=True,
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        (stdout, stderr) = process.communicate(input=fdf_stream)
+        (form_out, form_err) = process.communicate(input=fdf_stream)
 
+        coversheet_tmp = tempfile.NamedTemporaryFile()
         if include_postage:
-            to_address = election_mail.get_mailto_address(form_data.get('state'))
+            # buy a mailing label
+            to_address = election_mail.get_mailto_address(form_data.get('home_state'))
             from_address = {
                 "name": "{first_name} {last_name}".format(**form_data),
                 "street1": form_data.get('home_address'),
@@ -93,10 +98,58 @@ class NVRA(BaseOVRForm):
                 "zip": form_data.get('home_zip'),
                 "country": 'US',
             }
-            mailing_label = postage.buy_mailing_label(from_address, to_address)
-            
+            mailing_label = postage.buy_mailing_label(to_address, from_address)
 
-        return stdout
+            # write it to a tempfile, so we can adjust it to fit
+            mailing_label_tmp = tempfile.NamedTemporaryFile(delete=False)
+            mailing_label_tmp.write(mailing_label)
+            mailing_label_tmp.close()
+
+            # offset it with ghostscript
+            # because pdftk can't adjust stamp location
+            stamp_tmp = tempfile.NamedTemporaryFile(delete=False)
+            gs_offset = ['gs', '-q', '-o', stamp_tmp.name,
+                         '-sDEVICE=pdfwrite',
+                         '-g6120x7920',  # dimensions in points * 10
+                         '-c "<</PageOffset [280 790]>> setpagedevice"',  # adjust for center bottom
+                         '-f', mailing_label_tmp.name]
+            print ' '.join(gs_offset)
+            process = subprocess.Popen(' '.join(gs_offset), shell=True)
+            (offset_out, offset_err) = process.communicate(input=mailing_label)
+
+            # stamp it on the coversheet
+            pdftk_stamp_coversheet = [PDFTK_BIN,
+                 self.coversheet_template, 'stamp', '-',
+                 'output', coversheet_tmp.name]
+            process = subprocess.Popen(' '.join(pdftk_stamp_coversheet), shell=True,
+                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            (coversheet_out, coversheet_err) = process.communicate(input=stamp_tmp.read())
+
+            # clean up tempfiles
+            # os.remove(mailing_label_tmp.name)
+            #os.remove(stamp_tmp.name)
+        else:
+            # fill out coversheet with mailto field from fdf_stream
+            pdftk_fill_coversheet = [PDFTK_BIN,
+                 self.coversheet_template, 'fill_form', '-',
+                 'output', coversheet_tmp.name, 'flatten']
+            process = subprocess.Popen(' '.join(pdftk_fill_coversheet), shell=True,
+                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            (coversheet_out, coversheet_err) = process.communicate(input=fdf_stream)
+        print "coversheet_tmp", coversheet_tmp.name
+
+        # join coversheet with form
+        combined_tmp = tempfile.NamedTemporaryFile()
+        pdftk_join = [PDFTK_BIN,
+                     'A=%s' % coversheet_tmp.name, 'B=%s' % filled_form_tmp.name,
+                     'cat', 'A', 'B1-1',  # only include first page of filled_form
+                     'output', combined_tmp.name]
+        process = subprocess.Popen(' '.join(pdftk_join), shell=True,
+                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        (combined_out, combined_err) = process.communicate()
+
+        final_contents = combined_tmp.read()
+        return final_contents
 
     def submit(self, user, error_callback_url=None):
         self.error_callback_url = error_callback_url

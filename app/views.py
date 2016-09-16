@@ -53,6 +53,9 @@ def registration(request, registration_type="generate_pdf"):
         for (key, value) in user['settings'].items():
             user[key] = value
         del user['settings']
+    # push postage into user
+    if 'include_postage' in request_json:
+        user['include_postage'] = True
 
     state = user['state']
     if registration_type == "generate_pdf":
