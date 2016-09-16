@@ -18,6 +18,7 @@ class NVRA(BaseOVRForm):
         super(NVRA, self).__init__()
         self.coversheet_template = os.path.abspath('app/pdf_forms/templates/coversheet.pdf')
         self.coversheet_postage_template = os.path.abspath('app/pdf_forms/templates/coversheet-postage.pdf')
+        self.letter_template = os.path.abspath('app/pdf_forms/templates/letter.pdf')
         self.form_template = os.path.abspath('app/pdf_forms/templates/eac-nvra.pdf')
         self.add_required_fields(['us_citizen', 'will_be_18', 'state_id_number'])
         self.pdf_url = ''
@@ -78,7 +79,7 @@ class NVRA(BaseOVRForm):
         ])
         return form
 
-    def generate_pdf(self, form_data, include_postage=False):
+    def generate_pdf(self, form_data, include_postage=False, include_letter=False):
         # generate fdf data
         fdf_stream = forge_fdf(fdf_data_strings=form_data, checkbox_checked_name="On")
 
@@ -143,10 +144,17 @@ class NVRA(BaseOVRForm):
 
         # join coversheet with form
         combined_tmp = tempfile.NamedTemporaryFile()
-        pdftk_join = [PDFTK_BIN,
-                     'A=%s' % coversheet_tmp.name, 'B=%s' % filled_form_tmp.name,
-                     'cat', 'A', 'B1-1',  # only include first page of filled_form
-                     'output', combined_tmp.name]
+        if include_letter:
+            pdftk_join = [PDFTK_BIN,
+                         'A=%s' % coversheet_tmp.name, 'B=%s' % filled_form_tmp.name,
+                         'C=%s' % self.letter_template,
+                         'cat', 'C', 'A', 'B1-1',  # only include first page of filled_form
+                         'output', combined_tmp.name]
+        else:
+            pdftk_join = [PDFTK_BIN,
+                         'A=%s' % coversheet_tmp.name, 'B=%s' % filled_form_tmp.name,
+                         'cat', 'A', 'B1-1',  # only include first page of filled_form
+                         'output', combined_tmp.name]
         process = subprocess.Popen(' '.join(pdftk_join), shell=True,
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         (combined_out, combined_err) = process.communicate()
@@ -159,10 +167,20 @@ class NVRA(BaseOVRForm):
 
         try:
             form_data = self.match_fields(user)
-            pdf_file = self.generate_pdf(form_data, user.get('include_postage', False))
+            include_postage = user.get('include_postage', False)
+            mail_letter = user.get('mail_letter', False)
+            pdf_file = self.generate_pdf(form_data, include_postage, mail_letter)
+
             if pdf_file:
                 self.pdf_url = storage.upload_to_s3(pdf_file, 'print/%s.pdf' % self.uid)
-                return {'status': 'success', 'pdf_url': self.pdf_url}
+
+                if mail_letter:
+                    letter = postage.mail_letter(self.uid, user, self.pdf_url)
+                    return {'status': 'success',
+                            'mail_carrier': letter.carrier,
+                            'expected_delivery_date': letter.expected_delivery_date}
+                else:
+                    return {'status': 'success', 'pdf_url': self.pdf_url}
             else:
                 return {'status': 'error', 'message': 'unable to generate NVRA pdf'}
 
