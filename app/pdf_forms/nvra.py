@@ -101,21 +101,20 @@ class NVRA(BaseOVRForm):
             mailing_label = postage.buy_mailing_label(to_address, from_address)
 
             # write it to a tempfile, so we can adjust it to fit
-            mailing_label_tmp = tempfile.NamedTemporaryFile(delete=False)
+            mailing_label_tmp = tempfile.NamedTemporaryFile()
             mailing_label_tmp.write(mailing_label)
             mailing_label_tmp.close()
 
             # offset it with ghostscript
             # because pdftk can't adjust stamp location
-            stamp_tmp = tempfile.NamedTemporaryFile(delete=False)
+            stamp_tmp = tempfile.NamedTemporaryFile()
             gs_offset = ['gs', '-q', '-o', stamp_tmp.name,
                          '-sDEVICE=pdfwrite',
                          '-g6120x7920',  # dimensions in points * 10
-                         '-c "<</PageOffset [280 790]>> setpagedevice"',  # adjust for center bottom
+                         '-c "<</PageOffset [0 -450]>> setpagedevice"',  # adjust for center bottom
                          '-f', mailing_label_tmp.name]
-            print ' '.join(gs_offset)
             process = subprocess.Popen(' '.join(gs_offset), shell=True)
-            (offset_out, offset_err) = process.communicate(input=mailing_label)
+            (offset_out, offset_err) = process.communicate()
 
             # stamp it on the coversheet
             pdftk_stamp_coversheet = [PDFTK_BIN,
@@ -136,7 +135,6 @@ class NVRA(BaseOVRForm):
             process = subprocess.Popen(' '.join(pdftk_fill_coversheet), shell=True,
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             (coversheet_out, coversheet_err) = process.communicate(input=fdf_stream)
-        print "coversheet_tmp", coversheet_tmp.name
 
         # join coversheet with form
         combined_tmp = tempfile.NamedTemporaryFile()
