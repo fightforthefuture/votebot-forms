@@ -59,9 +59,14 @@ class NVRA(BaseOVRForm):
         
         form['registration_deadline'] = user.get('registration_deadline', 'Put the form in the mail at least 15 days before election day')
 
-        mailto_address = election_mail.get_mailto_address(user.get('state'))
-        if mailto_address:
-            form['mailto'] = '\n'.join(mailto_address.values())
+        mailto_dict = election_mail.get_mailto_address(user.get('state'))
+        # format mailto values to correct address
+        if mailto_dict:
+            mailto_list = [mailto_dict['name'], mailto_dict['street1']]
+            if 'street2' in mailto_dict:
+                mailto_list.append(mailto_dict['street2'])
+            mailto_list.append("%(city)s %(state)s %(zip)s" % mailto_dict)
+            form['mailto'] = '\n'.join(mailto_list)
 
         form['return_address'] = '\n'.join([
             "{first_name} {last_name}".format(**user),
