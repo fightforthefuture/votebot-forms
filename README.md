@@ -41,7 +41,7 @@ get a POST to your callback_url like
 ```
 {
     "status": "success", // for print and mail
-    "pdf_url": "https://hellovote.s3.amazonaws.com/print/UUID.pdf?access_token"
+    "pdf_url": "https://hellovote.s3.amazonaws.com/print/UUID/hellovote-registration-form.pdf"
 }
 ```
 or 

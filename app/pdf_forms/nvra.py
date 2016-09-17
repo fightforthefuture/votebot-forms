@@ -172,7 +172,7 @@ class NVRA(BaseOVRForm):
             pdf_file = self.generate_pdf(form_data, include_postage, mail_letter)
 
             if pdf_file:
-                self.pdf_url = storage.upload_to_s3(pdf_file, 'print/%s.pdf' % self.uid)
+                self.pdf_url = storage.upload_to_s3(pdf_file, 'print/%s/hellovote-registration.pdf' % self.uid)
 
                 if mail_letter:
                     letter = postage.mail_letter(self.uid, user, self.pdf_url)
