@@ -195,6 +195,7 @@ class Georgia(BaseOVRForm):
                 params={'emailId': user['email'], 'referenceNumber': form['referenceNumber'].value})
 
     def submit(self, user, error_callback_url=None):
+        self.set_user_agent(user)
         self.error_callback_url = error_callback_url
 
         try:

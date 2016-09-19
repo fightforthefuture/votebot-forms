@@ -10,7 +10,7 @@ class California(BaseOVRForm):
         self.success_string = "Your voter registration application is now complete."
 
     def submit(self, user, error_callback_url = None):
-
+        self.set_user_agent(user)
         self.error_callback_url = error_callback_url
 
         try:
