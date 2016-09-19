@@ -57,7 +57,15 @@ class NVRA(BaseOVRForm):
         form['choice_of_party'] = user.get('political_party', '')
         form['id_number'] = user.get('state_id_number', '')
         form['race_ethnic_group'] = user.get('ethnicity', '')
-        
+
+        # state specific id requirements
+        if user.get('state') in ("AL", "HI", "KY", "TN", "NM", "SC", "VA"):
+            form['id_number'] = user.get('ssn', 'NONE')
+
+        if user.get('state') in ("GA", ):
+            if not form.get('id_number'):
+                form['id_number'] = user.get('ssn_last4', 'NONE')
+
         form['registration_deadline'] = user.get('registration_deadline', 'Put the form in the mail at least 15 days before election day')
 
         mailto_dict = election_mail.get_mailto_address(user.get('state'))

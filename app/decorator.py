@@ -55,7 +55,7 @@ def check_auth(auth):
 def authenticate():
     """Sends a 401 response that enables basic auth"""
     return Response(
-        'You have to pass a valid API key as username', 401,
+        'You have to pass a valid API key as in request.auth username', 401,
         {'WWW-Authenticate': 'Basic realm="API Key Required"'}
     )
 
