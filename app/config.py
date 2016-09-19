@@ -5,6 +5,7 @@ REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/')
 RQ_REDIS_URL = REDIS_URL
 
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgres://localhost:5432/votebot-forms')
+VOTEBOT_API_KEY = os.environ.get('VOTEBOT_API_KEY', None)
 
 AWS_ACCESS_KEY = os.environ.get('AWS_ACCESS_KEY')
 AWS_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')

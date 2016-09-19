@@ -105,6 +105,7 @@ To create a new state integration:
 
 ## Security
 - Requires PyOpenSSL and ndg-httpsclient for improved SSL certificate validation. California's system won't validate without it...
+- If an environment variable `VOTEBOT_API_KEY` is set, we will require all POSTs to registration endpoints /pdf and /ovr to include it in an HTTP Basic Auth header.
 
 ## Deployment
 - run on Heroku under uwsgi w/ gevent
