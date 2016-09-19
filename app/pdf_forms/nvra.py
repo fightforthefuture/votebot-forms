@@ -177,8 +177,10 @@ class NVRA(BaseOVRForm):
                 if mail_letter:
                     letter = postage.mail_letter(self.uid, user, self.pdf_url)
                     return {'status': 'success',
+                            'mail_letter': True,
                             'mail_carrier': letter.carrier,
-                            'expected_delivery_date': letter.expected_delivery_date}
+                            'expected_delivery_date': letter.expected_delivery_date,
+                            'pdf_url': self.pdf_url}
                 else:
                     return {'status': 'success', 'pdf_url': self.pdf_url}
             else:
