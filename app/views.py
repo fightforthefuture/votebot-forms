@@ -88,3 +88,8 @@ def registration(request, registration_type="generate_pdf"):
             'status': 'queued',
             'uid': str(form.get_uid())
         })
+
+@votebot.route('/', methods=['GET'])
+def index():
+    return jsonify({'application': 'votebot-forms',
+                   'status': 'OK'})
