@@ -20,7 +20,7 @@ class NVRA(BaseOVRForm):
         self.coversheet_postage_template = os.path.abspath('app/pdf_forms/templates/coversheet-postage.pdf')
         self.letter_template = os.path.abspath('app/pdf_forms/templates/letter.pdf')
         self.form_template = os.path.abspath('app/pdf_forms/templates/eac-nvra.pdf')
-        self.add_required_fields(['us_citizen', 'will_be_18', 'state_id_number'])
+        self.add_required_fields(['us_citizen', 'will_be_18'])
         self.pdf_url = ''
 
     def match_fields(self, user):
@@ -59,12 +59,28 @@ class NVRA(BaseOVRForm):
         form['race_ethnic_group'] = user.get('ethnicity', '')
 
         # state specific id requirements
-        if user.get('state') in ("AL", "HI", "KY", "TN", "NM", "SC", "VA"):
-            form['id_number'] = user.get('ssn', 'NONE')
-
-        if user.get('state') in ("GA", ):
+        state = user.get('state')
+        # these states require full SSN
+        if state in ('AL', 'HI', 'KY', 'TN', 'NM', 'SC', 'VA'):
+            form['id_number'] = user.get('ssn')
+        # these states want full SSN as a backup to state ID
+        if state in ('OH', ):
             if not form.get('id_number'):
-                form['id_number'] = user.get('ssn_last4', 'NONE')
+                form['id_number'] = user.get('ssn')
+        # these states require last 4
+        if state in ('OK',):
+            form['id_number'] = user.get('ssn_last4')
+        # these states want last 4 as a backup
+        if state in ('AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'GA', 'FL', 'ID',
+                     'IL', 'IN', 'IA', 'KS', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS',
+                     'MO', 'MT', 'NE', 'NV', 'NJ', 'NY', 'NC', 'OR', 'PA', 'RI', 'SD',
+                     'TX', 'UT', 'VT', 'WA', 'WV', 'WI'):
+            if not form.get('id_number'):
+                form['id_number'] = user.get('ssn_last4')
+
+        # if nothing entered yet, fallback to NONE
+        if not form.get('id_number'):
+            form['id_number'] = "NONE"
 
         form['registration_deadline'] = user.get('registration_deadline', 'Put the form in the mail at least 15 days before election day')
 
