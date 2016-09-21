@@ -16,8 +16,8 @@ PDFTK_BIN = os.environ.get('PDFTK_BIN', 'pdftk')
 class NVRA(BaseOVRForm):
     def __init__(self):
         super(NVRA, self).__init__()
-        self.coversheet_template = os.path.abspath('app/pdf_forms/templates/coversheet.pdf')
-        self.coversheet_postage_template = os.path.abspath('app/pdf_forms/templates/coversheet-postage.pdf')
+        self.coversheet_email = os.path.abspath('app/pdf_forms/templates/coversheet-email.pdf')
+        self.coversheet_letter = os.path.abspath('app/pdf_forms/templates/coversheet-letter.pdf')
         self.letter_template = os.path.abspath('app/pdf_forms/templates/letter.pdf')
         self.form_template = os.path.abspath('app/pdf_forms/templates/eac-nvra.pdf')
         self.add_required_fields(['us_citizen', 'will_be_18'])
@@ -117,6 +117,13 @@ class NVRA(BaseOVRForm):
         (form_out, form_err) = process.communicate(input=fdf_stream)
 
         coversheet_tmp = tempfile.NamedTemporaryFile()
+
+        if include_letter:
+            coversheet_template = self.coversheet_letter
+        else:
+            coversheet_template = self.coversheet_email
+        # TODO, add a coversheet for email that does not include the stamp
+
         if include_postage:
             # buy a mailing label
             to_address = election_mail.get_mailto_address(form_data.get('home_state'))
@@ -152,7 +159,7 @@ class NVRA(BaseOVRForm):
 
             # stamp it on the coversheet
             pdftk_stamp_coversheet = [PDFTK_BIN,
-                 self.coversheet_postage_template, 'stamp', '-',
+                 coversheet_template, 'stamp', '-',
                  'output', coversheet_tmp.name]
             process = subprocess.Popen(' '.join(pdftk_stamp_coversheet), shell=True,
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -160,7 +167,7 @@ class NVRA(BaseOVRForm):
         else:
             # fill out coversheet with mailto field from fdf_stream
             pdftk_fill_coversheet = [PDFTK_BIN,
-                 self.coversheet_template, 'fill_form', '-',
+                 coversheet_template, 'fill_form', '-',
                  'output', coversheet_tmp.name, 'flatten']
             process = subprocess.Popen(' '.join(pdftk_fill_coversheet), shell=True,
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
