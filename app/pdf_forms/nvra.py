@@ -64,7 +64,7 @@ class NVRA(BaseOVRForm):
 
         # previous name
         if user.get('has_previous_name'):
-            prev_first, prev_middle, prev_last = split_name(user.get('previous_name'), '')
+            prev_first, prev_middle, prev_last = split_name(user.get('previous_name', ''))
             form['change_first_name'] = prev_first
             form['change_middle_name'] = prev_middle
             form['change_last_name'] = prev_last
