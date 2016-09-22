@@ -1,6 +1,7 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import bool_to_string, options_dict, split_date, get_party_from_list, clean_browser_response, ValidationError
+from form_utils import options_dict, split_date, get_party_from_list, clean_browser_response, ValidationError
 import sys, traceback
+
 
 class Colorado(BaseOVRForm):
     def __init__(self):
@@ -16,22 +17,18 @@ class Colorado(BaseOVRForm):
 
         try:
             self.validate(user)
-
+            
             # format is: [kwargs to select / identify form, method to call with form]
             forms = [
                 [{'id': 'verifyNewVoterForm'}, self.verify_identification],
-                [{'id': 'editVoterForm'}, self.edit_voter_information],
+                [{}, self.new_or_existing_voter],  # this splits between verify_eligibility, edit_voter_information
                 [{'id': 'reviewVoterForm'}, self.review],
                 [{'id': 'affirmationVoterForm'}, self.affirmation]
             ]
 
             for form_kwargs, handler in forms:
-
                 step_form = self.browser.get_form(**form_kwargs)
-
-                if step_form:
-                    handler(user, step_form)
-
+                handler(user, step_form)
                 errors = self.parse_errors()
                 if errors:
                     raise ValidationError(message='field_errors', payload=errors)
@@ -65,7 +62,6 @@ class Colorado(BaseOVRForm):
         return messages
 
     def verify_identification(self, user, form):
-
         form['verifyNewVoterForm:voterSearchLastId'].value = user['last_name']
         form['verifyNewVoterForm:voterSearchFirstId'].value = user['first_name']
 
@@ -83,6 +79,22 @@ class Colorado(BaseOVRForm):
             # todo: other calls to action, from the site:
             # Call Colorado SOS: 303-894-2200
             # Fill out CO's PDF: http://www.sos.state.co.us/pubs/elections/vote/VoterRegFormEnglish.pdf
+
+    def new_or_existing_voter(self, user):
+        if 'Verify that you are eligible to vote in the state of Colorado' in self.browser.response.text:
+            form = self.browser.get_form({'id': 'eligibilityVoterForm'})
+            return self.verify_eligibility(user, form)
+        else:
+            form = self.browser.get_form({'id': 'editVoterForm'})
+            return self.edit_voter_information(user, form)
+
+    def verify_eligibility(self, user, form):
+        if user['us_citizen']:
+            form['eligibilityVoterForm:usCitzId'].value = 'Y'
+        if user['will_be_18']:
+            form['eligibilityVoterForm:age18Id'].value = 'Y'
+        if user['legal_resident']:
+            form['eligibilityVoterForm:coResId'].value = 'Y'
 
     def edit_voter_information(self, user, form):
 
