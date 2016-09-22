@@ -17,7 +17,9 @@ class NVRA(BaseOVRForm):
     def __init__(self):
         super(NVRA, self).__init__()
         self.coversheet_email = os.path.abspath('app/pdf_forms/templates/coversheet-email.pdf')
+        self.coversheet_email_nostamp = os.path.abspath('app/pdf_forms/templates/coversheet-email-nostamp.pdf')
         self.coversheet_letter = os.path.abspath('app/pdf_forms/templates/coversheet-letter.pdf')
+        self.coversheet_letter_nostamp = os.path.abspath('app/pdf_forms/templates/coversheet-letter-nostamp.pdf')
         self.letter_template = os.path.abspath('app/pdf_forms/templates/letter.pdf')
         self.form_template = os.path.abspath('app/pdf_forms/templates/eac-nvra.pdf')
         self.add_required_fields(['us_citizen', 'will_be_18'])
@@ -118,14 +120,8 @@ class NVRA(BaseOVRForm):
 
         coversheet_tmp = tempfile.NamedTemporaryFile()
 
-        if include_letter:
-            coversheet_template = self.coversheet_letter
-        else:
-            coversheet_template = self.coversheet_email
-        # TODO, add a coversheet for email that does not include the stamp
-
         if include_postage:
-            # buy a mailing label
+            # try to buy a mailing label
             to_address = election_mail.get_mailto_address(form_data.get('home_state'))
             from_address = {
                 "name": "{first_name} {last_name}".format(**form_data),
@@ -137,7 +133,21 @@ class NVRA(BaseOVRForm):
                 "country": 'US',
             }
             mailing_label = postage.buy_mailing_label(to_address, from_address)
+        else:
+            mailing_label = False
 
+        if include_letter:
+            if mailing_label:
+                coversheet_template = self.coversheet_letter
+            else:
+                coversheet_template = self.coversheet_letter_nostamp
+        else:
+            if mailing_label:
+                coversheet_template = self.coversheet_email
+            else:
+                coversheet_template = self.coversheet_email_nostamp
+
+        if mailing_label:
             # write it to a tempfile, so we can adjust it to fit
             mailing_label_tmp = tempfile.NamedTemporaryFile(delete=False)
             mailing_label_tmp.write(mailing_label)

@@ -22,12 +22,19 @@ def easypost_shipment(to_address, from_address):
 
 def buy_mailing_label(to_address, from_address):
     postage = easypost_shipment(to_address, from_address)
-    result = postage.buy(rate=postage.lowest_rate())
-    label_pdf_url = result.postage_label.label_pdf_url
+    rate = postage.lowest_rate()
 
-    # get the file contents from the url
-    response = requests.get(label_pdf_url)
-    return response.content
+    # ensure rate is USPS first class
+    if rate.carrier == "USPS" and rate.service == "First":
+        result = postage.buy(rate=rate)
+        label_pdf_url = result.postage_label.label_pdf_url
+
+        # get the file contents from the url
+        response = requests.get(label_pdf_url)
+        return response.content
+    else:
+        print "bad rate", rate
+        return None
 
 
 def mail_letter(id, user, file):
