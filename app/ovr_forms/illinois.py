@@ -182,7 +182,7 @@ class Illinois(BaseOVRForm):
         frm = self.browser.get_form()
 
         if user["has_previous_address"]:
-            address = get_address_from_freeform(user['previous_address'])
+            address = get_address_components(user['previous_address'], user['previous_city'], user['previous_state'], user['previous_zip'])
             address_components = address["components"]
 
             frm['ctl00$MainContent$tbFormerStreetNumber'].value = address_components['primary_number']
