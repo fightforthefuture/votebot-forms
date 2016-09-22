@@ -26,6 +26,8 @@ POST to your desired form endpoint ('/pdf' or '/ovr') with json like
     "us_citizen":true,
     "legal_resident": true,
     "disenfranchised":false,
+    "has_previous_name": false,
+    "has_previous_address": false
   }
 }
 ```
