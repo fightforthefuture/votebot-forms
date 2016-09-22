@@ -44,6 +44,9 @@ def registration(request, registration_type="generate_pdf"):
     if not "user" in request_json:
         return render_error(400, "missing_user_data", "No user data specified.")
 
+    if not "uid" in request_json:
+        return render_error(400, "no_uid", "No unique uid specified in submission.")
+
     user = request_json['user']
 
     # pull fields out of user.settings
@@ -65,6 +68,8 @@ def registration(request, registration_type="generate_pdf"):
             "internal_error",
             "OVR submission specified, but state not implemented."
         )
+
+    form.set_uid(request_json["uid"])
 
     # validate before queueing for submission
     try:

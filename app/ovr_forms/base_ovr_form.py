@@ -32,8 +32,11 @@ class BaseOVRForm(object):
         if start_url:
             self.browser.open(start_url)
         self.required_fields = BASE_REQUIRED_FIELDS
-        self.uid = uuid.uuid4()
+        # self.uid = uuid.uuid4() # JL NOTE ~ this is now passed in from the client
         self.errors = []
+
+    def set_uid(self, uid):
+        self.uid = uid
 
     def get_uid(self):
         return self.uid
