@@ -15,15 +15,15 @@ class California(BaseOVRForm):
 
         try:
             forms = [
-                [{'action': '/?language=en-US'}, self.step1],
-                [{'action': '/Home/MainForm'}, self.step2],
-                [{'action': '/Home/MainForm2'}, self.step3],
-                [{'action': '/Home/Review'}, self.step4],
-                [{'action': '/Home/Confirmation'}, self.step5]
+                self.step1,
+                self.step2,
+                self.step3,
+                self.step4,
+                self.step5
             ]
 
-            for form_kwargs, handler in forms:
-                step_form = self.browser.get_form(**form_kwargs)
+            for handler in forms:
+                step_form = self.browser.get_form()
                 if step_form:
                     handler(step_form, user)
 
