@@ -83,9 +83,9 @@ class Illinois(BaseOVRForm):
         (dob_year, dob_month, dob_day) = split_date(user['date_of_birth'])
         illinois_identification_form['ctl00$MainContent$tbDOB'].value = '-'.join([dob_month, dob_day, dob_year])
 
-        (id_year, id_month, id_day) = split_date(user['date_of_birth'])   
+        (id_year, id_month, id_day) = split_date(user['date_of_birth']) 
         illinois_identification_form['ctl00$MainContent$tbIDIssuedDate'].value = '-'.join([id_month, id_day, id_year])
-        
+
         self.browser.submit_form(illinois_identification_form, submit=illinois_identification_form['ctl00$MainContent$btnNext'])
 
     def illinois_name(self, user):
@@ -109,7 +109,7 @@ class Illinois(BaseOVRForm):
             frm['ctl00$MainContent$ddlResidentStreetDirection'].value = options_dict(frm['ctl00$MainContent$ddlResidentStreetDirection'])[address_components['street_predirection'].upper()]
 
         frm['ctl00$MainContent$tbResidentStreetName'].value = address_components['street_name']
-        
+
         if 'street_suffix' in address_components:
             frm['ctl00$MainContent$ddlResidentStreetType'].value = options_dict(frm['ctl00$MainContent$ddlResidentStreetType'])[address_components['street_suffix'].upper()]
 
@@ -146,7 +146,7 @@ class Illinois(BaseOVRForm):
         frm['ctl00$MainContent$tbEmail'].value = user['email']
         frm['ctl00$MainContent$tbVerifyEmail'].value = user['email']
 
-        self.browser.submit_form(frm, submit=frm['ctl00$MainContent$btnNext'])        
+        self.browser.submit_form(frm, submit=frm['ctl00$MainContent$btnNext'])
 
     def illinois_election_authority(self, user):
         self.browser.open('https://ova.elections.il.gov/Step8.aspx')
@@ -155,7 +155,7 @@ class Illinois(BaseOVRForm):
         election_authority = self.determine_election_authority(user["city"], user["county"])
         frm['ctl00$MainContent$ddlElectionAuthoritySelect'].value = options_dict(frm['ctl00$MainContent$ddlElectionAuthoritySelect'])[election_authority]
 
-        self.browser.submit_form(frm, submit=frm['ctl00$MainContent$btnNext'])  
+        self.browser.submit_form(frm, submit=frm['ctl00$MainContent$btnNext'])
 
     def illinois_mailing_address(self, user):
         self.browser.open('https://ova.elections.il.gov/Step9.aspx')

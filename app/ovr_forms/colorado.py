@@ -17,7 +17,7 @@ class Colorado(BaseOVRForm):
 
         try:
             self.validate(user)
-            
+
             # format is: [kwargs to select / identify form, method to call with form]
             forms = [
                 [{'id': 'verifyNewVoterForm'}, self.verify_identification],
@@ -99,11 +99,11 @@ class Colorado(BaseOVRForm):
     def edit_voter_information(self, user, form):
 
         party = get_party_from_list(user['political_party'], options_dict(form['editVoterForm:partyAffiliationId']))
-        
+
         # it is required. if we haven't found a match, defer to 'Unaffiliated'
         if not party:
             party = 'Unaffiliated'
-        
+
         form['editVoterForm:partyAffiliationId'].value = options_dict(form['editVoterForm:partyAffiliationId'])[party]
 
         if user['military_or_overseas']:
@@ -112,7 +112,7 @@ class Colorado(BaseOVRForm):
         else:
             form['editVoterForm:areUOCAVAId'].value = 'N'
 
-        form['editVoterForm:uocavaBallotMethodId'].value = 'Mail' if user['vote_by_mail'] else 'Email' # or 'Fax'
+        form['editVoterForm:uocavaBallotMethodId'].value = 'Mail' if user['vote_by_mail'] else 'Email'  # or 'Fax'
 
         # email, phone and gender are prefilled
         form['editVoterForm:emailId'].value = user['email']
