@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
+import decorator
 from ovr_forms import OVR_FORMS
 from ovr_forms.base_ovr_form import OVRError
 from ovr_forms.form_utils import clean_sensitive_info, ValidationError
@@ -28,18 +29,15 @@ def render_error(status_code, str_code, message=None, payload=None):
     response.status_code = status_code
     return response
 
-@votebot.route('/vote_dot_org', methods=['POST'])
-def vote_dot_org():
-    return registration(request, "vote_dot_org")
-
 @votebot.route('/pdf', methods=['POST'])
+@decorator.requires_auth
 def generate_pdf():
     return registration(request, "generate_pdf")
 
 @votebot.route('/ovr', methods=['POST'])
+@decorator.requires_auth
 def ovr():
     return registration(request, "ovr")
-
 
 def registration(request, registration_type="generate_pdf"):
     request_json = request.get_json(force=True)  # so we don't have to set mimetype
@@ -95,3 +93,8 @@ def registration(request, registration_type="generate_pdf"):
             'status': 'queued',
             'uid': str(form.get_uid())
         })
+
+@votebot.route('/', methods=['GET'])
+def index():
+    return jsonify({'application': 'votebot-forms',
+                   'status': 'OK'})

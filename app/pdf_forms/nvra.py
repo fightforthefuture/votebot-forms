@@ -16,11 +16,11 @@ PDFTK_BIN = os.environ.get('PDFTK_BIN', 'pdftk')
 class NVRA(BaseOVRForm):
     def __init__(self):
         super(NVRA, self).__init__()
-        self.coversheet_template = os.path.abspath('app/pdf_forms/templates/coversheet.pdf')
-        self.coversheet_postage_template = os.path.abspath('app/pdf_forms/templates/coversheet-postage.pdf')
+        self.coversheet_email = os.path.abspath('app/pdf_forms/templates/coversheet-email.pdf')
+        self.coversheet_letter = os.path.abspath('app/pdf_forms/templates/coversheet-letter.pdf')
         self.letter_template = os.path.abspath('app/pdf_forms/templates/letter.pdf')
         self.form_template = os.path.abspath('app/pdf_forms/templates/eac-nvra.pdf')
-        self.add_required_fields(['us_citizen', 'will_be_18', 'state_id_number'])
+        self.add_required_fields(['us_citizen', 'will_be_18'])
         self.pdf_url = ''
 
     def match_fields(self, user):
@@ -57,7 +57,31 @@ class NVRA(BaseOVRForm):
         form['choice_of_party'] = user.get('political_party', '')
         form['id_number'] = user.get('state_id_number', '')
         form['race_ethnic_group'] = user.get('ethnicity', '')
-        
+
+        # state specific id requirements
+        state = user.get('state')
+        # these states require full SSN
+        if state in ('AL', 'HI', 'KY', 'TN', 'NM', 'SC', 'VA'):
+            form['id_number'] = user.get('ssn')
+        # these states want full SSN as a backup to state ID
+        if state in ('OH', ):
+            if not form.get('id_number'):
+                form['id_number'] = user.get('ssn')
+        # these states require last 4
+        if state in ('OK',):
+            form['id_number'] = user.get('ssn_last4')
+        # these states want last 4 as a backup
+        if state in ('AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'GA', 'FL', 'ID',
+                     'IL', 'IN', 'IA', 'KS', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS',
+                     'MO', 'MT', 'NE', 'NV', 'NJ', 'NY', 'NC', 'OR', 'PA', 'RI', 'SD',
+                     'TX', 'UT', 'VT', 'WA', 'WV', 'WI'):
+            if not form.get('id_number'):
+                form['id_number'] = user.get('ssn_last4')
+
+        # if nothing entered yet, fallback to NONE
+        if not form.get('id_number'):
+            form['id_number'] = "NONE"
+
         form['registration_deadline'] = user.get('registration_deadline', 'Put the form in the mail at least 15 days before election day')
 
         mailto_dict = election_mail.get_mailto_address(user.get('state'))
@@ -93,6 +117,13 @@ class NVRA(BaseOVRForm):
         (form_out, form_err) = process.communicate(input=fdf_stream)
 
         coversheet_tmp = tempfile.NamedTemporaryFile()
+
+        if include_letter:
+            coversheet_template = self.coversheet_letter
+        else:
+            coversheet_template = self.coversheet_email
+        # TODO, add a coversheet for email that does not include the stamp
+
         if include_postage:
             # buy a mailing label
             to_address = election_mail.get_mailto_address(form_data.get('home_state'))
@@ -128,7 +159,7 @@ class NVRA(BaseOVRForm):
 
             # stamp it on the coversheet
             pdftk_stamp_coversheet = [PDFTK_BIN,
-                 self.coversheet_postage_template, 'stamp', '-',
+                 coversheet_template, 'stamp', '-',
                  'output', coversheet_tmp.name]
             process = subprocess.Popen(' '.join(pdftk_stamp_coversheet), shell=True,
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -136,7 +167,7 @@ class NVRA(BaseOVRForm):
         else:
             # fill out coversheet with mailto field from fdf_stream
             pdftk_fill_coversheet = [PDFTK_BIN,
-                 self.coversheet_template, 'fill_form', '-',
+                 coversheet_template, 'fill_form', '-',
                  'output', coversheet_tmp.name, 'flatten']
             process = subprocess.Popen(' '.join(pdftk_fill_coversheet), shell=True,
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -172,13 +203,15 @@ class NVRA(BaseOVRForm):
             pdf_file = self.generate_pdf(form_data, include_postage, mail_letter)
 
             if pdf_file:
-                self.pdf_url = storage.upload_to_s3(pdf_file, 'print/%s.pdf' % self.uid)
+                self.pdf_url = storage.upload_to_s3(pdf_file, 'forms/%s/hellovote-registration-print-me.pdf' % self.uid)
 
                 if mail_letter:
                     letter = postage.mail_letter(self.uid, user, self.pdf_url)
                     return {'status': 'success',
+                            'mail_letter': True,
                             'mail_carrier': letter.carrier,
-                            'expected_delivery_date': letter.expected_delivery_date}
+                            'expected_delivery_date': letter.expected_delivery_date,
+                            'pdf_url': self.pdf_url}
                 else:
                     return {'status': 'success', 'pdf_url': self.pdf_url}
             else:

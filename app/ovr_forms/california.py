@@ -9,24 +9,21 @@ class California(BaseOVRForm):
                                  'ssn_last4', 'county', 'consent_use_signature'])
         self.success_string = "Your voter registration application is now complete."
 
-    def submit(self, user, error_callback_url = None):
-
+    def submit(self, user, error_callback_url=None):
+        self.set_user_agent(user)
         self.error_callback_url = error_callback_url
 
         try:
-            # dict loses its order when iteritem()'ing
-            # there are probably more elegant approaches than lists,
-            # but for now...
             forms = [
-                        ['/?language=en-US', self.step1],
-                        ['/Home/MainForm', self.step2],
-                        ['/Home/MainForm2', self.step3],
-                        ['/Home/Review', self.step4],
-                        ['/Home/Confirmation', self.step5]
-                    ]
+                [{'action': '/?language=en-US'}, self.step1],
+                [{'action': '/Home/MainForm'}, self.step2],
+                [{'action': '/Home/MainForm2'}, self.step3],
+                [{'action': '/Home/Review'}, self.step4],
+                [{'action': '/Home/Confirmation'}, self.step5]
+            ]
 
-            for action, handler in forms:
-                step_form = self.browser.get_form(action=action)
+            for form_kwargs, handler in forms:
+                step_form = self.browser.get_form(**form_kwargs)
                 if step_form:
                     handler(step_form, user)
 

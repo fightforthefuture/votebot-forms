@@ -11,7 +11,7 @@ class Kentucky(BaseOVRForm):
         self.success_string = 'Your Kentucky Voter Registration Application has been submitted'
 
     def submit(self, user, error_callback_url=None):
-
+        self.set_user_agent(user)
         self.error_callback_url = error_callback_url
 
         # KY doesn't have intermediate forms, they just submit as JSON all at once

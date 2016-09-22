@@ -4,6 +4,7 @@ from ..db import log_response
 from form_utils import ValidationError
 import requests
 import uuid
+import os
 
 
 BASE_REQUIRED_FIELDS = [
@@ -15,7 +16,6 @@ BASE_REQUIRED_FIELDS = [
     'city',
     'zip',
     'us_citizen',
-    'state_id_number'
 ]
 
 
@@ -24,7 +24,8 @@ class BaseOVRForm(object):
     error_callback_url = None
 
     def __init__(self, start_url=None):
-        self.browser = RoboBrowser(parser='html.parser', user_agent='HelloVote.org', history=True)
+        self.user_agent = os.environ.get('USER_AGENT', 'votebot-forms')
+        self.browser = RoboBrowser(parser='html.parser', user_agent=self.user_agent, history=True)
         # TESTING, disable SSL cert validation
         # self.browser.session.verify = 'charles-ssl-proxying-certificate.pem'
 
@@ -54,6 +55,9 @@ class BaseOVRForm(object):
             # if field not in user:
             if field not in user or user[field] == None:
                 self.add_error('%s is required' % field.replace('_', ' '), field=field)
+
+    def set_user_agent(self, user):
+        self.browser.user_agent = '%s on behalf of %s %s' % (self.user_agent, user.get('first_name'), user.get('last_name'))
 
     def validate(self, user):
         self.check_required_fields(user)

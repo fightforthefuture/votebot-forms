@@ -1,2 +1,2 @@
-web: uwsgi uwsgi.ini
-worker: python manager.py rq worker
+web: newrelic-admin run-program uwsgi uwsgi.ini
+worker: newrelic-admin run-python manager.py rq worker

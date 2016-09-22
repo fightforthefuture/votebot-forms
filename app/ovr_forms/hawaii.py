@@ -20,7 +20,7 @@ class Hawaii(BaseOVRForm):
         return messages
 
     def submit(self, user, error_callback_url=None):
-
+        self.set_user_agent(user)
         self.error_callback_url = error_callback_url
 
         try:

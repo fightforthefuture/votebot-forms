@@ -11,7 +11,7 @@ class Colorado(BaseOVRForm):
         self.success_string = "Your changes have been submitted to your County Clerk and Recorder for processing"
 
     def submit(self, user, error_callback_url=None):
-
+        self.set_user_agent(user)
         self.error_callback_url = error_callback_url
 
         try:

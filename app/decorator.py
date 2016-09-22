@@ -1,6 +1,6 @@
 from datetime import timedelta
-from flask import make_response, request, current_app
-from functools import update_wrapper
+from flask import make_response, Response, request, current_app
+from functools import update_wrapper, wraps
 
 
 def crossdomain(origin=None, methods=None, headers=None,
@@ -43,3 +43,28 @@ def crossdomain(origin=None, methods=None, headers=None,
         f.provide_automatic_options = False
         return update_wrapper(wrapped_function, f)
     return decorator
+
+
+def check_auth(auth):
+    if auth:
+        return auth.username == current_app.config.get('VOTEBOT_API_KEY')
+    else:
+        return False
+
+
+def authenticate():
+    """Sends a 401 response that enables basic auth"""
+    return Response(
+        'You have to pass a valid API key as in request.auth username', 401,
+        {'WWW-Authenticate': 'Basic realm="API Key Required"'}
+    )
+
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if current_app.config.get('VOTEBOT_API_KEY') and not check_auth(auth):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
