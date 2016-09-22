@@ -26,12 +26,16 @@ def buy_mailing_label(to_address, from_address):
 
     # ensure rate is USPS first class
     if rate.carrier == "USPS" and rate.service == "First":
-        result = postage.buy(rate=rate)
-        label_pdf_url = result.postage_label.label_pdf_url
+        try:
+            result = postage.buy(rate=rate)
+            label_pdf_url = result.postage_label.label_pdf_url
 
-        # get the file contents from the url
-        response = requests.get(label_pdf_url)
-        return response.content
+            # get the file contents from the url
+            response = requests.get(label_pdf_url)
+            return response.content
+        except easypost.Error:
+            print "unable to buy postage", rate
+            return None
     else:
         print "bad rate", rate
         return None
