@@ -245,8 +245,12 @@ class Illinois(BaseOVRForm):
             frm['ctl00$MainContent$cbLegalConfirmation'].value = 'on'
             frm['ctl00$MainContent$cbLegalConfirmation'].checked = 'checked'
         if user['reviewed_information']:
+            #  Affirm above
             frm['ctl00$MainContent$cbLegalConfirmation'].value = 'on'
             frm['ctl00$MainContent$cbLegalConfirmation'].checked = 'checked'
+            # I have reviewed the information on this page
+            frm['ctl00$MainContent$cbFinalAffirmation'].value = 'on'
+            frm['ctl00$MainContent$cbFinalAffirmation'].checked = 'checked'
 
         self.browser.submit_form(frm, submit=frm['ctl00$MainContent$btnFinish'])
 
