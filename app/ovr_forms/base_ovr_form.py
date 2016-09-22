@@ -62,6 +62,7 @@ class BaseOVRForm(object):
     def validate(self, user):
         self.check_required_fields(user)
         if self.errors:
+            self.errors.insert(0, user['state'])  # prepend state to error list, so we can debug in logs
             raise ValidationError(message='missing_fields', payload=self.errors)
 
     def submit(self, user, error_callback_url=None):
