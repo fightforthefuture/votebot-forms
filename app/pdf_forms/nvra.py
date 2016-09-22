@@ -1,5 +1,5 @@
 from app.ovr_forms.base_ovr_form import BaseOVRForm, OVRError
-from app.ovr_forms.form_utils import ValidationError, split_date
+from app.ovr_forms.form_utils import ValidationError, split_date, split_name
 
 import storage
 import postage
@@ -64,9 +64,10 @@ class NVRA(BaseOVRForm):
 
         # previous name
         if user.get('has_previous_name'):
-            form['change_first_name'] = user.get('previous_first_name', '')
-            form['change_middle_name'] = user.get('previous_middle_name', '')
-            form['change_last_name'] = user.get('previous_last_name', '')
+            prev_first, prev_middle, prev_last = split_name(user.get('previous_name'), '')
+            form['change_first_name'] = prev_first
+            form['change_middle_name'] = prev_middle
+            form['change_last_name'] = prev_last
 
         # rest of form
         (year, month, day) = split_date(user.get('date_of_birth'))

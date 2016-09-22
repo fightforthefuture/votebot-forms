@@ -66,6 +66,23 @@ def split_date(date, padding=True):
             raise ValidationError('date must be in YYYY-MM-DD format', payload=date)
 
 
+def split_name(full_name):
+    # really naive way of splitting name to (first, middle, last)
+    previous_name_space_count = full_name.count(' ')
+    previous_name_split = full_name.split(' ', 2)
+
+    if previous_name_space_count == 1:
+        first_name = previous_name_split[0]
+        middle_name = ''
+        last_name = previous_name_split[1]
+    else:
+        first_name = previous_name_split[0]
+        middle_name = previous_name_split[1]
+        last_name = previous_name_split[2]
+
+    return (first_name, middle_name, last_name)
+
+
 def bool_to_string(boolean, capitalize=False):
     if boolean is None:
         raise ValidationError("boolean shouldn't be None", payload=boolean)

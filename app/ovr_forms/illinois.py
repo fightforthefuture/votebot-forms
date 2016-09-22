@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import split_date, ValidationError, get_address_components, options_dict, get_address_from_freeform, clean_browser_response
+from form_utils import ValidationError, split_date, split_name, get_address_components, options_dict, get_address_from_freeform, clean_browser_response
 import sys, traceback
 
 
@@ -168,10 +168,11 @@ class Illinois(BaseOVRForm):
         frm = self.browser.get_form()
 
         if user["has_previous_name"]:
+            prev_first, prev_middle, prev_last = split_name(user.get('previous_name'))
             frm["ctl00$MainContent$rblFormerName"].value = "Yes"
-            frm["ctl00$MainContent$tbFormerFirstName"].value = user.get("previous_first_name")
-            frm["ctl00$MainContent$tbFormerMiddleName"].value = user.get("previous_middle_name")
-            frm["ctl00$MainContent$tbFormerLastName"].value = user.get("previous_last_name")
+            frm["ctl00$MainContent$tbFormerFirstName"].value = prev_first
+            frm["ctl00$MainContent$tbFormerMiddleName"].value = prev_middle
+            frm["ctl00$MainContent$tbFormerLastName"].value = prev_last
         else:
             frm["ctl00$MainContent$rblFormerName"].value = "No"
 
