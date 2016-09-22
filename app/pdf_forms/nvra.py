@@ -46,13 +46,29 @@ class NVRA(BaseOVRForm):
         # TODO handle Miss, Mrs?
             
         form['first_name'] = user.get('first_name')
-        # form['middle_name'] = user.get('middle_name')
+        form['middle_name'] = user.get('middle_name', '')
         form['last_name'] = user.get('last_name')
         form['home_address'] = user.get('address')
         form['home_apt'] = user.get('address_unit', '')
         form['home_city'] = user.get('city')
         form['home_state'] = user.get('state')
         form['home_zip'] = user.get('zip')
+
+        # previous address
+        if user.get('has_previous_address'):
+            form['change_address'] = user.get('previous_address', '')
+            form['change_apt'] = user.get('previous_address_unit', '')
+            form['change_city'] = user.get('previous_city', '')
+            form['change_state'] = user.get('previous_state', '')
+            form['change_zip'] = user.get('previous_zip', '')
+
+        # previous name
+        if user.get('has_previous_name'):
+            form['change_first_name'] = user.get('previous_first_name', '')
+            form['change_middle_name'] = user.get('previous_middle_name', '')
+            form['change_last_name'] = user.get('previous_last_name', '')
+
+        # rest of form
         (year, month, day) = split_date(user.get('date_of_birth'))
         form['date_of_birth'] = ' / '.join((month, day, year))
         form['phone_number'] = user.get('phone', '')

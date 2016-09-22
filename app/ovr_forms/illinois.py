@@ -168,23 +168,10 @@ class Illinois(BaseOVRForm):
         frm = self.browser.get_form()
 
         if user["has_previous_name"]:
-            previous_name_space_count = user["previous_name"].count(' ')
-            previous_name_split = user["previous_name"].split(' ', 2)
-
-            if previous_name_space_count == 1:
-                first_name = previous_name_split[0]
-                middle_name = ''
-                last_name = previous_name_split[1]
-            else:
-                first_name = previous_name_split[0]
-                middle_name = previous_name_split[1]
-                last_name = previous_name_split[2]
-
             frm["ctl00$MainContent$rblFormerName"].value = "Yes"
-            frm["ctl00$MainContent$tbFormerFirstName"].value = first_name
-            frm["ctl00$MainContent$tbFormerMiddleName"].value = middle_name
-            frm["ctl00$MainContent$tbFormerLastName"].value = last_name
-
+            frm["ctl00$MainContent$tbFormerFirstName"].value = user.get("previous_first_name")
+            frm["ctl00$MainContent$tbFormerMiddleName"].value = user.get("previous_middle_name")
+            frm["ctl00$MainContent$tbFormerLastName"].value = user.get("previous_last_name")
         else:
             frm["ctl00$MainContent$rblFormerName"].value = "No"
 
