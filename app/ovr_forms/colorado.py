@@ -80,7 +80,8 @@ class Colorado(BaseOVRForm):
             # Call Colorado SOS: 303-894-2200
             # Fill out CO's PDF: http://www.sos.state.co.us/pubs/elections/vote/VoterRegFormEnglish.pdf
 
-    def new_or_existing_voter(self, user):
+    def new_or_existing_voter(self, user, old_form):
+        # drop old_form, look up a new one depending on page contents
         if 'Verify that you are eligible to vote in the state of Colorado' in self.browser.response.text:
             form = self.browser.get_form({'id': 'eligibilityVoterForm'})
             return self.verify_eligibility(user, form)
