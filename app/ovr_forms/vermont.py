@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import ValidationError, clean_browser_response, options_dict, split_date, get_address_components
+from form_utils import ValidationError, clean_browser_response, options_dict, split_date, split_name, get_address_components
 import sys, traceback
 
 
@@ -115,13 +115,41 @@ class Vermont(BaseOVRForm):
             form['chkSameResidence'].checked = 'checked'
 
     def previous_info(self, user, form):
-        form['chkPrvVote'].value = 'N'
-        form['chkPrvVote'].checked = 'checked'
+
+        if user.get('has_previous_name'):
+            prev_first, prev_middle, prev_last = split_name(user.get('previous_name'))
+            form['previousFirstName'] = prev_first
+            form['previousMiddleName'] = prev_middle
+            form['previousLastName'] = prev_last
+
+        if user.get('has_previous_address'):
+            form['chkPrvVote'].value = 'Y'
+            form['chkPrvVote'].checked = 'checked'
+
+            address_components = get_address_components(user['previous_address'], user['previous_city'], user['previous_state'], user['previous_zip'])
+            street_name = address_components['street_name']
+            if 'street_predirection' in address_components:
+                street_name = "%s %s" % (address_components['street_predirection'], street_name)
+            if 'street_postdirection' in address_components:
+                street_name = "%s %s" % (street_name, address_components['street_postdirection'])
+            form['previousAddressLine1'].value = street_name
+
+            form['previousAddressCity'].value = address_components['city_name']
+            form['previousAddressState'].value = address_components['state_abbreviation']
+            form['previousAddressZip'].value = address_components['zipcode']
+
+        else:
+            form['chkPrvVote'].value = 'N'
+            form['chkPrvVote'].checked = 'checked'
 
     def review_affirm(self, user, form):
 
         if user.get('first_time_registering'):
-            # TODO
+            # "If you are registering to vote in Vermont for the first time, you must include a photocopy of an acceptable form of ID."
+            # however, this requirement is waived if you are registering as part of a voter registration drive
+            # per https://www.sec.state.vt.us/elections/voters/registration.aspx#VoterRegDrive
+
+            # TODO, investigate getting photo of ID over MMS
             pass
 
         if user['legal_resident']:
@@ -133,7 +161,7 @@ class Vermont(BaseOVRForm):
         self.browser.submit_form(form, submit=form['btnContinue'])
 
     def email_receipt(self, user, form):
-        email_form = self.browser.get_form('frmEmailSend')
+        email_form = self.browser.get_form({'id': 'frmEmailSend'})
         if email_form:
             email_form['txtEmail'].value = user.get('email')
             self.browser.submit_form(email_form)
