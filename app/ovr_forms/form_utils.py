@@ -83,6 +83,18 @@ def split_name(full_name):
     return (first_name, middle_name, last_name)
 
 
+def parse_gender(string):
+    # expects male/female and coerces to M/F
+    # other values raise ValidationError, because most state forms are binary
+    # I know, it sucks
+    if string.lower() == 'female':
+        return 'F'
+    if string.lower() == 'male':
+        return 'M'
+    else:
+        raise ValidationError("unable to coerce gender to M/F", payload=string)
+
+
 def bool_to_string(boolean, capitalize=False):
     if boolean is None:
         raise ValidationError("boolean shouldn't be None", payload=boolean)

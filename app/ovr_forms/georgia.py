@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import get_address_components, options_dict, split_date, clean_browser_response, ValidationError
+from form_utils import get_address_components, options_dict, split_date, parse_gender, clean_browser_response, ValidationError
 import robobrowser
 import sys, traceback
 
@@ -136,7 +136,14 @@ class Georgia(BaseOVRForm):
         # these fields are all optional, fill in only if defined
         if user.get('gender'):
             form['gender'].options = ['Male', 'Female']  # they have two buttons with the same name but different ids
-            form['gender'].value = user['gender'].capitalize()
+            gender_str = parse_gender(user['gender'])  # coerces free text to M/F
+            if gender_str is 'F':
+                form['gender'].value = 'Female'
+            elif gender_str is 'M':
+                form['gender'].value = 'Male'
+            else:
+                raise ValidationError(message='parse_gender error', payload=user['gender'])
+
         # poll_worker
         if user.get('ssn_last_4'):
             form['ssnId'] = user['ssn_last_4']

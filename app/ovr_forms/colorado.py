@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import options_dict, split_date, get_party_from_list, clean_browser_response, ValidationError
+from form_utils import options_dict, split_date, get_party_from_list, parse_gender, clean_browser_response, ValidationError
 import sys, traceback
 
 
@@ -120,7 +120,14 @@ class Colorado(BaseOVRForm):
         if 'phone' in user:
             # strip country prefix
             form['editVoterForm:phoneId'].value = user['phone'].replace('+1', '')
-        form['editVoterForm:genderSelectId'].value = '0' if 'f' in user['gender'].lower() else '1'
+
+        gender_str = parse_gender(user['gender'])
+        if gender_str is 'F':
+            form['editVoterForm:genderSelectId'].value = '0'
+        elif gender_str is 'M':
+            form['editVoterForm:genderSelectId'].value = '1'
+        else:
+            raise ValidationError(message='parse_gender error', payload=user['gender'])
 
         form['editVoterForm:resAddress'].value = user['address']
         form['editVoterForm:resCity'].value = user['city']

@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import ValidationError, split_date, get_party_from_list, get_address_components, clean_browser_response
+from form_utils import ValidationError, split_date, get_party_from_list, parse_gender, get_address_components, clean_browser_response
 import sys, traceback
 
 
@@ -97,7 +97,7 @@ class Kentucky(BaseOVRForm):
         form['mname'] = user.get('middle_name', '').upper()
         form['lname'] = user.get('last_name').upper()
 
-        form['sex'] = user.get('gender')[0].upper()
+        form['sex'] = parse_gender(user.get('gender'))
         form['email'] = user.get('email', '')
 
     def party_affiliation(self, user, form):

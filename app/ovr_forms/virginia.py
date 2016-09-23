@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import options_dict, split_date, clean_browser_response, ValidationError
+from form_utils import options_dict, split_date, clean_browser_response, parse_gender, ValidationError
 import sys, traceback
 from robobrowser import RoboBrowser
 
@@ -117,7 +117,8 @@ class Virginia(BaseOVRForm):
         (year, month, day) = split_date(user['date_of_birth'])
         form['Identity.DateOfBirth'].value = '/'.join([month, day, year])
 
-        form['Identity.Gender'] = user.get('gender')
+        # values need to be M/F
+        form['Identity.Gender'].value = parse_gender(user['gender'])
 
         if user.get('ssn') == "NONE":
             form['Identity.DoesNotHaveSocialSecurityNumber'] = "true"

@@ -1,5 +1,5 @@
 from app.ovr_forms.base_ovr_form import BaseOVRForm, OVRError
-from app.ovr_forms.form_utils import ValidationError, split_date, split_name
+from app.ovr_forms.form_utils import ValidationError, split_date, split_name, parse_gender
 
 import storage
 import postage
@@ -39,11 +39,13 @@ class NVRA(BaseOVRForm):
             self.add_error('You must be 18 by Election Day in order to register to vote.', field='will_be_18')
             return False
 
-        if user.get('gender') == 'M':
-            form['title_mr'] = True
-        elif user.get('gender') == 'F':
-            form['title_ms'] = True
-        # TODO handle Miss, Mrs?
+        if user.get('gender'):
+            gender_str = parse_gender(user.get('gender'))
+            if gender_str is 'M':
+                form['title_mr'] = True
+            elif gender_str is 'F':
+                form['title_ms'] = True
+            # TODO handle Miss, Mrs?
             
         form['first_name'] = user.get('first_name')
         form['middle_name'] = user.get('middle_name', '')

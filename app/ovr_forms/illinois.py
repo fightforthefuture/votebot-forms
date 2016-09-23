@@ -1,5 +1,5 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import ValidationError, split_date, split_name, get_address_components, options_dict, get_address_from_freeform, clean_browser_response
+from form_utils import ValidationError, split_date, split_name, parse_gender, get_address_components, options_dict, get_address_from_freeform, clean_browser_response
 import sys, traceback
 
 
@@ -135,7 +135,7 @@ class Illinois(BaseOVRForm):
         frm = self.browser.get_form()
 
         frm['ctl00$MainContent$tbSSN'].value = user['ssn_last4']
-        frm['ctl00$MainContent$rblSex'].value = 'F' if 'f' in user['gender'].lower() else 'M'
+        frm['ctl00$MainContent$rblSex'].value = parse_gender(user['gender'])
 
         self.browser.submit_form(frm, submit=frm['ctl00$MainContent$btnNext'])
 
