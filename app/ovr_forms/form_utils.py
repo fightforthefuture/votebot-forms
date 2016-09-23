@@ -71,14 +71,24 @@ def split_name(full_name):
     previous_name_space_count = full_name.count(' ')
     previous_name_split = full_name.split(' ', 2)
 
-    if previous_name_space_count == 1:
+    if previous_name_space_count == 0:
+        # JLEV HACK
+        # if a person has only one name, is it their last or first?
+        first_name = ''
+        middle_name = ''
+        last_name = previous_name_split[0]
+    elif previous_name_space_count == 1:
         first_name = previous_name_split[0]
         middle_name = ''
         last_name = previous_name_split[1]
-    else:
+    elif previous_name_space_count == 2:
         first_name = previous_name_split[0]
         middle_name = previous_name_split[1]
         last_name = previous_name_split[2]
+    else:
+        first_name = previous_name_split[0]
+        middle_name = previous_name_split[1]
+        last_name = ' '.join(previous_name_split[2:])
 
     return (first_name, middle_name, last_name)
 
