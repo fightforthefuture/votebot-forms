@@ -86,7 +86,7 @@ class Colorado(BaseOVRForm):
             form = self.browser.get_form({'id': 'eligibilityVoterForm'})
             return self.verify_eligibility(user, form)
         else:
-            form = self.browser.get_form({'id': 'editVoterForm'})
+            form = self.browser.get_form({'action': '/voter-classic/pages/pub/olvr/editVoter.xhtml'})
             return self.edit_voter_information(user, form)
 
     def verify_eligibility(self, user, form):
