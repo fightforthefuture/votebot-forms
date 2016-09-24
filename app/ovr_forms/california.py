@@ -110,7 +110,10 @@ class California(BaseOVRForm):
         form['VoterInformation.AddressCity'].value = user['city']
         form['VoterInformation.AddressZip'].value = user['zip']
         county_options = options_dict(form['VoterInformation.CountyIdKey'])
-        form['VoterInformation.CountyIdKey'].value = county_options.get(user['county'])
+        try:
+            form['VoterInformation.CountyIdKey'].value = county_options.get(user['county'].strip())
+        except KeyError:
+            raise ValidationError(message='no county match', payload=user['county'])
 
         # Ethnicity (optional)
         if 'ethnicity' in user:
