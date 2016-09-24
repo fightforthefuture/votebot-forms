@@ -260,5 +260,7 @@ class Illinois(BaseOVRForm):
             return 'CITY OF ROCKFORD'
         elif county == 'Cook':
             return 'COOK - SUBURBS'
+        elif county == 'Dupage':
+            return 'DuPAGE'  # case sensitive, obvs
         else:
             return county.upper()
