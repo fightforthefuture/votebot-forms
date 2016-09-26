@@ -1,7 +1,9 @@
 from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import (ValidationError, clean_browser_response,
-                        bool_to_string, split_date, options_dict, get_party_from_list)
+                        bool_to_string, split_date, split_name, options_dict, get_party_from_list)
+from form_address import (get_address_from_freeform, get_street_address_from_components, get_address_unit_from_components)
 import sys, traceback
+
 
 class California(BaseOVRForm):
     def __init__(self):
@@ -86,12 +88,38 @@ class California(BaseOVRForm):
             form['VoterInformation.SuffixIdKey'].value = suffix_options.get(user['name_suffix'])
 
         # change of name
+        if user.get('has_previous_name'):
+            form['VoterInformation.IsPreviouslyRegisteredName'].checked = 'checked'
+            (prev_first, prev_middle, prev_last) = split_name(user.get('previous_name', ''))
+            form['VoterInformation.NamePriorFirst'] = prev_first
+            form['VoterInformation.NamePriorMiddle'] = prev_middle
+            form['VoterInformation.NamePriorLast'] = prev_last
 
         # change of address
+        if user.get('has_previous_adress'):
+            form['VoterInformation.IsPreviouslyRegisteredName'].checked = 'checked'
+            form['VoterInformation.PreviousAddressStreet1'] = user.get('previous_address', '')
+            form['VoterInformation.PreviousAddressStreet2'] = user.get('previous_address_unit', '')
+            form['VoterInformation.PreviousAddressCity'] = user.get('previous_city', '')
+            form['VoterInformation.PreviousAddressState'] = user.get('previous_zip', '')
+            form['VoterInformation.PreviousAddressZip'] = user.get('previous_state', '')
+
+        # separate mailing address
+        if user.get('has_separate_mailing_addresss'):
+            form['VoterInformation.IsDifferentMailingAddress'].checked = 'checked'
+
+            mailing_components = get_address_from_freeform(user.get('separate_mailing_address'))
+            form['VoterInformation.MailingAddressStreet1'] = get_street_address_from_components(mailing_components)
+            form['VoterInformation.MailingAddressStreet2'] = get_address_unit_from_components(mailing_components)
+            form['VoterInformation.MailingAddressCity'] = mailing_components('city_name')
+            form['VoterInformation.MailingAddressState'] = mailing_components('state_abbreviation')
+            form['VoterInformation.MailingAddressZip'] = mailing_components('zipcode')
 
         form['VoterInformation.EmailId'].value = user.get('email', '')
         form['VoterInformation.ConfirmEmailId'].value = user.get('email', '')
-        #form['VoterInformation.PhoneNumber].value'] = user.get('phone', '')
+        if user.get('phone'):
+            phone = user.get('phone').replace('+1', '').replace('-', '')
+            form['VoterInformation.PhoneNumber'].value = phone
 
         (year, month, day) = split_date(user['date_of_birth'], padding=False)
         form['VoterInformation.Month'].value = month
