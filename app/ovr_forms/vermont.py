@@ -1,5 +1,6 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import ValidationError, clean_browser_response, options_dict, split_date, split_name, get_address_components
+from form_utils import (ValidationError, clean_browser_response,
+                        options_dict, split_date, split_name, get_address_components)
 import sys, traceback
 
 

@@ -1,5 +1,7 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import get_address_components, options_dict, split_date, parse_gender, clean_browser_response, ValidationError
+from form_utils import (ValidationError, clean_browser_response,
+                        options_dict, split_date, parse_gender,
+                        get_address_components)
 import robobrowser
 import sys, traceback
 

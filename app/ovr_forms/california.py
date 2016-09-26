@@ -1,5 +1,6 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import bool_to_string, split_date, options_dict, get_party_from_list, clean_browser_response, ValidationError
+from form_utils import (ValidationError, clean_browser_response,
+                        bool_to_string, split_date, options_dict, get_party_from_list)
 import sys, traceback
 
 class California(BaseOVRForm):
