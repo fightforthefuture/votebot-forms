@@ -81,9 +81,9 @@ class Illinois(BaseOVRForm):
         illinois_identification_form = self.browser.get_form()
         if user.get('state_id_number'):
             if user['state_id_number'][0].isalpha():
-                illinois_identification_form['ctl00$MainContent$tbILDLIDNumber'] = user['state_id_number'][1:4]
-                illinois_identification_form['ctl00$MainContent$tbILDLIDNumber2'] = user['state_id_number'][5:8]
-                illinois_identification_form['ctl00$MainContent$tbILDLIDNumber3'] = user['state_id_number'][9:12]
+                illinois_identification_form['ctl00$MainContent$tbILDLIDNumber'] = user['state_id_number'][0:4]
+                illinois_identification_form['ctl00$MainContent$tbILDLIDNumber2'] = user['state_id_number'][4:8]
+                illinois_identification_form['ctl00$MainContent$tbILDLIDNumber3'] = user['state_id_number'][8:12]
             else:
                 raise ValidationError(message='A valid Illinois ID number must start with a letter')
         else:
