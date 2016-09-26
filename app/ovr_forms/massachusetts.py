@@ -1,5 +1,7 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import get_address_components, options_dict, split_date, get_party_from_list, clean_browser_response, ValidationError
+from form_utils import (ValidationError, clean_browser_response, options_dict,
+                        split_date, split_name, get_party_from_list,
+                        get_address_components, get_address_from_freeform)
 import json
 import sys, traceback
 
@@ -181,14 +183,77 @@ class Massachusetts(BaseOVRForm):
             # No Party (Unenrolled, commonly referred to as ''Independent'')
             form['ctl00$MainContent$PartyEnrolled'].value = 'rdoBtnNoParty'
 
-        # possible todos, all optional:
-        # phone number
+        # phone number, optional
+        if user.get('phone'):
+            phone = user.get('phone').replace('+1', '')
+            form['ctl00$MainContent$txtAreaCode'] = phone[0:3]
+            form['ctl00$MainContent$txtPhone3'] = phone[3:6]
+            form['ctl00$MainContent$txtPhone4'] = phone[6:10]
 
         # separate mailing address
+        if user.get('has_separate_mailing_address'):
+            form['ctl00$MainContent$ChkDiffMailAddr'].checked = 'checked'
+            form['ctl00$MainContent$ChkDiffMailAddr'].value = 'on'
+
+            # remove the disabled attr on the relevant fields
+            del self.browser.select('input[name="ctl00$MainContent$txtDiffStNamePO"]')[0]['disabled']
+            del self.browser.select('input[name="ctl00$MainContent$txtDiffUnitApt"]')[0]['disabled']
+            del self.browser.select('input[name="ctl00$MainContent$txtDiffCityTownCounty"]')[0]['disabled']
+            del self.browser.select('input[name="ctl00$MainContent$txtDiffZip"]')[0]['disabled']
+            del self.browser.select('select[name="ctl00$MainContent$ddlDiffStateTerr"]')[0]['disabled']
+
+            # parse mailing address components
+            address = get_address_from_freeform(user['separate_mailing_address'])
+            address_components = address['components']
+
+            mailing_address = "%s " % address_components['primary_number']
+            if 'street_predirection' in address_components:
+                mailing_address += "%s " % address_components['street_predirection']
+            mailing_address += "%s" % address_components['street_name']
+            if 'street_suffix' in address_components:
+                mailing_address += " %s" % address_components["street_suffix"]
+            if 'street_postdirection' in address_components:
+                mailing_address += " %s" % address_components["street_postdirection"]
+
+            # update fields with mailing address data
+            form['ctl00$MainContent$txtDiffStNamePO'].value = mailing_address
+            if address_components.get('secondary_number'):
+                mailing_address_unit = address_components['secondary_number']
+                if address_components.get('secondary_designator'):
+                    mailing_address_unit = "%s %s" % (address_components['secondary_designator'], mailing_address_unit)
+                form['ctl00$MainContent$txtDiffUnitApt'].value = mailing_address_unit
+            form['ctl00$MainContent$txtDiffCityTownCounty'].value = address_components['city_name']
+            form['ctl00$MainContent$txtDiffZip'].value = address_components['zipcode']
+            form['ctl00$MainContent$ddlDiffStateTerr'].value = address_components['state_abbreviation']
 
         # former name
+        if user.get('has_previous_name'):
+            prev_first, prev_last = split_name(user.get('previous_name'))
 
-        # address where you were last registered to vote.
+            del self.browser.select('input[name="ctl00$MainContent$txtFirstNameFormer"]')[0]['disabled']
+            del self.browser.select('input[name="ctl00$MainContent$txtLastNameFormer"]')[0]['disabled']
+
+            form['ctl00$MainContent$txtFirstNameFormer'] = prev_first
+            form['ctl00$MainContent$txtLastNameFormer'] = prev_last
+
+        # address where you were last registered to vote
+        if user.get('has_previous_address'):
+            form['ctl00$MainContent$ChkPrevRegAddr'].checked = 'checked'
+            form['ctl00$MainContent$ChkPrevRegAddr'].value = 'on'
+
+            # remove the disabled attr on the relevant fields
+            del self.browser.select('input[name="ctl00$MainContent$TxtPrevRegStAddr"]')[0]['disabled']
+            del self.browser.select('input[name="ctl00$MainContent$TxtPrevRegUnitApt"]')[0]['disabled']
+            del self.browser.select('input[name="ctl00$MainContent$TxtPrevRegCityTownCounty"]')[0]['disabled']
+            del self.browser.select('input[name="ctl00$MainContent$TxtPrevRegZip"]')[0]['disabled']
+            del self.browser.select('select[name="ctl00$MainContent$ddlPrevRegStateTerr"]')[0]['disabled']
+
+            # update fields with previous address data
+            form['ctl00$MainContent$TxtPrevRegStAddr'] = user.get('previous_address', '')
+            form['ctl00$MainContent$TxtPrevRegUnitApt'] = user.get('previous_address_unit', '')
+            form['ctl00$MainContent$TxtPrevRegCityTownCounty'] = user.get('previous_city', '')
+            form['ctl00$MainContent$TxtPrevRegZip'] = user.get('previous_zip', '')
+            form['ctl00$MainContent$ddlPrevRegStateTerr'] = user.get('previous_state', '')
 
         self.browser.submit_form(form)
 
