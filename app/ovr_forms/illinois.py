@@ -70,20 +70,29 @@ class Illinois(BaseOVRForm):
     def application_type(self, user):
         self.browser.open('https://ova.elections.il.gov/Step3.aspx')
         application_type_form = self.browser.get_form()
-        application_type_form['ctl00$MainContent$rblApplicationType'].value = 'R'
+        if user.get('has_previous_address'):
+            application_type_form['ctl00$MainContent$rblApplicationType'].value = 'CA'
+        else:
+            application_type_form['ctl00$MainContent$rblApplicationType'].value = 'R'
         self.browser.submit_form(application_type_form, submit=application_type_form['ctl00$MainContent$btnNext'])
 
     def illinois_identification(self, user):
         self.browser.open('https://ova.elections.il.gov/Step4.aspx')
         illinois_identification_form = self.browser.get_form()
-        illinois_identification_form['ctl00$MainContent$tbILDLIDNumber'] = user['state_id_number'][0:3]
-        illinois_identification_form['ctl00$MainContent$tbILDLIDNumber2'] = user['state_id_number'][4:7]
-        illinois_identification_form['ctl00$MainContent$tbILDLIDNumber3'] = user['state_id_number'][8:11]
+        if user.get('state_id_number'):
+            if user['state_id_number'][0].isalpha():
+                illinois_identification_form['ctl00$MainContent$tbILDLIDNumber'] = user['state_id_number'][1:4]
+                illinois_identification_form['ctl00$MainContent$tbILDLIDNumber2'] = user['state_id_number'][5:8]
+                illinois_identification_form['ctl00$MainContent$tbILDLIDNumber3'] = user['state_id_number'][9:12]
+            else:
+                raise ValidationError(message='A valid Illinois ID number must start with a letter')
+        else:
+            raise ValidationError(message='A valid Illinois ID number is required to register to vote online')
 
         (dob_year, dob_month, dob_day) = split_date(user['date_of_birth'])
         illinois_identification_form['ctl00$MainContent$tbDOB'].value = '-'.join([dob_month, dob_day, dob_year])
 
-        (id_year, id_month, id_day) = split_date(user['date_of_birth']) 
+        (id_year, id_month, id_day) = split_date(user['date_of_birth'])
         illinois_identification_form['ctl00$MainContent$tbIDIssuedDate'].value = '-'.join([id_month, id_day, id_year])
 
         self.browser.submit_form(illinois_identification_form, submit=illinois_identification_form['ctl00$MainContent$btnNext'])
@@ -183,8 +192,7 @@ class Illinois(BaseOVRForm):
         frm = self.browser.get_form()
 
         if user["has_previous_address"]:
-            address = get_address_components(user['previous_address'], user['previous_city'], user['previous_state'], user['previous_zip'])
-            address_components = address["components"]
+            address_components = get_address_components(user['previous_address'], user['previous_city'], user['previous_state'], user['previous_zip'])
 
             frm['ctl00$MainContent$tbFormerStreetNumber'].value = address_components['primary_number']
 
@@ -202,7 +210,7 @@ class Illinois(BaseOVRForm):
             frm['ctl00$MainContent$tbFormerCity'].value = address_components['city_name']
             frm['ctl00$MainContent$tbFormerZip'].value = address_components['zipcode']
 
-            election_authority = self.determine_election_authority(address_components['city_name'], address['metadata']['county_name'])
+            election_authority = self.determine_election_authority(address_components['city_name'], address_components['county_name'])
             frm['ctl00$MainContent$ddlCountySelect'].value = options_dict(frm['ctl00$MainContent$ddlCountySelect'])[election_authority]
 
         else:
