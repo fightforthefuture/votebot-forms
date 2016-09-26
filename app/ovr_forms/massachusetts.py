@@ -52,7 +52,7 @@ class Massachusetts(BaseOVRForm):
                     raise ValidationError(message='field_errors', payload=errors)
                 if not step_form:
                     raise ValidationError(message='no_form_found', payload=handler.__name__)
-                
+
             success_page = clean_browser_response(self.browser)
             if self.success_string in success_page:
                 return {'status': 'success'}
@@ -102,7 +102,7 @@ class Massachusetts(BaseOVRForm):
         form['ctl00$MainContent$TxtDoB'].value = '/'.join([month, day, year])
 
         form['ctl00$MainContent$TxtRMVID'].value = user['state_id_number']
-        
+
         if user['consent_use_signature']:
             form['ctl00$MainContent$ChkConsent'].checked = 'checked'
             form['ctl00$MainContent$ChkConsent'].value = 'on'
@@ -114,7 +114,6 @@ class Massachusetts(BaseOVRForm):
 
         if "Your RMV ID cannot be verified" in self.browser.response.text:
             self.add_error("Your Massachusetts RMV ID cannot be verified.", field='state_id_number')
-            # todo: fall back to PDF form here? retry?
 
     def complete_form(self, user, form):
 
@@ -177,15 +176,18 @@ class Massachusetts(BaseOVRForm):
                 # unable to match designation, unenrolled
                 self.add_error("We were unable to match that political designation", field='political_party')
                 form['ctl00$MainContent$PartyEnrolled'].value = 'rdoBtnNoParty'
-            
+
         else:
             # No Party (Unenrolled, commonly referred to as ''Independent'')
             form['ctl00$MainContent$PartyEnrolled'].value = 'rdoBtnNoParty'
 
         # possible todos, all optional:
-        # former name
-        # separate mailing address
         # phone number
+
+        # separate mailing address
+
+        # former name
+
         # address where you were last registered to vote.
 
         self.browser.submit_form(form)
