@@ -251,7 +251,9 @@ class Illinois(BaseOVRForm):
         self.browser.submit_form(frm, submit=frm['ctl00$MainContent$btnFinish'])
 
     def determine_election_authority(self, city, county):
+        # match SmartyStreets city/county names to IL SOS list
 
+        # handle cities
         if city == 'Chicago':
             return 'CITY OF CHICAGO'
         elif city == 'Aurora':
@@ -266,9 +268,22 @@ class Illinois(BaseOVRForm):
             return 'CITY OF DANVILLE'
         elif city == 'Rockford':
             return 'CITY OF ROCKFORD'
+        # handle counties
         elif county == 'Cook':
             return 'COOK - SUBURBS'
+        # county names are case sensitive
+        # and sometimes oddly capitalized
+        elif county == 'Dekalb':
+            return 'DeKALB'
+        elif county == 'Dewitt':
+            return 'DeWITT'
         elif county == 'Dupage':
-            return 'DuPAGE'  # case sensitive, obvs
+            return 'DuPAGE'
+        elif county == 'Jo Daviess':
+            return 'JoDAVIESS'
+        elif county == 'La Salle':
+            return 'LaSALLE'
+        elif county == 'Saint Clair':
+            return 'ST. CLAIR'
         else:
             return county.upper()
