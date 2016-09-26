@@ -85,6 +85,10 @@ class California(BaseOVRForm):
         if 'name_suffix' in user:
             form['VoterInformation.SuffixIdKey'].value = suffix_options.get(user['name_suffix'])
 
+        # change of name
+
+        # change of address
+
         form['VoterInformation.EmailId'].value = user.get('email', '')
         form['VoterInformation.ConfirmEmailId'].value = user.get('email', '')
         #form['VoterInformation.PhoneNumber].value'] = user.get('phone', '')
