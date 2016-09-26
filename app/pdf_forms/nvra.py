@@ -173,9 +173,25 @@ class NVRA(BaseOVRForm):
 
         if mailing_label:
             # write it to a tempfile, so we can adjust it to fit
+            # don't delete automatically, because ghostscript needs a handle
             mailing_label_tmp = tempfile.NamedTemporaryFile(delete=False)
             mailing_label_tmp.write(mailing_label)
             mailing_label_tmp.close()
+
+            if include_letter:
+                # rotate with pdftk
+                mailing_label_rotate_tmp = tempfile.NamedTemporaryFile(delete=False)
+                pdftk_mailing_label_rotate = [PDFTK_BIN,
+                     mailing_label_tmp.name, 'rotate', '1-1south',
+                     'output', mailing_label_rotate_tmp.name]
+                process = subprocess.Popen(' '.join(pdftk_mailing_label_rotate), shell=True,
+                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                (pdftk_rotate_out, pdftk_rotate_err) = process.communicate()
+                stamp_offset = '[0 550]'  # offset vertically back up the page
+
+                mailing_label_tmp = mailing_label_rotate_tmp
+            else:
+                stamp_offset = '[0 -450]'  # center page bottom
 
             # offset it with ghostscript
             # because pdftk can't adjust stamp location
@@ -183,21 +199,23 @@ class NVRA(BaseOVRForm):
             gs_offset = ['gs', '-q', '-o', stamp_tmp.name,
                          '-sDEVICE=pdfwrite',
                          '-g6120x7920',  # dimensions in points * 10
-                         '-c "<</PageOffset [0 -450]>> setpagedevice"',  # adjust for center bottom
+                         '-c "<</PageOffset %s>> setpagedevice"' % stamp_offset,
                          '-f', mailing_label_tmp.name]
             process = subprocess.Popen(' '.join(gs_offset), shell=True)
             (offset_out, offset_err) = process.communicate()
+            if offset_err:
+                print "ghostscript error", offset_err
 
             # delete mailing label file
             os.remove(mailing_label_tmp.name)
 
             # stamp it on the coversheet
             pdftk_stamp_coversheet = [PDFTK_BIN,
-                 coversheet_template, 'stamp', '-',
+                 coversheet_template, 'stamp', stamp_tmp.name,
                  'output', coversheet_tmp.name]
             process = subprocess.Popen(' '.join(pdftk_stamp_coversheet), shell=True,
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            (coversheet_out, coversheet_err) = process.communicate(input=stamp_tmp.read())
+            (coversheet_out, coversheet_err) = process.communicate()
         else:
             # fill out coversheet with mailto field from fdf_stream
             pdftk_fill_coversheet = [PDFTK_BIN,
@@ -214,7 +232,7 @@ class NVRA(BaseOVRForm):
             letter_tmp = tempfile.NamedTemporaryFile()
             fdf_letter_stream = forge_fdf(fdf_data_strings=form_data)
             pdftk_fill_letter = [PDFTK_BIN,
-                 self.letter_template.name, 'fill_form', '-',
+                 self.letter_template, 'fill_form', '-',
                  'output', letter_tmp.name, 'flatten']
             process = subprocess.Popen(' '.join(pdftk_fill_letter), shell=True,
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)
