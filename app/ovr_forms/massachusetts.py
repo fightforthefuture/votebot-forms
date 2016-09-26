@@ -132,7 +132,11 @@ class Massachusetts(BaseOVRForm):
             form['ctl00$MainContent$txtUnitApt'].value = user.get('address_unit')
 
         if 'street_suffix' in address_components:
-            form['ctl00$MainContent$ddlStreetSuffix'].value = options_dict(form['ctl00$MainContent$ddlStreetSuffix'])[address_components['street_suffix'].upper()]
+            street_suffix_options = options_dict(form['ctl00$MainContent$ddlStreetSuffix'])
+            try:
+                form['ctl00$MainContent$ddlStreetSuffix'].value = street_suffix_options[address_components['street_suffix'].upper()]
+            except KeyError:
+                form['ctl00$MainContent$ddlStreetSuffix'].value = street_suffix_options['No suffix']
             
         form['ctl00$MainContent$ddlCityTown'].value = options_dict(form['ctl00$MainContent$ddlCityTown'])[user['city']]
 
