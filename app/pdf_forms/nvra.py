@@ -14,7 +14,7 @@ PDFTK_BIN = os.environ.get('PDFTK_BIN', 'pdftk')
 
 
 class NVRA(BaseOVRForm):
-    def __init__(self):
+    def __init__(self, mail_deadline=None):
         super(NVRA, self).__init__()
         self.coversheet_email = os.path.abspath('app/pdf_forms/templates/coversheet-email.pdf')
         self.coversheet_email_nostamp = os.path.abspath('app/pdf_forms/templates/coversheet-email-nostamp.pdf')
@@ -24,6 +24,10 @@ class NVRA(BaseOVRForm):
         self.form_template = os.path.abspath('app/pdf_forms/templates/eac-nvra.pdf')
         self.add_required_fields(['us_citizen', 'will_be_18'])
         self.pdf_url = ''
+        if mail_deadline:
+            self.mail_deadline_text = mail_deadline
+        else:
+            self.mail_deadline_text = "The mailing deadline is soon"
 
     def match_fields(self, user):
         form = {}
@@ -103,7 +107,8 @@ class NVRA(BaseOVRForm):
         if not form.get('id_number'):
             form['id_number'] = "NONE"
 
-        form['registration_deadline'] = user.get('registration_deadline', 'Put the form in the mail at least 15 days before election day')
+        # include mail deadline for letters
+        form['mail_deadline'] = self.mail_deadline_text
 
         mailto_dict = election_mail.get_mailto_address(user.get('state'))
         # format mailto values to correct address
@@ -205,15 +210,25 @@ class NVRA(BaseOVRForm):
         # join coversheet with form
         combined_tmp = tempfile.NamedTemporaryFile()
         if include_letter:
+            # fill in letter template with mail_deadline
+            letter_tmp = tempfile.NamedTemporaryFile()
+            fdf_letter_stream = forge_fdf(fdf_data_strings=form_data)
+            pdftk_fill_letter = [PDFTK_BIN,
+                 self.letter_template.name, 'fill_form', '-',
+                 'output', letter_tmp.name, 'flatten']
+            process = subprocess.Popen(' '.join(pdftk_fill_letter), shell=True,
+                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            (letter_out, letter_err) = process.communicate(input=fdf_letter_stream)
+
             pdftk_join = [PDFTK_BIN,
-                         'A=%s' % coversheet_tmp.name, 'B=%s' % filled_form_tmp.name,
-                         'C=%s' % self.letter_template,
-                         'cat', 'C', 'A', 'B1-1',  # only include first page of filled_form
+                         'C=%s' % coversheet_tmp.name, 'F=%s' % filled_form_tmp.name,
+                         'L=%s' % letter_tmp.name,
+                         'cat', 'L', 'C', 'F1-1',  # only include first page of filled_form
                          'output', combined_tmp.name]
         else:
             pdftk_join = [PDFTK_BIN,
-                         'A=%s' % coversheet_tmp.name, 'B=%s' % filled_form_tmp.name,
-                         'cat', 'A', 'B1-1',  # only include first page of filled_form
+                         'C=%s' % coversheet_tmp.name, 'F=%s' % filled_form_tmp.name,
+                         'cat', 'C', 'F1-1',  # only include first page of filled_form
                          'output', combined_tmp.name]
         process = subprocess.Popen(' '.join(pdftk_join), shell=True,
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE)

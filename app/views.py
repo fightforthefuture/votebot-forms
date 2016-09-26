@@ -57,9 +57,7 @@ def registration(request, registration_type="generate_pdf"):
 
     state = user['state']
     if registration_type == "generate_pdf":
-        form = OVR_FORMS['NVRA']()
-    elif registration_type == "vote_dot_org":
-        form = OVR_FORMS['VoteDotOrg']()
+        form = OVR_FORMS['NVRA'](mail_deadline=request_json.get('mail_deadline_text', None))
     elif state in OVR_FORMS:
         form = OVR_FORMS[state]()
     else:
