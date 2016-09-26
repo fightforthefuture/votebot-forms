@@ -1,7 +1,7 @@
 from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import (ValidationError, clean_browser_response,
-                        options_dict, split_date, parse_gender,
-                        get_address_components)
+                        options_dict, split_date, parse_gender)
+from form_address import (get_address_components, get_street_name_from_components)
 import robobrowser
 import sys, traceback
 
@@ -88,14 +88,9 @@ class Georgia(BaseOVRForm):
 
         form['streetNum'].value = address_components['primary_number']
 
-        full_street_name = address_components['street_name']
-        if 'street_predirection' in address_components:
-            full_street_name = address_components['street_predirection'] + ' ' + full_street_name
-
-        if 'street_suffix' in address_components:
-            full_street_name += ' %s' % address_components['street_suffix']
-
+        full_street_name = get_street_name_from_components(address_components)
         form['streetName1'].value = options_dict(form['streetName1'])[full_street_name.upper()]
+
         street_value = form['streetName1'].value
 
         # look up postal city key and rural_flag from street_value

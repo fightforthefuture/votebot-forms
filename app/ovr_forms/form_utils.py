@@ -1,13 +1,7 @@
-from smartystreets.client import Client
-
 import datetime
 import difflib
 import json
 import re
-
-from ..config import SMARTY_STREETS_AUTH_ID, SMARTY_STREETS_AUTH_TOKEN
-
-#  TODO, move some of these into a fork of robobrowser?
 
 
 def log_form(form):
@@ -120,43 +114,6 @@ def bool_to_int(boolean):
         raise ValidationError("boolean shouldn't be None", payload=boolean)
     r = int(boolean)
     return r
-
-
-def get_address_components(address, city, state, zip):
-    client = Client(auth_id=SMARTY_STREETS_AUTH_ID, auth_token=SMARTY_STREETS_AUTH_TOKEN)
-
-    # reassemble components into string
-    # smarty streets specifically wants strings (not unicode) so...
-    full_address = "%(address)s, %(city)s, %(state)s, %(zip)s" % \
-        {'address': str(address), 'city': str(city), 'state': str(state), 'zip': str(zip)}
-    response = client.street_address(str(full_address))
-
-    if not response or not response.get('analysis', False) or \
-      response['analysis'].get('active', 'N') != 'Y':
-        raise ValidationError("could not validate address", payload={
-            "address": address,
-            "city": city,
-            "state": state,
-            "zip": zip
-            })
-
-    # merge county into components dict
-    d = response['components']
-    d['county_name'] = response['metadata']['county_name']
-    return d
-
-
-def get_address_from_freeform(address):
-    client = Client(auth_id=SMARTY_STREETS_AUTH_ID, auth_token=SMARTY_STREETS_AUTH_TOKEN)
-    response = client.street_address(str(address))
-
-    if not response or not response.get('analysis', False) or \
-      response['analysis'].get('active', 'N') != 'Y':
-        raise ValidationError("could not validate freeform address", payload={
-            "address": address
-            })
-
-    return response
 
 
 def get_party_from_list(party, party_list):

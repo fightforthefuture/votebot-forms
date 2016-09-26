@@ -1,6 +1,7 @@
 from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import (ValidationError, clean_browser_response,
-                        options_dict, split_date, split_name, get_address_components)
+                        options_dict, split_date, split_name)
+from form_address import (get_address_components, get_street_name_from_components)
 import sys, traceback
 
 
@@ -96,12 +97,7 @@ class Vermont(BaseOVRForm):
         address_components = get_address_components(user['address'], user['city'], user['state'], user['zip'])
 
         form['addressNumber'].value = address_components['primary_number']
-        street_name = address_components['street_name']
-        if 'street_predirection' in address_components:
-            street_name = "%s %s" % (address_components['street_predirection'], street_name)
-        if 'street_postdirection' in address_components:
-            street_name = "%s %s" % (street_name, address_components['street_postdirection'])
-        form['addressStreet1'].value = street_name
+        form['addressStreet1'].value = get_street_name_from_components(address_components)
 
         if user.get('address_unit') and not user.get('address_unit').lower() == "none":
             form['addressUnit'].value = user.get('address_unit')

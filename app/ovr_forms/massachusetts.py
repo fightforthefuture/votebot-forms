@@ -1,7 +1,9 @@
 from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import (ValidationError, clean_browser_response, options_dict,
-                        split_date, split_name, get_party_from_list,
-                        get_address_components, get_address_from_freeform)
+                        split_date, split_name, get_party_from_list)
+from form_address import (get_address_components, get_address_from_freeform,
+                        get_street_name_from_components, get_street_address_from_components,
+                        get_address_unit_from_components)
 import json
 import sys, traceback
 
@@ -122,14 +124,7 @@ class Massachusetts(BaseOVRForm):
         address_components = get_address_components(user['address'], user['city'], user['state'], user['zip'])
 
         form['ctl00$MainContent$txtStNum'].value = address_components['primary_number']
-        street_name = address_components['street_name']
-
-        if 'street_predirection' in address_components:
-            street_name = "%s %s" % (address_components['street_predirection'], street_name)
-
-        if 'street_postdirection' in address_components:
-            street_name = "%s %s" % (street_name, address_components['street_postdirection'])
-
+        street_name = get_street_name_from_components(address_components)
         form['ctl00$MainContent$txStNameSuffix'].value = street_name[:25]
 
         if user.get('address_unit') and not user.get('address_unit').lower() == "none":
@@ -141,7 +136,7 @@ class Massachusetts(BaseOVRForm):
                 form['ctl00$MainContent$ddlStreetSuffix'].value = street_suffix_options[address_components['street_suffix'].upper()]
             except KeyError:
                 form['ctl00$MainContent$ddlStreetSuffix'].value = street_suffix_options['No suffix']
-            
+
         form['ctl00$MainContent$ddlCityTown'].value = options_dict(form['ctl00$MainContent$ddlCityTown'])[user['city']]
         city_normalized = MA_ARCHAIC_COMMUNITIES.get(user['city'], user['city'])
         try:
@@ -203,28 +198,16 @@ class Massachusetts(BaseOVRForm):
             del self.browser.select('select[name="ctl00$MainContent$ddlDiffStateTerr"]')[0]['disabled']
 
             # parse mailing address components
-            address = get_address_from_freeform(user['separate_mailing_address'])
-            address_components = address['components']
-
-            mailing_address = "%s " % address_components['primary_number']
-            if 'street_predirection' in address_components:
-                mailing_address += "%s " % address_components['street_predirection']
-            mailing_address += "%s" % address_components['street_name']
-            if 'street_suffix' in address_components:
-                mailing_address += " %s" % address_components["street_suffix"]
-            if 'street_postdirection' in address_components:
-                mailing_address += " %s" % address_components["street_postdirection"]
+            mailing_address = get_address_from_freeform(user['separate_mailing_address'])
+            mailing_components = mailing_address['components']
 
             # update fields with mailing address data
-            form['ctl00$MainContent$txtDiffStNamePO'].value = mailing_address
-            if address_components.get('secondary_number'):
-                mailing_address_unit = address_components['secondary_number']
-                if address_components.get('secondary_designator'):
-                    mailing_address_unit = "%s %s" % (address_components['secondary_designator'], mailing_address_unit)
-                form['ctl00$MainContent$txtDiffUnitApt'].value = mailing_address_unit
-            form['ctl00$MainContent$txtDiffCityTownCounty'].value = address_components['city_name']
-            form['ctl00$MainContent$txtDiffZip'].value = address_components['zipcode']
-            form['ctl00$MainContent$ddlDiffStateTerr'].value = address_components['state_abbreviation']
+            form['ctl00$MainContent$txtDiffStNamePO'].value = get_street_address_from_components(mailing_components)
+            if mailing_components.get('secondary_number'):
+                form['ctl00$MainContent$txtDiffUnitApt'].value = get_address_unit_from_components(mailing_components)
+            form['ctl00$MainContent$txtDiffCityTownCounty'].value = mailing_components['city_name']
+            form['ctl00$MainContent$txtDiffZip'].value = mailing_components['zipcode']
+            form['ctl00$MainContent$ddlDiffStateTerr'].value = mailing_components['state_abbreviation']
 
         # former name
         if user.get('has_previous_name'):

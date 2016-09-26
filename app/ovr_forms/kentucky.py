@@ -1,5 +1,7 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import ValidationError, split_date, get_party_from_list, parse_gender, get_address_components, clean_browser_response
+from form_utils import (ValidationError, clean_browser_response,
+                        split_date, parse_gender, get_party_from_list)
+from form_address import (get_address_components, get_street_name_from_components)
 import sys, traceback
 
 
@@ -120,13 +122,7 @@ class Kentucky(BaseOVRForm):
 
         form['resstreetnumber'] = address_components['primary_number']
 
-        street_name = address_components['street_name']
-        if 'street_predirection' in address_components:
-            street_name = "%s %s" % (address_components['street_predirection'], street_name)
-
-        if 'street_postdirection' in address_components:
-            street_name = "%s %s" % (street_name, address_components['street_postdirection'])
-
+        street_name = get_street_name_from_components(address_components)
         form["resaddress"] = street_name.upper()
 
         form['rescity'] = user['city'].upper()

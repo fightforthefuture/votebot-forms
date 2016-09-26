@@ -1,6 +1,6 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import (ValidationError, clean_browser_response, options_dict, split_date,
-                        get_address_from_freeform, get_party_from_list)
+from form_utils import (ValidationError, clean_browser_response, options_dict, split_date, get_party_from_list)
+from form_address import (get_address_from_freeform, get_street_address_from_components)
 import sys, traceback
 
 
@@ -138,18 +138,7 @@ class Arizona(BaseOVRForm):
             address = get_address_from_freeform(user['separate_mailing_address'])
             address_components = address['components']
 
-            mailing_address = "%s " % address_components['primary_number']
-
-            if 'street_predirection' in address_components:
-                mailing_address += "%s " % address_components['street_predirection']
-
-            mailing_address += "%s" % address_components['street_name']
-
-            if 'street_suffix' in address_components:
-                mailing_address += " %s" % address_components["street_suffix"]
-
-            if 'street_postdirection' in address_components:
-                mailing_address += " %s" % address_components["street_postdirection"]
+            mailing_address = get_street_address_from_components(address_components)
 
             frm['mailAddr'].value = mailing_address
             frm['mailCity'].value = address_components['city_name']
