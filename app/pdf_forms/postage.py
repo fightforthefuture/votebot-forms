@@ -22,7 +22,7 @@ def easypost_shipment(to_address, from_address):
 
 def buy_mailing_label(to_address, from_address):
     postage = easypost_shipment(to_address, from_address)
-    rate = postage.lowest_rate()
+    rate = postage.lowest_rate(carriers=['USPS'], services=['First'])
 
     # ensure rate is USPS first class
     if rate.carrier == "USPS" and rate.service == "First":
@@ -43,11 +43,11 @@ def buy_mailing_label(to_address, from_address):
 
 def mail_letter(id, user, file):
     to_address = {
-        "name": "{first_name} {last_name}".format(**user),
+        "name": "{first_name} {last_name}".format(**user)[:50],
         "address_line1": "{address} {unit}".format(
             address=user.get('address'),
             unit=user.get('address_unit', '')  # default to avoid KeyError
-        ).strip(),
+        ).strip()[:50],
         "address_city": user['city'],
         "address_state": user['state'],
         "address_zip": user['zip'],
