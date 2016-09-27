@@ -12,7 +12,7 @@ class Illinois(BaseOVRForm):
         self.add_required_fields(['will_be_18', 'state_id_issue_date', 'ssn_last4',
             'county', 'gender', 'has_previous_name', 'has_previous_address',
             'confirm_name_address', 'consent_use_signature', 'reviewed_information'])
-        self.success_string = 'TBD'
+        self.success_string = 'The information you provided SUCCESSFULLY MATCHED'
 
     def submit(self, user, error_callback_url):
         self.set_user_agent(user)
