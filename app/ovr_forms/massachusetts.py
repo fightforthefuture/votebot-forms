@@ -236,7 +236,12 @@ class Massachusetts(BaseOVRForm):
             form['ctl00$MainContent$TxtPrevRegUnitApt'].value = user.get('previous_address_unit', '')
             form['ctl00$MainContent$TxtPrevRegCityTownCounty'].value = user.get('previous_city', '')
             form['ctl00$MainContent$TxtPrevRegZip'].value = user.get('previous_zip', '')
-            form['ctl00$MainContent$ddlPrevRegStateTerr'].value = options_dict(form['ctl00$MainContent$ddlPrevRegStateTerr'])[state_abbr_to_name(user.get('previous_state'))]
+            state_options = options_dict(form['ctl00$MainContent$ddlPrevRegStateTerr'])
+            try:
+                prev_state = state_options[state_abbr_to_name(user.get('previous_state'))]
+                form['ctl00$MainContent$ddlPrevRegStateTerr'].value = prev_state
+            except KeyError:
+                pass
 
         self.browser.submit_form(form)
 
