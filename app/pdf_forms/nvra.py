@@ -44,13 +44,15 @@ class NVRA(BaseOVRForm):
             return False
 
         if user.get('gender'):
-            gender_str = parse_gender(user.get('gender'))
-            if gender_str is 'M':
-                form['title_mr'] = True
-            elif gender_str is 'F':
-                form['title_ms'] = True
-            # TODO handle Miss, Mrs?
-            
+            try:
+                gender_str = parse_gender(user.get('gender'))
+                if gender_str is 'M':
+                    form['title_mr'] = True
+                elif gender_str is 'F':
+                    form['title_ms'] = True
+            except ValidationError:
+                pass
+
         form['first_name'] = user.get('first_name')
         form['middle_name'] = user.get('middle_name', '')
         form['last_name'] = user.get('last_name')
