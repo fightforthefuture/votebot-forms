@@ -1,6 +1,6 @@
 from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import (ValidationError, clean_browser_response,
-                        options_dict, split_date, parse_gender)
+                        options_dict, split_date, split_name, parse_gender)
 from form_address import (get_address_components, get_street_name_from_components)
 import robobrowser
 import sys, traceback
@@ -57,8 +57,21 @@ class Georgia(BaseOVRForm):
         # update form action, this happens in javascript on validateForm
         form.action = 'reqConsentAndDecline.do'
 
-        # new voter
-        form['changeType'].value = 'NV'
+        if user('has_previous_address'):
+            # change voter registration
+            form['changeType'].value = 'CV'
+            form['_addrChange'].checked = 'checked'
+            # don't actually change registration here, do it later in general information
+        else:
+            # new voter registration
+            form['changeType'].value = 'NV'
+
+        if user.get('has_previous_name'):
+            form['changeType'].value = 'CV'
+            form['_nmChange'].checked = 'checked'
+            (prev_first, prev_middle, prev_last) = split_name(user.get('previous_name'))
+            form['preFirstName'].value = prev_first
+            form['preLastName'].value = prev_last
 
         # county select from list
         form['county'].value = options_dict(form['county'])[user['county'].upper()]
@@ -152,6 +165,17 @@ class Georgia(BaseOVRForm):
             # format?
         # ethnicity requires a dropdown, and is optional
         # skip it
+
+        # previous address appears here
+        if user.get('has_previous_address'):
+            prev_address_components = get_address_components(user['previous_address'], user['previous_city'], user['previous_state'], user['previous_zip'])
+            form['preStreetNo'].value = prev_address_components['primary_number']
+            form['preStreetName'].value = get_street_name_from_components(prev_address_components).upper()
+            if 'secondary_number' in prev_address_components:
+                form['preAptNo'].value = prev_address_components['secondary_number']
+            form['prePostalCity'].value = prev_address_components['city_name']
+            form['ctl00$MainContent$TxtPrevRegZip'].value = prev_address_components['zipcode']
+            form['preState'].value = prev_address_components['state_abbreviation']
 
         form.action = 'summary.do'
         self.browser.submit_form(form, submit=form['next'])
