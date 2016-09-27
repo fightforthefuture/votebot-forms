@@ -99,14 +99,15 @@ class Colorado(BaseOVRForm):
             form['eligibilityVoterForm:coResId'].value = 'Y'
 
     def edit_voter_information(self, user, form):
-
-        party = get_party_from_list(user['political_party'], options_dict(form['editVoterForm:partyAffiliationId']))
+        party_options = options_dict(form['editVoterForm:partyAffiliationId'])
+        # do fuzzy match to political party options
+        party = get_party_from_list(user['political_party'], party_options.keys())
 
         # it is required. if we haven't found a match, defer to 'Unaffiliated'
         if not party:
             party = 'Unaffiliated'
 
-        form['editVoterForm:partyAffiliationId'].value = options_dict(form['editVoterForm:partyAffiliationId'])[party]
+        form['editVoterForm:partyAffiliationId'].value = party_options[party]
 
         if user['military_or_overseas']:
             form['editVoterForm:areUOCAVAId'].value = 'Y'
