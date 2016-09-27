@@ -26,7 +26,7 @@ class Arizona(BaseOVRForm):
                 self.confirm_address,
                 self.register_to_vote,
                 self.verify_voter_registration,
-                # self.vote_by_mail  # no longer appears as the last stage of the form?
+                self.vote_by_mail
             ]
 
             for handler in forms:
