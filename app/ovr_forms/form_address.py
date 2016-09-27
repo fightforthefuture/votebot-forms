@@ -53,7 +53,7 @@ def get_street_name_from_components(address_components):
 
 
 def get_street_address_from_components(address_components):
-    return "%s " % (address_components['primary_number'], get_street_name_from_components(address_components))
+    return "%s %s" % (address_components['primary_number'], get_street_name_from_components(address_components))
 
 
 def get_address_unit_from_components(address_components):
