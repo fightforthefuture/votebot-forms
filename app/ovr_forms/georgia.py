@@ -57,7 +57,7 @@ class Georgia(BaseOVRForm):
         # update form action, this happens in javascript on validateForm
         form.action = 'reqConsentAndDecline.do'
 
-        if user('has_previous_address'):
+        if user.get('has_previous_address'):
             # change voter registration
             form['changeType'].value = 'CV'
             form['_addrChange'].checked = 'checked'
