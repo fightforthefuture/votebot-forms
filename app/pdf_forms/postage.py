@@ -43,8 +43,8 @@ def buy_mailing_label(to_address, from_address):
 
 def mail_letter(id, user, file):
     to_address = {
-        "name": "{first_name} {last_name}".format(**user)[:50],
-        "address_line1": "{address} {unit}".format(
+        "name": u"{first_name} {last_name}".format(**user)[:50],
+        "address_line1": u"{address} {unit}".format(
             address=user.get('address'),
             unit=user.get('address_unit', '')  # default to avoid KeyError
         ).strip()[:50],

@@ -120,12 +120,12 @@ class NVRA(BaseOVRForm):
             form['mailto'] = '\n'.join(mailto_list)
 
         form['return_address'] = '\n'.join([
-            "{first_name} {last_name}".format(**user),
-            "{address} {unit}".format(
+            u"{first_name} {last_name}".format(**user),
+            u"{address} {unit}".format(
                 address=user.get('address'),
                 unit=user.get('address_unit', '')  # default to avoid KeyError
             ),
-            "{city} {state} {zip}".format(**user)
+            u"{city} {state} {zip}".format(**user)
         ])
         return form
 
@@ -148,7 +148,7 @@ class NVRA(BaseOVRForm):
             # try to buy a mailing label
             to_address = election_mail.get_mailto_address(form_data.get('home_state'))
             from_address = {
-                "name": "{first_name} {last_name}".format(**form_data),
+                "name": u"{first_name} {last_name}".format(**form_data),
                 "street1": form_data.get('home_address'),
                 "street2": form_data.get('home_apt'),
                 "city": form_data.get('home_city'),
