@@ -1,6 +1,7 @@
 from base_ovr_form import BaseOVRForm, OVRError
-from form_utils import (ValidationError, clean_browser_response, options_dict, split_date, get_party_from_list)
-from form_address import (get_address_from_freeform, get_street_address_from_components)
+from form_utils import (ValidationError, clean_browser_response, options_dict,
+                        split_date, split_name, get_party_from_list)
+from form_address import (get_address_from_freeform, get_street_address_from_components, get_address_components)
 import sys, traceback
 
 
@@ -52,7 +53,7 @@ class Arizona(BaseOVRForm):
         if self.errors:
             return self.errors
         messages = []
-        errorSel = ['.formError', '.pageError']
+        errorSel = ['.formError', '.pageError', '.formerror']
         for selector in errorSel:
             for error in self.browser.select(selector):
                 messages.append({'error': error.text})
@@ -127,7 +128,6 @@ class Arizona(BaseOVRForm):
     
     def update_address(self, user):
         frm = self.browser.get_form()
-        print frm
 
         frm['resAddr'].value = user['address']
         frm['resCity'].value = user['city']
@@ -171,6 +171,26 @@ class Arizona(BaseOVRForm):
                 frm['otherPartyPreference'].value = user['political_party']
 
         frm['email'].value = user['email']
+
+        if user.get('has_previous_address'):
+            frm['regOther'].checked = 'checked'
+            prev_address_components = get_address_components(user['previous_address'], user['previous_city'], user['previous_state'], user['previous_zip'])
+            # County or state where previously registered
+            try:
+                if prev_address_components['state_abbreviation'] == "AZ":
+                    COUNTY_IDS = {"Apache": "01", "Cochise": "02", "Coconino": "03", "Gila": "04", "Graham": "05", "Greenlee": "06", "Maricopa": "07", "Mohave": "08", "Navajo": "09", "Pima": "10", "Pinal": "11", "Santa Cruz": "12", "Yavapai": "13", "Yuma": "14", "La Paz": "15"}
+                    frm['regCounty'].value = COUNTY_IDS[prev_address_components['county_name']]
+                else:
+                    frm['regCounty'].value = user['previous_state']
+            except KeyError:
+                raise ValidationError(message='unable to match previous state/county', payload=user['previous_zip'])
+
+        if user.get('has_previous_name'):
+            frm['nameChange'].checked = 'checked'
+            (prev_first, prev_middle, prev_last) = split_name(user.get('previous_name'))
+            frm['formerFirstName'] = prev_first
+            frm['formerMiddleName'] = prev_middle
+            frm['formerLastname'] = prev_last
 
         self.browser.submit_form(frm, submit=frm['_eventId_register'], headers=self.get_default_submit_headers())
 
