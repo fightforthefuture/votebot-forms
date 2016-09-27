@@ -137,12 +137,11 @@ class Massachusetts(BaseOVRForm):
             except KeyError:
                 form['ctl00$MainContent$ddlStreetSuffix'].value = street_suffix_options['No suffix']
 
-        form['ctl00$MainContent$ddlCityTown'].value = options_dict(form['ctl00$MainContent$ddlCityTown'])[user['city']]
         city_normalized = MA_ARCHAIC_COMMUNITIES.get(user['city'], user['city'])
         try:
             form['ctl00$MainContent$ddlCityTown'].value = options_dict(form['ctl00$MainContent$ddlCityTown'])[city_normalized]
         except KeyError:
-            raise ValidationError(message='unable to find city in CityTown list', payload=user['city'])
+            raise ValidationError(message='unable to find city in MA CityTown list', payload=user['city'])
 
         form['ctl00$MainContent$txtZip'].value = user['zip']
 
