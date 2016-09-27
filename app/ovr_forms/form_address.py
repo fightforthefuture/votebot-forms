@@ -125,4 +125,4 @@ def get_address_unit_from_components(address_components):
 
 
 def state_abbr_to_name(abbr):
-    US_STATES.get(abbr)
+    return US_STATES.get(abbr)
