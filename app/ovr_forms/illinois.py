@@ -94,7 +94,7 @@ class Illinois(BaseOVRForm):
         (dob_year, dob_month, dob_day) = split_date(user['date_of_birth'])
         illinois_identification_form['ctl00$MainContent$tbDOB'].value = '-'.join([dob_month, dob_day, dob_year])
 
-        (id_year, id_month, id_day) = split_date(user['date_of_birth'])
+        (id_year, id_month, id_day) = split_date(user['state_id_issue_date'])
         illinois_identification_form['ctl00$MainContent$tbIDIssuedDate'].value = '-'.join([id_month, id_day, id_year])
 
         self.browser.submit_form(illinois_identification_form, submit=illinois_identification_form['ctl00$MainContent$btnNext'])
