@@ -84,10 +84,10 @@ class Colorado(BaseOVRForm):
     def new_or_existing_voter(self, user, old_form):
         # drop old_form, look up a new one depending on page contents
         if 'Verify that you are eligible to vote in the state of Colorado' in self.browser.response.text:
-            form = self.browser.get_form({'id': 'eligibilityVoterForm'})
+            form = self.browser.get_form(action='/voter-classic/pages/pub/olvr/eligibiltyVoter.xhtml')
             return self.verify_eligibility(user, form)
         else:
-            form = self.browser.get_form({'action': '/voter-classic/pages/pub/olvr/editVoter.xhtml'})
+            form = self.browser.get_form(action='/voter-classic/pages/pub/olvr/editVoter.xhtml')
             return self.edit_voter_information(user, form)
 
     def verify_eligibility(self, user, form):
