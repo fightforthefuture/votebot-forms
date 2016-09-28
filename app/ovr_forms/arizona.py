@@ -129,7 +129,8 @@ class Arizona(BaseOVRForm):
     def update_address(self, user):
         frm = self.browser.get_form()
 
-        frm['resAddr'].value = user['address']
+        address_w_unit = "%s %s" % (user['address'], user.get('address_unit', ''))
+        frm['resAddr'].value = address_w_unit.strip()
         frm['resCity'].value = user['city']
         frm['resState'].value = "AZ"
         frm['resZip1'].value = user['zip']
@@ -146,6 +147,12 @@ class Arizona(BaseOVRForm):
             frm['mailZip1'].value = address_components['zipcode']
 
         self.browser.submit_form(frm, submit=frm['_eventId_update'], headers=self.get_default_submit_headers())
+
+        if "Our address matching system detected possible errors in the address listed." in self.browser.state.response.content:
+            # they do their own address matching
+            # in case there is a typo, or unit mismatch default to accept their changes
+            frm = self.browser.get_form("newAddress")
+            self.browser.submit_form(frm, submit=frm['_eventId_acceptChanges'], headers=self.get_default_submit_headers())
 
     def confirm_address(self, user):
         frm = self.browser.get_form()
@@ -200,7 +207,7 @@ class Arizona(BaseOVRForm):
 
     def vote_by_mail(self, user):
         frm = self.browser.get_form()
-        if user.get('vote_by_mail'):
+        if user.get('az_pevl'):
             submit_choice = frm['_eventId_votemail']
         else:
             submit_choice = frm['_eventId_votepolls']
