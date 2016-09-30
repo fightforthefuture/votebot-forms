@@ -210,7 +210,7 @@ class Massachusetts(BaseOVRForm):
 
         # former name
         if user.get('has_previous_name'):
-            prev_first, prev_last = split_name(user.get('previous_name'))
+            prev_first, prev_middle, prev_last = split_name(user.get('previous_name'))
 
             del self.browser.select('input[name="ctl00$MainContent$txtFirstNameFormer"]')[0]['disabled']
             del self.browser.select('input[name="ctl00$MainContent$txtLastNameFormer"]')[0]['disabled']
