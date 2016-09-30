@@ -116,25 +116,39 @@ def bool_to_int(boolean):
     return r
 
 
+def coerce_string_to_list(string, valid_list):
+    try:
+        return difflib.get_close_matches(string, valid_list)[0]
+    except IndexError:
+        try:
+            return filter(lambda e: string.lower() in e.lower(), valid_list)[0]
+        except IndexError:
+            return None
+
+
 def get_party_from_list(party, party_list):
-
-    # todo: we should normalize presence / abence of the word "Party"
-
-    # common misspellings / too short to catch
+    # common misspellings / too short to catch / translations of common names
     if party.lower() in ['dem', 'd']:
         party = 'Democratic'
 
     elif party.lower().strip() in ['r', 'gop', 'rep', 'repub', 'g.o.p.', 'grand old party']:
         party = 'Republican'
 
-    try:
-        return difflib.get_close_matches(party, party_list)[0]
-    except IndexError:
-        try:
-            return filter(lambda p: party.lower() in p.lower(), party_list)[0]
-        except IndexError:
-            # need some kind of graceful fallback here.
-            return None
+    elif party.lower().strip() in ['lib', 'libertario']:
+        party = 'Libertarian'
+
+    elif party.lower().strip() in ['green', 'verde']:
+        party = 'Green'
+
+    return coerce_string_to_list(party, party_list)
+
+def get_ethnicity_from_list(ethnicity, ethnicity_list=None):
+    # list we offer in votebot-api
+    if not ethnicity_list:
+        ethnicity_list = ["asian-pacific", "black", "hispanic", "native-american", "white", "multi-racial", "other"]
+    # todo, handle spanish?
+    # asiatico o isleno del pacifico/negro/hispano/indigena norteamericano/blanco/multi-racial/otro
+    return coerce_string_to_list(ethnicity, ethnicity_list)
 
 
 class ValidationError(Exception):
