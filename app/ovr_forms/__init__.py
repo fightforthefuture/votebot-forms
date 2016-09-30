@@ -8,6 +8,7 @@ from hawaii import Hawaii
 from illinois import Illinois
 from kentucky import Kentucky
 from massachusetts import Massachusetts
+from pennsylvania import Pennsylvania
 from vermont import Vermont
 from virginia import Virginia
 from west_virginia import WestVirginia
@@ -24,6 +25,7 @@ OVR_FORMS = {
     'IL': Illinois,
     'KY': Kentucky,
     'MA': Massachusetts,
+    #'PA': Pennsylvania, # hold until we get production API key
     'VA': Virginia,
     'VT': Vermont,
     'WV': WestVirginia,
