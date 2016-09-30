@@ -131,7 +131,7 @@ class NVRA(BaseOVRForm):
         ])
         return form
 
-    def generate_pdf(self, form_data, include_postage=False, include_letter=False):
+    def generate_pdf(self, form_data, include_postage=False, mail_letter=False):
         # generate fdf data
         fdf_stream = forge_fdf(fdf_data_strings=form_data, checkbox_checked_name="On")
 
@@ -162,7 +162,7 @@ class NVRA(BaseOVRForm):
         else:
             mailing_label = False
 
-        if include_letter:
+        if mail_letter:
             if mailing_label:
                 coversheet_template = self.coversheet_letter
             else:
@@ -180,7 +180,7 @@ class NVRA(BaseOVRForm):
             mailing_label_tmp.write(mailing_label)
             mailing_label_tmp.close()
 
-            if include_letter:
+            if mail_letter:
                 # rotate with pdftk
                 mailing_label_rotate_tmp = tempfile.NamedTemporaryFile(delete=False)
                 pdftk_mailing_label_rotate = [PDFTK_BIN,
@@ -229,7 +229,7 @@ class NVRA(BaseOVRForm):
 
         # join coversheet with form
         combined_tmp = tempfile.NamedTemporaryFile()
-        if include_letter:
+        if mail_letter:
             # fill in letter template with mail_deadline
             letter_tmp = tempfile.NamedTemporaryFile()
             fdf_letter_stream = forge_fdf(fdf_data_strings=form_data)
