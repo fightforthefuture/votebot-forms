@@ -126,7 +126,10 @@ def coerce_string_to_list(string, valid_list):
             return None
 
 
-def get_party_from_list(party, party_list):
+def get_party_from_list(party, party_list=None):
+    if not party_list:
+        party_list = ["democrat", "republican", "libertarian", "green", "reform", "other"]
+
     # common misspellings / too short to catch / translations of common names
     if party.lower() in ['dem', 'd']:
         party = 'Democratic'
@@ -141,6 +144,7 @@ def get_party_from_list(party, party_list):
         party = 'Green'
 
     return coerce_string_to_list(party, party_list)
+
 
 def get_ethnicity_from_list(ethnicity, ethnicity_list=None):
     # list we offer in votebot-api
