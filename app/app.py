@@ -1,7 +1,7 @@
 from flask import Flask, make_response
 from flask_rq2 import RQ
 
-app = Flask('votebot-forms')
+app = Flask('app')
 app.config.from_object('app.config')
 
 rq = RQ(async=app.config.get('DEBUG', False))
