@@ -22,7 +22,7 @@ def create_sos_address_checks(state):
             'state': 'CA',
             'zip': '94612'
         }
-        to_address = election_mail.get_mailto_address(state)
+        to_address = election_mail.get_mailto_address({'state': state})
         assert to_address
         if 'street1' in to_address:
             shipment = postage.easypost_shipment(to_address, from_address)

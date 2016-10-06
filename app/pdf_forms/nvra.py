@@ -112,7 +112,7 @@ class NVRA(BaseOVRForm):
         # include mail deadline for letters
         form['mail_deadline'] = self.mail_deadline_text
 
-        mailto_dict = election_mail.get_mailto_address(user.get('state'))
+        mailto_dict = election_mail.get_mailto_address(user)
         # format mailto values to correct address
         if mailto_dict:
             mailto_list = [mailto_dict['name'], mailto_dict['street1']]
@@ -131,7 +131,7 @@ class NVRA(BaseOVRForm):
         ])
         return form
 
-    def generate_pdf(self, form_data, include_postage=False, mail_letter=False):
+    def generate_pdf(self, form_data, to_address, include_postage=False, mail_letter=False):
         # generate fdf data
         fdf_stream = forge_fdf(fdf_data_strings=form_data, checkbox_checked_name="On")
 
@@ -148,7 +148,6 @@ class NVRA(BaseOVRForm):
 
         if include_postage:
             # try to buy a mailing label
-            to_address = election_mail.get_mailto_address(form_data.get('home_state'))
             from_address = {
                 "name": u"{first_name} {last_name}".format(**form_data),
                 "street1": form_data.get('home_address'),
@@ -264,7 +263,8 @@ class NVRA(BaseOVRForm):
             form_data = self.match_fields(user)
             include_postage = user.get('include_postage', False)
             mail_letter = user.get('mail_letter', False)
-            pdf_file = self.generate_pdf(form_data, include_postage, mail_letter)
+            to_address = election_mail.get_mailto_address(user)
+            pdf_file = self.generate_pdf(form_data, to_address, include_postage, mail_letter)
 
             if pdf_file:
                 self.pdf_url = storage.upload_to_s3(pdf_file, 'forms/%s/hellovote-registration-print-me.pdf' % self.uid)

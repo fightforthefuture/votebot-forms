@@ -1,0 +1,506 @@
+{
+  "ALBANY": {
+    "name": "Albany County Board of Elections",
+    "street1": "32 North Russell Road",
+    "street2": "",
+    "city": "Albany",
+    "state": "NY",
+    "zip": "12206"
+  },
+  "ALLEGANY": {
+    "name": "Allegany County Board of Elections",
+    "street1": "6 Schuyler Street",
+    "street2": "",
+    "city": "Belmont",
+    "state": "NY",
+    "zip": "14813"
+  },
+  "BRONX": {
+    "name": "Bronx County Board of Elections",
+    "street1": "1780 Grand Concourse-5th Floor",
+    "street2": "",
+    "city": "Bronx",
+    "state": "NY",
+    "zip": "10457"
+  },
+  "BROOME": {
+    "name": "Broome County Board of Elections",
+    "street1": "60 Hawley St., Government Plaza",
+    "street2": "P.O. Box 1766",
+    "city": "Binghamton",
+    "state": "NY",
+    "zip": "13902"
+  },
+  "CATTARAUGUS": {
+    "name": "Cattaraugus County Board of Elections",
+    "street1": "207 Rock City Street - Suite 100",
+    "street2": "",
+    "city": "Little Valley",
+    "state": "NY",
+    "zip": "14755"
+  },
+  "CAYUGA": {
+    "name": "Cayuga County Board of Elections",
+    "street1": "157 Genesee Street (Basement)",
+    "street2": "",
+    "city": "Auburn",
+    "state": "NY",
+    "zip": "13021"
+  },
+  "CHAUTAUQUA": {
+    "name": "Chautauqua County Board of Elections",
+    "street1": "7 North Erie Street",
+    "street2": "",
+    "city": "Mayville",
+    "state": "NY",
+    "zip": "14757"
+  },
+  "CHEMUNG": {
+    "name": "Chemung County Board of Elections",
+    "street1": "378 So. Main Street",
+    "street2": "P.O. Box 588",
+    "city": "Elmira",
+    "state": "NY",
+    "zip": "14902-0588"
+  },
+  "CHENANGO": {
+    "name": "Chenango County Board of Elections",
+    "street1": "5 Court Street",
+    "street2": "",
+    "city": "Norwich",
+    "state": "NY",
+    "zip": "13815"
+  },
+  "CLINTON": {
+    "name": "Clinton County Board of Elections",
+    "street1": "Co. Government Center. Suite 104",
+    "street2": "137 Margaret Street",
+    "city": "Plattsburgh",
+    "state": "NY",
+    "zip": "12901"
+  },
+  "COLUMBIA": {
+    "name": "Columbia County Board of Elections",
+    "street1": "401 State St.",
+    "street2": "",
+    "city": "Hudson",
+    "state": "NY",
+    "zip": "12534"
+  },
+  "CORTLAND": {
+    "name": "Cortland County Board of Elections",
+    "street1": "112 River Street - Suite 1",
+    "street2": "",
+    "city": "Cortland",
+    "state": "NY",
+    "zip": "13045-2828"
+  },
+  "DELAWARE": {
+    "name": "Delaware County Board of Elections",
+    "street1": "3 Gallant Ave.",
+    "street2": "",
+    "city": "Delhi",
+    "state": "NY",
+    "zip": "13753"
+  },
+  "DUTCHESS": {
+    "name": "Dutchess County Board of Elections",
+    "street1": "47 Cannon St.",
+    "street2": "",
+    "city": "Poughkeepsie",
+    "state": "NY",
+    "zip": "12601"
+  },
+  "ERIE": {
+    "name": "Erie County Board of Elections",
+    "street1": "134 West Eagle St.",
+    "street2": "",
+    "city": "Buffalo",
+    "state": "NY",
+    "zip": "14202"
+  },
+  "ESSEX": {
+    "name": "Essex County Board of Elections",
+    "street1": "7551 Court Street",
+    "street2": "P. O. Box 217",
+    "city": "Elizabethtown",
+    "state": "NY",
+    "zip": "12932"
+  },
+  "FRANKLIN": {
+    "name": "Franklin County Board of Elections",
+    "street1": "355 West Main Street - Suite 161",
+    "street2": "",
+    "city": "Malone",
+    "state": "NY",
+    "zip": "12953-1823"
+  },
+  "FULTON": {
+    "name": "Fulton County Board of Elections",
+    "street1": "2714 STHWY 29, Suite 1",
+    "street2": "",
+    "city": "Johnstown",
+    "state": "NY",
+    "zip": "12095-9946"
+  },
+  "GENESEE": {
+    "name": "Genesee County Board of Elections",
+    "street1": "County Building One",
+    "street2": "15 Main Street",
+    "city": "Batavia",
+    "state": "NY",
+    "zip": "14020"
+  },
+  "GREENE": {
+    "name": "Greene County Board of Elections",
+    "street1": "411 Main Street, Suite 437",
+    "street2": "",
+    "city": "Catskill",
+    "state": "NY",
+    "zip": "12414"
+  },
+  "HAMILTON": {
+    "name": "Hamilton County Board of Elections",
+    "street1": "Route 8",
+    "street2": "P. O. Box 175",
+    "city": "Lake Pleasant",
+    "state": "NY",
+    "zip": "12108"
+  },
+  "HERKIMER": {
+    "name": "Herkimer County Board of Elections",
+    "street1": "109  Mary Street, Suite 1306",
+    "street2": "",
+    "city": "Herkimer",
+    "state": "NY",
+    "zip": "13350"
+  },
+  "JEFFERSON": {
+    "name": "Jefferson County Board of Elections",
+    "street1": "175 Arsenal St.",
+    "street2": "",
+    "city": "Watertown",
+    "state": "NY",
+    "zip": "13601"
+  },
+  "KINGS": {
+    "name": "Kings County Board of Elections",
+    "street1": "345 Adams Street - 4th Floor",
+    "street2": "",
+    "city": "Brooklyn",
+    "state": "NY",
+    "zip": "11201"
+  },
+  "LEWIS": {
+    "name": "Lewis County Board of Elections",
+    "street1": "7660 N. State Street",
+    "street2": "",
+    "city": "Lowville",
+    "state": "NY",
+    "zip": "13367"
+  },
+  "LIVINGSTON": {
+    "name": "Livingston County Board of Elections",
+    "street1": "County Government Center",
+    "street2": "6 Court Street, Room 104",
+    "city": "Geneseo",
+    "state": "NY",
+    "zip": "14454-1043"
+  },
+  "MADISON": {
+    "name": "Madison County Board of Elections",
+    "street1": "North Court Street - County Office Bldg.",
+    "street2": "P. O. Box 666",
+    "city": "Wampsville",
+    "state": "NY",
+    "zip": "13163"
+  },
+  "MONROE": {
+    "name": "Monroe County Board of Elections",
+    "street1": "39 Main St. West",
+    "street2": "",
+    "city": "Rochester",
+    "state": "NY",
+    "zip": "14614"
+  },
+  "MONTGOMERY": {
+    "name": "Montgomery County Board of Elections",
+    "street1": "Old Courthouse, 9 Park Street",
+    "street2": "P. O. Box 1500",
+    "city": "Fonda",
+    "state": "NY",
+    "zip": "12068-1500"
+  },
+  "NASSAU": {
+    "name": "Nassau County Board of Elections",
+    "street1": "240 Old Country Road - 5th Floor",
+    "street2": "",
+    "city": "Mineola",
+    "state": "NY",
+    "zip": "11501"
+  },
+  "NY City Board": {
+    "name": "New York City Board of Elections",
+    "street1": "32 Broadway",
+    "street2": "7th Floor",
+    "city": "New York",
+    "state": "NY",
+    "zip": "10004"
+  },
+  "NEW YORK": {
+    "name": "New York County Board of Elections",
+    "street1": "200 Varick Street - 10th Floor",
+    "street2": "",
+    "city": "New York",
+    "state": "NY",
+    "zip": "10014"
+  },
+  "NIAGARA": {
+    "name": "Niagara County Board of Elections",
+    "street1": "111 Main Street, Suite 100",
+    "street2": "",
+    "city": "Lockport",
+    "state": "NY",
+    "zip": "14094"
+  },
+  "ONEIDA": {
+    "name": "Oneida County Board of Elections",
+    "street1": "Union Station",
+    "street2": "321 Main Street - 3rd Floor",
+    "city": "Utica",
+    "state": "NY",
+    "zip": "13501"
+  },
+  "ONONDAGA": {
+    "name": "Onondaga County Board of Elections",
+    "street1": "1000 Erie Boulevard West",
+    "street2": "",
+    "city": "Syracuse",
+    "state": "NY",
+    "zip": "13204"
+  },
+  "ONTARIO": {
+    "name": "Ontario County Board of Elections",
+    "street1": "74 Ontario Street",
+    "street2": "",
+    "city": "Canandaigua",
+    "state": "NY",
+    "zip": "14424"
+  },
+  "ORANGE": {
+    "name": "Orange County Board of Elections",
+    "street1": "75 Webster Avenue",
+    "street2": "P. O. Box 30",
+    "city": "Goshen",
+    "state": "NY",
+    "zip": "10924"
+  },
+  "ORLEANS": {
+    "name": "Orleans County Board of Elections",
+    "street1": "14012 State Route 31",
+    "street2": "",
+    "city": "Albion",
+    "state": "NY",
+    "zip": "14411"
+  },
+  "OSWEGO": {
+    "name": "Oswego County Board of Elections",
+    "street1": "185 E. Seneca Street, Box 9",
+    "street2": "",
+    "city": "Oswego",
+    "state": "NY",
+    "zip": "13126"
+  },
+  "OTSEGO": {
+    "name": "Otsego County Board of Elections",
+    "street1": "Suite 2",
+    "street2": "140 County Highway 33W",
+    "city": "Cooperstown",
+    "state": "NY",
+    "zip": "13326"
+  },
+  "PUTNAM": {
+    "name": "Putnam County Board of Elections",
+    "street1": "25 Old Route 6",
+    "street2": "",
+    "city": "Carmel",
+    "state": "NY",
+    "zip": "10512"
+  },
+  "QUEENS": {
+    "name": "Queens County Board of Elections",
+    "street1": "118-35 Queens Boulevard",
+    "street2": "",
+    "city": "Forest Hills",
+    "state": "NY",
+    "zip": "11375"
+  },
+  "RENSSELAER": {
+    "name": "Rensselaer County Board of Elections",
+    "street1": "Ned Pattison Government Center",
+    "street2": "1600 Seventh Ave.",
+    "city": "Troy",
+    "state": "NY",
+    "zip": "12180"
+  },
+  "RICHMOND": {
+    "name": "Richmond County Board of Elections",
+    "street1": "1 Edgewater Plaza, 4th Floor",
+    "street2": "",
+    "city": "Staten Island",
+    "state": "NY",
+    "zip": "10305"
+  },
+  "ROCKLAND": {
+    "name": "Rockland County Board of Elections",
+    "street1": "11 New Hempstead Road",
+    "street2": "",
+    "city": "New City",
+    "state": "NY",
+    "zip": "10956"
+  },
+  "SARATOGA": {
+    "name": "Saratoga County Board of Elections",
+    "street1": "50 W. High St.",
+    "street2": "",
+    "city": "Ballston Spa",
+    "state": "NY",
+    "zip": "12020"
+  },
+  "SCHENECTADY": {
+    "name": "Schenectady County Board of Elections",
+    "street1": "388 Broadway - Suite E",
+    "street2": "",
+    "city": "Schenectady",
+    "state": "NY",
+    "zip": "12305-2520"
+  },
+  "SCHOHARIE": {
+    "name": "Schoharie County Board of Elections",
+    "street1": "County Office Bldg. - 284 Main Street",
+    "street2": "P. O. Box 99",
+    "city": "Schoharie",
+    "state": "NY",
+    "zip": "12157"
+  },
+  "SCHUYLER": {
+    "name": "Schuyler County Board of Elections",
+    "street1": "County Office Building",
+    "street2": "105  9th Street, Unit 13",
+    "city": "Watkins Glen",
+    "state": "NY",
+    "zip": "14891-9972"
+  },
+  "SENECA": {
+    "name": "Seneca County Board of Elections",
+    "street1": "One DiPronio Drive",
+    "street2": "",
+    "city": "Waterloo",
+    "state": "NY",
+    "zip": "13165"
+  },
+  "ST.LAWRENCE": {
+    "name": "St. Lawrence County Board of Elections",
+    "street1": "80 State Highway 310",
+    "street2": "",
+    "city": "Canton",
+    "state": "NY",
+    "zip": "13617"
+  },
+  "STEUBEN": {
+    "name": "Steuben County Board of Elections",
+    "street1": "3 E. Pulteney Square",
+    "street2": "",
+    "city": "Bath",
+    "state": "NY",
+    "zip": "14810"
+  },
+  "SUFFOLK": {
+    "name": "Suffolk County Board of Elections",
+    "street1": "Yaphank Avenue",
+    "street2": "P. O. Box 700",
+    "city": "Yaphank",
+    "state": "NY",
+    "zip": "11980"
+  },
+  "SULLIVAN": {
+    "name": "Sullivan County Board of Elections",
+    "street1": "Government Center, 100 North Street",
+    "street2": "P. O. Box 5012",
+    "city": "Monticello",
+    "state": "NY",
+    "zip": "12701-5192"
+  },
+  "TIOGA": {
+    "name": "Tioga County Board of Elections",
+    "street1": "1062 State Route 38",
+    "street2": "P.O. Box 306",
+    "city": "Owego",
+    "state": "NY",
+    "zip": "13827"
+  },
+  "TOMPKINS": {
+    "name": "Tompkins County Board of Elections",
+    "street1": "Court House Annex",
+    "street2": "128 E. Buffalo Street",
+    "city": "Ithaca",
+    "state": "NY",
+    "zip": "14850"
+  },
+  "ULSTER": {
+    "name": "Ulster County Board of Elections",
+    "street1": "284  Wall Street",
+    "street2": "",
+    "city": "Kingston",
+    "state": "NY",
+    "zip": "12401"
+  },
+  "WARREN": {
+    "name": "Warren County Board of Elections",
+    "street1": "Co. Municipal Ctr. 3rd Fl.- Human Serv.",
+    "street2": "1340 State Route 9",
+    "city": "Lake George",
+    "state": "NY",
+    "zip": "12845"
+  },
+  "WASHINGTON": {
+    "name": "Washington County Board of Elections",
+    "street1": "383 Broadway",
+    "street2": "",
+    "city": "Fort Edward",
+    "state": "NY",
+    "zip": "12828"
+  },
+  "WAYNE": {
+    "name": "Wayne County Board of Elections",
+    "street1": "7376 State Route 31",
+    "street2": "P. O. Box 636",
+    "city": "Lyons",
+    "state": "NY",
+    "zip": "14489"
+  },
+  "WESTCHESTER": {
+    "name": "Westchester County Board of Elections",
+    "street1": "25 Quarropas Street",
+    "street2": "",
+    "city": "White Plains",
+    "state": "NY",
+    "zip": "10601"
+  },
+  "WYOMING": {
+    "name": "Wyoming County Board of Elections",
+    "street1": "4 Perry Avenue",
+    "street2": "",
+    "city": "Warsaw",
+    "state": "NY",
+    "zip": "14569"
+  },
+  "YATES": {
+    "name": "Yates County Board of Elections",
+    "street1": "Suite 1124",
+    "street2": "417 Liberty Street",
+    "city": "Penn Yan",
+    "state": "NY",
+    "zip": "14527"
+  }
+}
