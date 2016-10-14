@@ -6,6 +6,7 @@ from boto.s3.key import Key
 S3_CONNECTION = S3Connection(os.environ.get('AWS_ACCESS_KEY'),
                              os.environ.get('AWS_SECRET_KEY'))
 BUCKET_NAME = 'hellovote'
+DOWNLOAD_FILENAME = 'hellovote-registration-print-me.pdf'
 
 
 def write_to_tmp(file_stream):
@@ -20,7 +21,9 @@ def upload_to_s3(file_stream, filename):
     k = Key(bucket)
     k.key = filename
     k.set_contents_from_string(file_stream)
-    k.set_acl('public-read')
 
-    access_url = 'https://%s.s3.amazonaws.com/%s' % (BUCKET_NAME, filename)
+    seconds_available = 60 * 60 * 24 * 30  # 30 days
+    access_url = S3_CONNECTION.generate_url(seconds_available, 'GET', BUCKET_NAME, filename,
+        response_headers={'response-content-disposition': 'attachment; filename="%s"' % DOWNLOAD_FILENAME})
+
     return access_url
