@@ -24,8 +24,8 @@ def upload_to_s3(file_stream, filename):
     return sign_s3_url(bucket.name, filename, force_download=True)
 
 
-def sign_s3_url(bucket, key, seconds_available=60 * 60 * 24 * 30, force_download=True):
-    # seconds_available defaults to 30 days
+def sign_s3_url(bucket, key, seconds_available=60 * 60 * 24 * 7, force_download=True):
+    # seconds_available defaults to 7 days
 
     if force_download:
         headers = {'response-content-disposition': 'attachment;'}
