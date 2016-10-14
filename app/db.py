@@ -3,6 +3,7 @@ from flask import current_app
 import json
 import psycopg2
 from ovr_forms.form_utils import clean_browser_response
+from pdf_forms.storage import sign_s3_url
 from config import DATABASE_URL
 
 
@@ -50,3 +51,24 @@ def log_response(form, status):
     db.close()
 
     return id_of_new_row
+
+
+def update_form_urls():
+    db = get_db()
+    cur = db.cursor()
+
+    query = "SELECT id, settings from users where settings->>'nvra_pdf_url' not LIKE %s"
+    cur.execute(query, ("https://hellovote.s3.amazonaws.com/forms/%/hellovote-registration-print-me.pdf?Signature=%",))
+    ids = cur.fetchall()
+
+    print len(ids), "forms without signed urls"
+
+    for (user_id, settings) in ids:
+        pdf_filename = settings['nvra_pdf_url'].replace('https://hellovote.s3.amazonaws.com', '')
+        signed_url = sign_s3_url('hellovote', pdf_filename)
+        settings['nvra_pdf_url'] = signed_url
+
+        update_sql = "UPDATE users SET settings=%s WHERE id = %s"
+        cur.execute(update_sql, (json.dumps(settings), user_id))
+        db.commit()
+    db.close()

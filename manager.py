@@ -16,5 +16,14 @@ def generate_ma_data():
     print "wrote %d archaic community names" % len(d['archaic'])
     print "unable to match %d to city or town" % len(d['unmatched'])
 
+
+@manager.command
+def update_s3_urls():
+    import app.db
+    print "updating form urls with signatures"
+    app.db.update_form_urls()
+    print "done"
+
+
 if __name__ == "__main__":
     manager.run()
