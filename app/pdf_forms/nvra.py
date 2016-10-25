@@ -100,8 +100,8 @@ class NVRA(BaseOVRForm):
         # these states want last 4 as a backup
         if state in ('AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'GA', 'FL', 'ID',
                      'IL', 'IN', 'IA', 'KS', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS',
-                     'MO', 'MT', 'NE', 'NV', 'NJ', 'NY', 'NC', 'OR', 'PA', 'RI', 'SD',
-                     'TX', 'UT', 'VT', 'WA', 'WV', 'WI'):
+                     'MT', 'NE', 'NV', 'NJ', 'NY', 'NC', 'OR', 'PA', 'RI', 'SD', 'TX',
+                     'UT', 'VT', 'WA', 'WV', 'WI'):
             if not form.get('id_number'):
                 form['id_number'] = user.get('ssn_last4')
 
