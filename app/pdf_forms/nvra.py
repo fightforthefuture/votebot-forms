@@ -95,7 +95,7 @@ class NVRA(BaseOVRForm):
             if not form.get('id_number'):
                 form['id_number'] = user.get('ssn')
         # these states require last 4 AND state ID
-        if state in ('OK',):
+        if state in ('OK', 'MO'):
             form['id_number'] = "%s %s" % (user.get('ssn_last4'), user.get('state_id_number', ''))
         # these states want last 4 as a backup
         if state in ('AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'GA', 'FL', 'ID',
