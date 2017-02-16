@@ -2,6 +2,7 @@ from base_ovr_form import BaseOVRForm, OVRError
 from form_utils import (ValidationError, clean_browser_response,
                         bool_to_string, split_date, split_name, options_dict, get_party_from_list)
 from form_address import (get_address_from_freeform, get_street_address_from_components, get_address_unit_from_components)
+from robobrowser.forms.fields import Input
 import sys, traceback
 
 
@@ -55,12 +56,27 @@ class California(BaseOVRForm):
             errors_dict[error['data-valmsg-for']] = error.text
         return errors_dict
 
+    def submit_form_field(self, form, name):
+        submit_button = form[name]
+        submit_value = submit_button.value
+
+        # weird workaround required to add a hidden copy of the same value
+        # required so that the state sends us a 302 redirect, instead of a 404
+        form.add_field(Input("<input type='hidden' name='%s' value='%s' />" % (name, submit_value)))
+        self.browser.submit_form(form, submit=submit_button)
+
     def step1(self, form, user):
-        form['VoterType'].value = 'A001'  # default check 'A California resident living in the United States.'
-        self.browser.submit_form(form)
+        if user['us_citizen'] and (user['state'].upper() == 'CA'):
+            form['ClassificationType'].value = '1'  # default check 'A U.S. citizen residing in California.'
+        else:
+            raise ValidationError(message='must be US citizen residing in California to register', payload={
+                'us_citizen': user['us_citizen'],
+                'state': user['state']
+            })
+        self.submit_form_field(form, 'GoToNext')
 
         #  TODO, do we have to check against others voter types?
-        #  A California resident living in the United States.
+        #  A U.S. citizen residing in California.
         #  A member of the Uniformed Services or Merchant Marine on active duty outside my county.
         #  An eligible spouse or dependent of a member of the Uniformed Services or Merchant Marine on active duty outside my county.
         #  An activated National Guard member on State orders outside my county.
@@ -69,159 +85,159 @@ class California(BaseOVRForm):
         #  A U.S. citizen and have never resided in the U.S.
 
     def step2(self, form, user):
-
         # doctor up the DOM to un-disable Political Party
-        del self.browser.select('select[name="VoterInformation.PoliticalPartyIdKey"]')[0]['disabled']
+        del self.browser.select('select[name="PoliticalPartyId"]')[0]['disabled']
 
         #  Eligibility
-        form['VoterInformation.IsUsCitizen'].value = bool_to_string(user['us_citizen'])
-        form['VoterInformation.IsEighteenYear'].value = bool_to_string(user['will_be_18'])
+        form['IsUSCitizen'].value = bool_to_string(user['us_citizen'])
+        if user['will_be_18']:
+            form['RegistrationChoice'].value = '1'
+            # I will be 18 or older by the next election.
+        else:
+            # other options:
+            # form['RegistrationChoice'].value = '2'
+            # I am a 16 or 17 years old and I would like to pre-register to vote.
+            # don't handle this yet, needs update in votebot-api
+            raise ValidationError(message='no county match', payload={
+                'will_be_18': user['will_be_18'],
+                'date_of_birth': user['date_of_birth']
+            }) 
 
-        prefix_options = options_dict(form['VoterInformation.PrefixIdKey'])
+        prefix_options = options_dict(form['Prefix'])
         if 'name_prefix' in user:
-            form['VoterInformation.PrefixIdKey'].value = prefix_options.get(user['name_prefix'])
-        form['VoterInformation.NameFirst'].value = user['first_name']
-        form['VoterInformation.NameMiddle'].value = user.get('middle_name')
-        form['VoterInformation.NameLast'].value = user['last_name']
-        suffix_options = options_dict(form['VoterInformation.SuffixIdKey'])
+            form['Prefix'].value = prefix_options.get(user['name_prefix'])
+        form['FirstName'].value = user['first_name']
+        form['MiddleName'].value = user.get('middle_name')
+        form['LastName'].value = user['last_name']
+        suffix_options = options_dict(form['Suffix'])
         if 'name_suffix' in user:
-            form['VoterInformation.SuffixIdKey'].value = suffix_options.get(user['name_suffix'])
+            form['Suffix'].value = suffix_options.get(user['name_suffix'])
+
+        form['EmailAddress'].value = user.get('email', '')
+        form['ConfirmEmail'].value = user.get('email', '')
+        if user.get('phone'):
+            phone = user.get('phone').replace('+1', '').replace('-', '')
+            form['PhoneNumber'].value = phone
 
         # change of name
         if user.get('has_previous_name'):
-            form['VoterInformation.IsPreviouslyRegisteredName'].checked = 'checked'
+            form['IsPreviouslyRegistered'].checked = 'checked'
             (prev_first, prev_middle, prev_last) = split_name(user.get('previous_name', ''))
-            form['VoterInformation.NamePriorFirst'] = prev_first
-            form['VoterInformation.NamePriorMiddle'] = prev_middle
-            form['VoterInformation.NamePriorLast'] = prev_last
+            form['Previous_FirstName'] = prev_first
+            form['Previous_MiddleName'] = prev_middle
+            form['Previous_LastName'] = prev_last
 
         # change of address
         if user.get('has_previous_adress'):
-            form['VoterInformation.IsPreviouslyRegisteredName'].checked = 'checked'
-            form['VoterInformation.PreviousAddressStreet1'] = user.get('previous_address', '')
-            form['VoterInformation.PreviousAddressStreet2'] = user.get('previous_address_unit', '')
-            form['VoterInformation.PreviousAddressCity'] = user.get('previous_city', '')
-            form['VoterInformation.PreviousAddressState'] = user.get('previous_zip', '')
-            form['VoterInformation.PreviousAddressZip'] = user.get('previous_state', '')
+            form['IsPreviouslyRegistered'].checked = 'checked'
+            form['Previous.StreetAddress'] = user.get('previous_address', '')
+            form['Previous.ApartmentLotNumber'] = user.get('previous_address_unit', '')
+            form['Previous.City'] = user.get('previous_city', '')
+            form['Previous.Zip'] = user.get('previous_zip', '')
+            form['Previous.StateId'] = user.get('previous_state', '')
 
         # separate mailing address
         if user.get('has_separate_mailing_addresss'):
-            form['VoterInformation.IsDifferentMailingAddress'].checked = 'checked'
+            form['IsDifferentMailingAddress'].checked = 'checked'
 
             mailing_components = get_address_from_freeform(user.get('separate_mailing_address'))
-            form['VoterInformation.MailingAddressStreet1'] = get_street_address_from_components(mailing_components)
-            form['VoterInformation.MailingAddressStreet2'] = get_address_unit_from_components(mailing_components)
-            form['VoterInformation.MailingAddressCity'] = mailing_components('city_name')
-            form['VoterInformation.MailingAddressState'] = mailing_components('state_abbreviation')
-            form['VoterInformation.MailingAddressZip'] = mailing_components('zipcode')
-
-        form['VoterInformation.EmailId'].value = user.get('email', '')
-        form['VoterInformation.ConfirmEmailId'].value = user.get('email', '')
-        if user.get('phone'):
-            phone = user.get('phone').replace('+1', '').replace('-', '')
-            form['VoterInformation.PhoneNumber'].value = phone
+            form['Mailing.StreetAddress'] = get_street_address_from_components(mailing_components)
+            form['Mailing.ApartmentLotNumber'] = get_address_unit_from_components(mailing_components)
+            form['Mailing.City'] = mailing_components('city_name')
+            form['Mailing.State'] = mailing_components('state_abbreviation')
+            form['Mailing.Zip'] = mailing_components('zipcode')
 
         (year, month, day) = split_date(user['date_of_birth'], padding=False)
-        form['VoterInformation.Month'].value = month
-        form['VoterInformation.Day'].value = day
-        form['VoterInformation.Year'].value = year
+        form['MonthOfBirth'].value = month
+        form['DayOfBirth'].value = day
+        form['YearOfBirth'].value = year
 
         #  ID and last 4 of SSN (CA requires both!)
         if 'state_id_number' in user:
-            form['VoterInformation.CaIdentification'].value = user.get('state_id_number')
+            form['CaliforniaID'].value = user.get('state_id_number')
         else:
-            form['VoterInformation.NoCaIdentification'].value = bool_to_string(True)
+            form['HasNoCaliforniaID'].value = bool_to_string(True)
             # we actually require this, so shouldn't get here, but just in case
         if user.get('ssn_last4') == "NONE":
-            form['VoterInformation.NoSsnLastFour'].value = bool_to_string(True)
+            form['HasNoSSN'].value = bool_to_string(True)
         else:
-            form['VoterInformation.SsnLastFour'].value = user.get('ssn_last4')
+            form['SSN4'].value = user.get('ssn_last4')
 
         #  Home and Mailing Address
-        form['VoterInformation.AddressStreet1'].value = user['address']
-        form['VoterInformation.AddressStreet2'].value = user.get('address_unit')
-        form['VoterInformation.AddressCity'].value = user['city']
-        form['VoterInformation.AddressZip'].value = user['zip']
-        county_options = options_dict(form['VoterInformation.CountyIdKey'])
+        form['Home.StreetAddress'].value = user['address']
+        form['Home.ApartmentLotNumber'].value = user.get('address_unit')
+        form['Home.City'].value = user['city']
+        form['Home.Zip'].value = user['zip']
+        county_options = options_dict(form['Home.CountyId'])
         try:
-            form['VoterInformation.CountyIdKey'].value = county_options.get(user['county'].strip())
+            form['Home.CountyId'].value = county_options.get(user['county'].strip().upper())
         except KeyError:
             raise ValidationError(message='no county match', payload=user['county'])
 
         # Ethnicity (optional)
         if 'ethnicity' in user:
-            ethnicity_options = options_dict(form['VoterInformation.EthnicityIdKey'])
-            form['VoterInformation.EthnicityIdKey'].value = ethnicity_options.get(user['ethnicity'],
-                                                                                       ethnicity_options['Other'])
+            ethnicity_options = options_dict(form['EthnicityId'])
+            form['EthnicityId'].value = ethnicity_options.get(user['ethnicity'].upper(), ethnicity_options['OTHER'])
 
         #  Political Party Preference
-        user["political_party"] = user["political_party"].strip()
+        user["political_party"] = user["political_party"].strip().upper()
 
         if user['political_party'].lower() == 'independent' or user['political_party'].lower() == "none":
 
             # JL HACK ~ JL NOTE ~ RoboBrowser has a bug where it's not pulling in the
             # "False" radio button, so we're manually mucking with its internal stuff
-            form['VoterInformation.isPoliticalPrefSelected'].options.append('False')
+            form['isPoliticalPrefSelected'].options.append('False')
             #########################################################################
 
-            form['VoterInformation.isPoliticalPrefSelected'].value = "False"
+            form['PoliticalPreferenceType'].value = '2'
         else:
-            form['VoterInformation.isPoliticalPrefSelected'].value = bool_to_string(True, capitalize=True)
-            party_options = options_dict(form['VoterInformation.PoliticalPartyIdKey'])
+            form['PoliticalPreferenceType'].value = '1'
+            party_options = options_dict(form['PoliticalPartyId'])
             # do fuzzy match to political party options
             party_choice = get_party_from_list(user['political_party'], party_options.keys())
 
             if party_choice in party_options.keys():
-                form['VoterInformation.PoliticalPartyIdKey'].value = party_options[party_choice]
+                form['PoliticalPartyId'].value = party_options[party_choice]
             else:
-                form['VoterInformation.PoliticalPartyIdKey'].value = party_options.get('Other')
-                form['VoterInformation.PoliticalPrefOther'].value = user['political_party']
+                form['PoliticalPartyId'].value = party_options.get('Other')
+                form['OtherPoliticalParty'].value = user['political_party']
 
-        next_button = form['command']
-        next_button.value = 'Next'
-        
-        self.browser.submit_form(form, submit=next_button)
+        self.submit_form_field(form, 'GoToNext')
 
     def step3(self, form, user):
-
         #  Vote by Mail
-        form['VoterInformation.IsVoteByMail'].value = bool_to_string(user.get('vote_by_mail', False))
+        vote_by_mail_choice = bool_to_string(user.get('vote_by_mail', False), capitalize=True)
+        # I want to get my ballot by mail before each election.
+        form['IsPermanentVBM'].value = vote_by_mail_choice
+        # I want to get my state voter information guide by mail before each statewide election.
+        form['IsVIG'].value = vote_by_mail_choice
+        # I want to get my sample ballot by mail before each election.
+        form['IsSampleBallot'].value = vote_by_mail_choice
 
         #  Consent to Use Signature
-        form['VoterInformation.IsDmvSignatureConsent'].value = bool_to_string(user['consent_use_signature'])
+        if user.get('consent_use_signature'):
+            form['ConsentToUseSignature'].value = "True"
+        else:
+            raise ValidationError(message='consent_use_signature must be True', payload=user['consent_use_signature'])
 
         #  Affirmation
         user_is_eligible = user['us_citizen'] and user['will_be_18'] and (not user['disenfranchised'])
         
         # also add "information is true and correct"?
-        form['VoterInformation.isAffirmationSelected'].value = bool_to_string(user_is_eligible)
-        form['VoterInformation.isAffirmationSelected'].checked = 'checked'
+        form['Affirmation'].value = bool_to_string(user_is_eligible)
+        form['Affirmation'].checked = 'checked'
 
-        # seemingly very redundant, but in testing, curl's failed without these:
-        form['VoterInformation.IsAPollWorker'].value = 'false'
-        form['VoterInformation.MultiLanguageList[0].IsSelected'].value = 'false'
-        form['VoterInformation.MultiLanguageList[1].IsSelected'].value = 'false'
-        form['VoterInformation.MultiLanguageList[2].IsSelected'].value = 'false'
-        form['VoterInformation.MultiLanguageList[3].IsSelected'].value = 'false'
-        form['VoterInformation.MultiLanguageList[4].IsSelected'].value = 'false'
-        form['VoterInformation.MultiLanguageList[5].IsSelected'].value = 'false'
-        form['VoterInformation.MultiLanguageList[6].IsSelected'].value = 'false'
-        form['VoterInformation.MultiLanguageList[7].IsSelected'].value = 'false'
-        form['VoterInformation.MultiLanguageList[8].IsSelected'].value = 'false'
-        form['VoterInformation.MultiLanguageList[9].IsSelected'].value = 'false'
-        form['VoterInformation.MultiLanguageList[10].IsSelected'].value = 'false'
-        form['VoterInformation.IsPollingPlaceProvided'].value = 'false'
-
-        next_button = form['command']
-        next_button.value = 'Next'
-        self.browser.submit_form(form, submit=next_button)
+        # not capitalized the same as other fields
+        form['CanBePollWorker'].value = 'false'
+        form['CanProvidePollingPlace'].value = 'false'
+        
+        self.submit_form_field(form, 'GoToNext')
 
     def step4(self, form, user):
-        submit_button = form['command']
-        submit_button.value = 'Submit'
-        self.browser.submit_form(form, submit=submit_button)
+        self.submit_form_field(form, 'SubmitRegistration')
 
     def step5(self, form, user):
+        form = self.browser.get_form(action='/en/OnlineVoterRegistration/PostForm')
         # Send an email receipt from the state
         if user.get('email'):
             form['Email'] = user['email']
