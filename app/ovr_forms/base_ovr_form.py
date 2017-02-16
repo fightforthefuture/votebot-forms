@@ -28,6 +28,7 @@ class BaseOVRForm(object):
         self.browser = RoboBrowser(parser='html.parser', user_agent=self.user_agent, history=True)
         # TESTING, disable SSL cert validation
         # self.browser.session.verify = 'charles-ssl-proxying-certificate.pem'
+        self.browser.allow_redirects = True
 
         if start_url:
             self.browser.open(start_url)
@@ -57,7 +58,7 @@ class BaseOVRForm(object):
                 self.add_error('%s is required' % field.replace('_', ' '), field=field)
 
     def set_user_agent(self, user):
-        self.browser.user_agent = '%s on behalf of %s %s' % (self.user_agent, user.get('first_name'), user.get('last_name'))
+        self.browser.session.headers['User-Agent'] ='%s on behalf of %s %s' % (self.user_agent, user.get('first_name'), user.get('last_name'))
 
     def validate(self, user):
         self.check_required_fields(user)
