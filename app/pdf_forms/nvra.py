@@ -8,9 +8,13 @@ import election_mail
 from fdfgen import forge_fdf
 import subprocess
 import tempfile
+import logging
 import os, sys, traceback
 
+log = logging.getLogger(__name__)
+
 PDFTK_BIN = os.environ.get('PDFTK_BIN', 'pdftk')
+GS_BIN = os.environ.get('GS_BIN', 'gs')
 
 
 class NVRA(BaseOVRForm):
@@ -131,6 +135,26 @@ class NVRA(BaseOVRForm):
         ])
         return form
 
+    def run_subprocess(self, command, input_stream=None):
+        if type(command) == list:
+            command = ' '.join(command)
+
+        log.debug(command)
+        process = subprocess.Popen(command, shell=True,
+                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        log.debug('start')
+        if input_stream:
+            log.debug(input_stream)
+            (out, err) = process.communicate(input=input_stream)
+        else:
+            (out, err) = process.communicate()
+        log.debug('done')
+
+        if out:
+            log.info(out)
+        if err:
+            log.error(err)
+
     def generate_pdf(self, form_data, to_address, include_postage=False, mail_letter=False):
         # generate fdf data
         fdf_stream = forge_fdf(fdf_data_strings=form_data, checkbox_checked_name="On")
@@ -140,9 +164,7 @@ class NVRA(BaseOVRForm):
         pdftk_fill = [PDFTK_BIN,
                      self.form_template, 'fill_form', '-',
                      'output', filled_form_tmp.name, 'flatten']
-        process = subprocess.Popen(' '.join(pdftk_fill), shell=True,
-                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        (form_out, form_err) = process.communicate(input=fdf_stream)
+        self.run_subprocess(pdftk_fill, fdf_stream)
 
         coversheet_tmp = tempfile.NamedTemporaryFile()
 
@@ -185,9 +207,7 @@ class NVRA(BaseOVRForm):
                 pdftk_mailing_label_rotate = [PDFTK_BIN,
                      mailing_label_tmp.name, 'rotate', '1-1south',
                      'output', mailing_label_rotate_tmp.name]
-                process = subprocess.Popen(' '.join(pdftk_mailing_label_rotate), shell=True,
-                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-                (pdftk_rotate_out, pdftk_rotate_err) = process.communicate()
+                self.run_subprocess(pdftk_mailing_label_rotate)
                 stamp_offset = '[0 550]'  # offset vertically back up the page
 
                 mailing_label_tmp = mailing_label_rotate_tmp
@@ -197,15 +217,12 @@ class NVRA(BaseOVRForm):
             # offset it with ghostscript
             # because pdftk can't adjust stamp location
             stamp_tmp = tempfile.NamedTemporaryFile()
-            gs_offset = ['gs', '-q', '-o', stamp_tmp.name,
+            gs_offset = [GS_BIN, '-q', '-o', stamp_tmp.name,
                          '-sDEVICE=pdfwrite',
                          '-g6120x7920',  # dimensions in points * 10
                          '-c "<</PageOffset %s>> setpagedevice"' % stamp_offset,
                          '-f', mailing_label_tmp.name]
-            process = subprocess.Popen(' '.join(gs_offset), shell=True)
-            (offset_out, offset_err) = process.communicate()
-            if offset_err:
-                print "ghostscript error", offset_err
+            self.run_subprocess(gs_offset)
 
             # delete mailing label file
             os.remove(mailing_label_tmp.name)
@@ -214,17 +231,14 @@ class NVRA(BaseOVRForm):
             pdftk_stamp_coversheet = [PDFTK_BIN,
                  coversheet_template, 'stamp', stamp_tmp.name,
                  'output', coversheet_tmp.name]
-            process = subprocess.Popen(' '.join(pdftk_stamp_coversheet), shell=True,
-                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            (coversheet_out, coversheet_err) = process.communicate()
+            self.run_subprocess(pdftk_stamp_coversheet)
+
         else:
             # fill out coversheet with mailto field from fdf_stream
             pdftk_fill_coversheet = [PDFTK_BIN,
                  coversheet_template, 'fill_form', '-',
                  'output', coversheet_tmp.name, 'flatten']
-            process = subprocess.Popen(' '.join(pdftk_fill_coversheet), shell=True,
-                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            (coversheet_out, coversheet_err) = process.communicate(input=fdf_stream)
+            self.run_subprocess(pdftk_fill_coversheet, fdf_stream)
 
         # join coversheet with form
         combined_tmp = tempfile.NamedTemporaryFile()
@@ -235,9 +249,7 @@ class NVRA(BaseOVRForm):
             pdftk_fill_letter = [PDFTK_BIN,
                  self.letter_template, 'fill_form', '-',
                  'output', letter_tmp.name, 'flatten']
-            process = subprocess.Popen(' '.join(pdftk_fill_letter), shell=True,
-                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-            (letter_out, letter_err) = process.communicate(input=fdf_letter_stream)
+            self.run_subprocess(pdftk_fill_letter, fdf_letter_stream)
 
             pdftk_join = [PDFTK_BIN,
                          'C=%s' % coversheet_tmp.name, 'F=%s' % filled_form_tmp.name,
@@ -249,9 +261,7 @@ class NVRA(BaseOVRForm):
                          'C=%s' % coversheet_tmp.name, 'F=%s' % filled_form_tmp.name,
                          'cat', 'C', 'F1-1',  # only include first page of filled_form
                          'output', combined_tmp.name]
-        process = subprocess.Popen(' '.join(pdftk_join), shell=True,
-                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        (combined_out, combined_err) = process.communicate()
+        self.run_subprocess(pdftk_join)
 
         final_contents = combined_tmp.read()
         return final_contents
@@ -286,4 +296,5 @@ class NVRA(BaseOVRForm):
 
         except Exception, e:
             ex_type, ex, tb = sys.exc_info()
+            log.error(ex_type, ex, tb)
             raise OVRError(self, message="%s %s" % (ex_type, ex), payload=traceback.format_tb(tb), error_callback_url=self.error_callback_url)
