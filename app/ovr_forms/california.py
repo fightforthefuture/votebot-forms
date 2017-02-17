@@ -183,12 +183,6 @@ class California(BaseOVRForm):
         user["political_party"] = user["political_party"].strip().upper()
 
         if user['political_party'].lower() == 'independent' or user['political_party'].lower() == "none":
-
-            # JL HACK ~ JL NOTE ~ RoboBrowser has a bug where it's not pulling in the
-            # "False" radio button, so we're manually mucking with its internal stuff
-            form['isPoliticalPrefSelected'].options.append('False')
-            #########################################################################
-
             form['PoliticalPreferenceType'].value = '2'
         else:
             form['PoliticalPreferenceType'].value = '1'
