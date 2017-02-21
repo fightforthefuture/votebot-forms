@@ -85,9 +85,6 @@ class California(BaseOVRForm):
         #  A U.S. citizen and have never resided in the U.S.
 
     def step2(self, form, user):
-        # doctor up the DOM to un-disable Political Party
-        del self.browser.select('select[name="PoliticalPartyId"]')[0]['disabled']
-
         #  Eligibility
         form['IsUSCitizen'].value = bool_to_string(user['us_citizen'])
         if user['will_be_18']:
@@ -182,10 +179,25 @@ class California(BaseOVRForm):
         #  Political Party Preference
         user["political_party"] = user["political_party"].strip().upper()
 
+        # they have two inputs with the same name but separated by other elements
+        # so robobrowser's _group_flat_tags creates two entries, which their server won't validate
+        form.fields.pop('PoliticalPreferenceType')
+        # recreate with just one
+        PoliticalPreferenceType = Input("<input type='radio' name='PoliticalPreferenceType'/>")
+        PoliticalPreferenceType.options = ['1', '2']
+        form.add_field(PoliticalPreferenceType)
+
         if user['political_party'].lower() == 'independent' or user['political_party'].lower() == "none":
-            form['PoliticalPreferenceType'].value = '2'
+            PoliticalPreferenceType.value = '2'
+            PoliticalPreferenceType.checked = 'checked'
+            # also delete the politcal party select
+            form.fields.pop('PoliticalPartyId')
         else:
-            form['PoliticalPreferenceType'].value = '1'
+            # mess with the DOM to un-disable Political Party
+            del self.browser.select('select[name="PoliticalPartyId"]')[0]['disabled']
+
+            PoliticalPreferenceType.value = '1'
+            PoliticalPreferenceType.checked = 'checked'
             party_options = options_dict(form['PoliticalPartyId'])
             # do fuzzy match to political party options
             party_choice = get_party_from_list(user['political_party'], party_options.keys())
