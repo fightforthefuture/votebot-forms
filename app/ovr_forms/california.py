@@ -240,7 +240,7 @@ class California(BaseOVRForm):
         self.submit_form_field(form, 'GoToNext')
 
     def step4(self, form, user):
-        self.submit_form_field(form, 'SubmitRegistration')
+        self.submit_form_field(form, 'GoToNext')
 
     def step5(self, form, user):
         form = self.browser.get_form(action='/en/OnlineVoterRegistration/PostForm')
