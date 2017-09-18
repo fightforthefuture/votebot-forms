@@ -120,9 +120,9 @@ class California(BaseOVRForm):
         if user.get('has_previous_name'):
             form['IsPreviouslyRegistered'].checked = 'checked'
             (prev_first, prev_middle, prev_last) = split_name(user.get('previous_name', ''))
-            form['Previous_FirstName'] = prev_first
-            form['Previous_MiddleName'] = prev_middle
-            form['Previous_LastName'] = prev_last
+            form['Previous.FirstName'] = prev_first
+            form['Previous.MiddleName'] = prev_middle
+            form['Previous.LastName'] = prev_last
 
         # change of address
         if user.get('has_previous_adress'):
