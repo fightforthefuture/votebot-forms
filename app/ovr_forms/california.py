@@ -31,7 +31,7 @@ class California(BaseOVRForm):
                 if step_form:
                     handler(step_form, user)
 
-                errors = self.parse_errors()
+                errors = self.parse_errors(step_form)
                 if errors:
                     raise ValidationError(message='field_errors', payload=errors)
                 if not step_form:
@@ -50,10 +50,15 @@ class California(BaseOVRForm):
             ex_type, ex, tb = sys.exc_info()
             raise OVRError(self, message="%s %s" % (ex_type, ex), payload=traceback.format_tb(tb), error_callback_url=self.error_callback_url)
 
-    def parse_errors(self):
+    def parse_errors(self, step_form):
         errors_dict = {}
         for error in self.browser.find_all(class_='field-validation-error'):
             errors_dict[error['data-valmsg-for']] = error.text
+
+        step_status_code = self.browser.state.response.status_code
+        if step_status_code != 200:
+            errors_dict['form.action'] = step_form.action
+            errors_dict['form.status_code'] = step_status_code
         return errors_dict
 
     def submit_form_field(self, form, name):
@@ -95,7 +100,7 @@ class California(BaseOVRForm):
             # form['RegistrationChoice'].value = '2'
             # I am a 16 or 17 years old and I would like to pre-register to vote.
             # don't handle this yet, needs update in votebot-api
-            raise ValidationError(message='no county match', payload={
+            raise ValidationError(message='not eligible', payload={
                 'will_be_18': user['will_be_18'],
                 'date_of_birth': user['date_of_birth']
             }) 
