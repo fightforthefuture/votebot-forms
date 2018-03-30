@@ -17,7 +17,7 @@ fdfgen==0.14.0
 lob==2.26
 ndg-httpsclient==0.4.3
 itsdangerous==0.24
-psycopg2==2.6.2
+psycopg2==2.7.3.2
 pyOpenSSL==17.3.0
 pyasn1==0.3.6
 python-dateutil==2.5.3
