@@ -62,8 +62,11 @@ class California(BaseOVRForm):
 
         step_status_code = self.browser.state.response.status_code
         if step_status_code not in [200, 302]:
-            errors_dict['form.action'] = step_form.action
-            errors_dict['form.status_code'] = step_status_code
+            errors_dict['form'] = {
+                'action': step_form.action,
+                'data': step_form.serialize().data,
+                'status_code': step_status_code
+            }
         return errors_dict
 
     def submit_form_field(self, form, name):
@@ -74,9 +77,19 @@ class California(BaseOVRForm):
         # required so that the state sends us a 302 redirect, instead of a 404
         form.add_field(Input("<input type='hidden' name='%s' value='%s' />" % (name, submit_value)))
         self.browser.submit_form(form, submit=submit_button)
+
         response = self.browser.state.response
         if response.status_code == 302:
             self.browser.open('https://covr.sos.ca.gov'+response.headers['Location'])
+        else:
+            raise ValidationError(message='unable to submit', payload={
+                'url': self.browser.state.url,
+                'form': {
+                    'action': form.action,
+                    'data': form.serialize().data,
+                    'status_code': response.status_code
+                }
+            })
 
 
     def step1(self, form, user):

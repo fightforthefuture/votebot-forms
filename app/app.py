@@ -10,9 +10,11 @@ rq = RQ(async=app.config.get('DEBUG', False))
 rq.init_app(app)
 
 if app.config.get('DEBUG'):
-	loglevel = logging.DEBUG
+    loglevel = logging.DEBUG
+    from httplib import HTTPConnection
+    HTTPConnection.debuglevel = 2
 else:
-	loglevel = logging.WARNING
+    loglevel = logging.WARNING
 logging.basicConfig(level=loglevel)
 
 # votebot views depend on rq & db for jobs, import after we've created them
