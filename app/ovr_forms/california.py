@@ -8,9 +8,11 @@ import sys, traceback
 
 class California(BaseOVRForm):
     def __init__(self):
-        super(California, self).__init__(start_url='https://covr.sos.ca.gov/?language=en-US',
+        super(California, self).__init__(start_url='https://covr.sos.ca.gov/',
             # verify='charles-ssl-proxying-certificate.pem',
+            upgrade_tls=True,
             allow_redirects=False)
+
         self.add_required_fields(['will_be_18', 'political_party', 'disenfranchised',
                                  'ssn_last4', 'county', 'consent_use_signature'])
         self.success_string = "Your voter registration application is now complete."

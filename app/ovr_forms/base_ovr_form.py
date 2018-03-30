@@ -5,6 +5,7 @@ from form_utils import ValidationError
 import requests
 import uuid
 import os
+from ssl_upgrade import Tls12HttpAdapter
 
 
 BASE_REQUIRED_FIELDS = [
@@ -23,9 +24,11 @@ class BaseOVRForm(object):
 
     error_callback_url = None
 
-    def __init__(self, start_url=None, verify=True, allow_redirects=True):
+    def __init__(self, start_url=None, verify=True, upgrade_tls=False, allow_redirects=True):
         self.user_agent = os.environ.get('USER_AGENT', 'votebot-forms')
         self.browser = RoboBrowser(parser='html.parser', user_agent=self.user_agent, history=True)
+        if upgrade_tls:
+            self.browser.session.mount(start_url, Tls12HttpAdapter())
         self.browser.session.verify = verify
         self.browser.allow_redirects = allow_redirects
 
