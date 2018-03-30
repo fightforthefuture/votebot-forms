@@ -23,12 +23,11 @@ class BaseOVRForm(object):
 
     error_callback_url = None
 
-    def __init__(self, start_url=None):
+    def __init__(self, start_url=None, verify=True, allow_redirects=True):
         self.user_agent = os.environ.get('USER_AGENT', 'votebot-forms')
         self.browser = RoboBrowser(parser='html.parser', user_agent=self.user_agent, history=True)
-        # TESTING, disable SSL cert validation
-        # self.browser.session.verify = 'charles-ssl-proxying-certificate.pem'
-        self.browser.allow_redirects = True
+        self.browser.session.verify = verify
+        self.browser.allow_redirects = allow_redirects
 
         if start_url:
             self.browser.open(start_url)

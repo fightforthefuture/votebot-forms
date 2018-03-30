@@ -8,7 +8,9 @@ import sys, traceback
 
 class California(BaseOVRForm):
     def __init__(self):
-        super(California, self).__init__('https://covr.sos.ca.gov/?language=en-US')
+        super(California, self).__init__(start_url='https://covr.sos.ca.gov/?language=en-US',
+            # verify='charles-ssl-proxying-certificate.pem',
+            allow_redirects=False)
         self.add_required_fields(['will_be_18', 'political_party', 'disenfranchised',
                                  'ssn_last4', 'county', 'consent_use_signature'])
         self.success_string = "Your voter registration application is now complete."
@@ -37,6 +39,9 @@ class California(BaseOVRForm):
                 if not step_form:
                     raise ValidationError(message='no_form_found', payload=handler.__name__)
             
+            success_response = self.browser.state.response
+            if success_response.status_code == 302:
+                self.browser.open('https://covr.sos.ca.gov'+success_response.headers['Location'])
             success_page = clean_browser_response(self.browser)
             if self.success_string in success_page:
                 return {'status': 'success'}
@@ -56,7 +61,7 @@ class California(BaseOVRForm):
             errors_dict[error['data-valmsg-for']] = error.text
 
         step_status_code = self.browser.state.response.status_code
-        if step_status_code != 200:
+        if step_status_code not in [200, 302]:
             errors_dict['form.action'] = step_form.action
             errors_dict['form.status_code'] = step_status_code
         return errors_dict
@@ -69,6 +74,10 @@ class California(BaseOVRForm):
         # required so that the state sends us a 302 redirect, instead of a 404
         form.add_field(Input("<input type='hidden' name='%s' value='%s' />" % (name, submit_value)))
         self.browser.submit_form(form, submit=submit_button)
+        response = self.browser.state.response
+        if response.status_code == 302:
+            self.browser.open('https://covr.sos.ca.gov'+response.headers['Location'])
+
 
     def step1(self, form, user):
         if user['us_citizen'] and (user['state'].upper() == 'CA'):

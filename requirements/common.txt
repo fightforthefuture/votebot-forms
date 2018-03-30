@@ -7,6 +7,9 @@ Werkzeug==0.11.10
 beautifulsoup4==4.4.1
 blinker==1.4
 boto==2.42.0
+certifi==2017.7.27.1
+chardet==3.0.4
+cffi==1.9.1
 click==6.6
 croniter>=0.3.9
 easypost==3.2.2
@@ -16,13 +19,14 @@ ndg-httpsclient==0.4.3
 itsdangerous==0.24
 psycopg2==2.6.2
 pyOpenSSL==17.3.0
-pyasn1==0.1.9
+pyasn1==0.3.6
 python-dateutil==2.5.3
 redis>=2.7.0
-requests==2.10.0
+requests==2.18.4
 rq-scheduler>=0.6.1
 rq>=0.6.0,<0.7.0
 robobrowser==0.5.3
 six==1.10.0
 smartystreets.py==0.4.0
+urllib3==1.22
 wsgiref==0.1.2
