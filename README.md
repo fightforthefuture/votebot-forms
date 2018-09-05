@@ -54,6 +54,26 @@ or
 }
 ```
 
+## Status
+Currently works in:
+- Alaska
+- Arizona
+- Colorado
+- Georgia
+- Hawaii
+- Illinois
+- Kentucky
+- Massachusetts
+- Vermont
+- Virginia
+- West Virginia
+
+Has worked in:
+- California (blocked by [#1](https://github.com/fightforthefuture/votebot-forms/issues/1))
+
+Could work in:
+- Pennsylvania (code written in [feature/pennsyvanlia-api](https://github.com/fightforthefuture/votebot-forms/tree/pennsylvania-api), deployment was delayed in 2016 due to testing timeline)
+
 ## PDF Form
 The PDF form is generated from the [National Mail Voter Registration Form](http://www.eac.gov/voter_resources/register_to_vote.aspx), with a custom instructions and mailing page. These are combined with PDFTK and filled in with an FDF data stream before being uploaded to Amazon S3 for user download.
 
@@ -110,7 +130,8 @@ To create a new state integration:
 - If an environment variable `VOTEBOT_API_KEY` is set, we will require all POSTs to registration endpoints /pdf and /ovr to include it in an HTTP Basic Auth header.
 
 ## Deployment
-- run on Heroku under uwsgi w/ gevent
+- runs on Heroku under uwsgi w/ gevent
 - use included compiled pdftk 2.02 binaries with
   `heroku config:set LD_LIBRARY_PATH=/app/.heroku/vendor/lib:/app/vendor/pdftk/lib`
   `heroku config:set PATH=/app/.heroku/python/bin:/usr/local/bin:/usr/bin:/bin:/app/vendor/pdftk/bin`
+- alternately, write a Dockerfile for your favorite cloud host (and send us a pull-request?)
